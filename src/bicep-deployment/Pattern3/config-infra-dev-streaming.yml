@@ -1,0 +1,26 @@
+variables:
+
+  # Global
+  ap_vm_image: windows-2019
+  ap_vm_image_ubuntu: ubuntu-latest
+  location: eastus 
+  prefix: fasthack 
+  postfix: uc35
+  environment: dev
+
+
+  # Azure DevOps 
+  ado_service_connection_rg: Azure-ARM-Dev-SAPA
+  # github
+  gihub_repo_name: "Azure/fta-Catalytics"
+
+  # IaC
+  baseName: $(prefix)$(postfix)$(environment)
+  resourceGroupName: P3-$(baseName)-RG #You also need to change the ResourceGroupname in main.bicep file
+  dataLakeAccountName: $(prefix)adl$(postfix)$(environment)
+  synapseWorkspace: $(prefix)-synapse-$(postfix)$(environment)
+  synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(environment)
+  keyVaultName: $(prefix)-akv-$(postfix)$(environment)
+  eventHubNamespacename: '$(prefix)ehns$(postfix)$(environment)'
+  functionAppname: '$(prefix)-fnapp-$(postfix)$(environment)'
+

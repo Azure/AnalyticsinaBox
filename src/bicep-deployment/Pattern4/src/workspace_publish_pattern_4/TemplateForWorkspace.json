@@ -1,0 +1,2123 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "synwfasthackpt1"
+		},
+		"synwfasthackpt1-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'synwfasthackpt1-WorkspaceDefaultSqlServer'"
+		},
+		"LS_ADLS_G2_properties_typeProperties_url": {
+			"type": "string"
+		},
+		"LS_AKV_properties_typeProperties_baseUrl": {
+			"type": "string"
+		},
+		"LS_Blob_Storage_Staging_properties_typeProperties_serviceEndpoint": {
+			"type": "string"
+		},
+		"LS_sqldb_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "sqlconn-sampledb"
+		},
+		"synwfasthackpt1-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string"
+		},
+		"AutoResolveIntegrationRuntime_properties_typeProperties_computeProperties": {
+			"type": "object",
+			"defaultValue": {
+				"location": "AutoResolve",
+				"dataFlowProperties": {
+					"computeType": "General",
+					"coreCount": 8,
+					"timeToLive": 0
+				}
+			}
+		},
+		"Raw_To_Curated_Full_Load_properties_bigDataPool_referenceName": {
+			"type": "string",
+			"defaultValue": "sparkpool"
+		},
+		"Raw_To_Curated_Full_Load_properties_metadata_a365ComputeOptions_id": {
+			"type": "string",
+			"defaultValue": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/rg-fasthackpt1/providers/Microsoft.Synapse/workspaces/synwfasthackpt1/bigDataPools/sparkpool"
+		},
+		"Raw_To_Curated_Full_Load_properties_metadata_a365ComputeOptions_endpoint": {
+			"type": "string",
+			"defaultValue": "https://synwfasthackpt1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool"
+		},
+		"Raw_To_Curated_Incremental_Load_properties_bigDataPool_referenceName": {
+			"type": "string",
+			"defaultValue": "sparkpool"
+		},
+		"Raw_To_Curated_Incremental_Load_properties_metadata_a365ComputeOptions_id": {
+			"type": "string",
+			"defaultValue": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/rg-fasthackpt1/providers/Microsoft.Synapse/workspaces/synwfasthackpt1/bigDataPools/sparkpool"
+		},
+		"Raw_To_Curated_Incremental_Load_properties_metadata_a365ComputeOptions_endpoint": {
+			"type": "string",
+			"defaultValue": "https://synwfasthackpt1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/PL_Curated_Full_Load')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup_metadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_metadata",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Loop metadata",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup_metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup_metadata').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@bool(item().FULLOAD)",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Notebook To Load FullData in Curated Layer",
+												"type": "SynapseNotebook",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"notebook": {
+														"referenceName": "Raw_To_Curated_Full_Load",
+														"type": "NotebookReference"
+													},
+													"parameters": {
+														"schema_name": {
+															"value": {
+																"value": "@{item().SCHEMA_NAME}",
+																"type": "Expression"
+															},
+															"type": "string"
+														},
+														"table_name": {
+															"value": {
+																"value": "@{item().TABLE_NAME}",
+																"type": "Expression"
+															},
+															"type": "string"
+														},
+														"date": {
+															"value": {
+																"value": "@pipeline().parameters.currentDate",
+																"type": "Expression"
+															},
+															"type": "string"
+														},
+														"datalakeName": {
+															"value": {
+																"value": "@pipeline().parameters.datalakeName",
+																"type": "Expression"
+															},
+															"type": "string"
+														}
+													},
+													"snapshot": true,
+													"sparkPool": {
+														"referenceName": "sparkpool",
+														"type": "BigDataPoolReference"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"currentDate": {
+						"type": "string"
+					},
+					"datalakeName": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/DS_metadata')]",
+				"[concat(variables('workspaceId'), '/notebooks/Raw_To_Curated_Full_Load')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PL_Curated_Incremental_Load')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup_metadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_metadata",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Loop metadata",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup_metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup_metadata').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@bool(item().FULLOAD)",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Notebook for Curated Incremental Load",
+												"type": "SynapseNotebook",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"notebook": {
+														"referenceName": "Raw_To_Curated_Incremental_Load",
+														"type": "NotebookReference"
+													},
+													"parameters": {
+														"schema_name": {
+															"value": {
+																"value": "@{item().SCHEMA_NAME}",
+																"type": "Expression"
+															},
+															"type": "string"
+														},
+														"table_name": {
+															"value": {
+																"value": "@{item().TABLE_NAME}",
+																"type": "Expression"
+															},
+															"type": "string"
+														},
+														"date": {
+															"value": {
+																"value": "@pipeline().parameters.currentDate",
+																"type": "Expression"
+															},
+															"type": "string"
+														},
+														"merge_join_condition": {
+															"value": {
+																"value": "@{item().MERGE_JOIN_CONDITION}",
+																"type": "Expression"
+															},
+															"type": "string"
+														},
+														"datalakeName": {
+															"value": {
+																"value": "@pipeline().parameters.datalakeName",
+																"type": "Expression"
+															},
+															"type": "string"
+														}
+													},
+													"snapshot": true,
+													"sparkPool": {
+														"referenceName": "sparkpool",
+														"type": "BigDataPoolReference"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"currentDate": {
+						"type": "string"
+					},
+					"datalakeName": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/DS_metadata')]",
+				"[concat(variables('workspaceId'), '/notebooks/Raw_To_Curated_Incremental_Load')]",
+				"[concat(variables('workspaceId'), '/bigDataPools/sparkpool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PL_master_pipeline')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "SQL to Staging",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_move_data_from_SQL_to_Staging_area",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Staging to Raw",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "SQL to Staging",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_move_files_from_staging_to_raw",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentDate": {
+									"value": "@pipeline().parameters.currentDate",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Raw to Curated Full",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Staging to Raw",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Curated_Full_Load",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentDate": {
+									"value": "@pipeline().parameters.currentDate",
+									"type": "Expression"
+								},
+								"datalakeName": {
+									"value": "@pipeline().parameters.datalakeName",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Raw to Curated Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Staging to Raw",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Curated_Incremental_Load",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentDate": {
+									"value": "@pipeline().parameters.currentDate",
+									"type": "Expression"
+								},
+								"datalakeName": {
+									"value": "@pipeline().parameters.datalakeName",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"currentDate": {
+						"type": "string"
+					},
+					"datalakeName": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/PL_move_data_from_SQL_to_Staging_area')]",
+				"[concat(variables('workspaceId'), '/pipelines/PL_move_files_from_staging_to_raw')]",
+				"[concat(variables('workspaceId'), '/pipelines/PL_Curated_Full_Load')]",
+				"[concat(variables('workspaceId'), '/pipelines/PL_Curated_Incremental_Load')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PL_move_data_from_SQL_to_Staging_area')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup_metadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_metadata",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Loop metadata",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup_metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup_metadata').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@bool(item().FULLOAD)",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Copy Incremental Data",
+												"type": "Copy",
+												"dependsOn": [
+													{
+														"activity": "current_date_time",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "select * from @{item().SCHEMA_NAME}.@{item().TABLE_NAME} where @{item().WATER_MARK_COLUMN} > @{concat('''',item().DATA_FETCHED_TILL_TIMESTAMP, '''')}  and @{item().WATER_MARK_COLUMN} <= @{concat('''', variables('current_get_time'),'''')}",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobStorageWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_source_samplesqldb",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_staging_csv",
+														"type": "DatasetReference",
+														"parameters": {
+															"directoryname": {
+																"value": "@{item().SCHEMA_NAME}.@{item().TABLE_NAME}",
+																"type": "Expression"
+															},
+															"filename": {
+																"value": "@concat('Incremental_copy_',formatDateTime(convertTimeZone(utcnow(),'UTC','India Standard Time'),'yyyy-MM-ddTHHmmss'), '.csv')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "current_date_time",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "current_get_time",
+													"value": {
+														"value": "@formatDateTime(utcnow(), 'yyyy-MM-dd HH:mm:ss')",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "update_water_mark_column",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "Copy Incremental Data",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "dbo.usp_update_watermark_datetime",
+													"storedProcedureParameters": {
+														"schemaName": {
+															"value": {
+																"value": "@{item().SCHEMA_NAME}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"tableName": {
+															"value": {
+																"value": "@{item().TABLE_NAME}",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"watermarkValueToBeUpdated": {
+															"value": {
+																"value": "@variables('current_get_time')",
+																"type": "Expression"
+															},
+															"type": "DateTime"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "LS_sqldb",
+													"type": "LinkedServiceReference"
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "Copy Full Data",
+												"type": "Copy",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "7.00:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "select * from @{item().SCHEMA_NAME}.@{item().TABLE_NAME}",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobStorageWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
+												},
+												"inputs": [
+													{
+														"referenceName": "DS_source_samplesqldb",
+														"type": "DatasetReference",
+														"parameters": {}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "DS_staging_csv",
+														"type": "DatasetReference",
+														"parameters": {
+															"directoryname": {
+																"value": "@{item().SCHEMA_NAME}.@{item().TABLE_NAME}",
+																"type": "Expression"
+															},
+															"filename": {
+																"value": "@concat('Full_copy_',formatDateTime(convertTimeZone(utcnow(),'UTC','India Standard Time'),'yyyy-MM-ddTHHmmss'), '.csv')",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"variables": {
+					"current_get_time": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/DS_metadata')]",
+				"[concat(variables('workspaceId'), '/datasets/DS_source_samplesqldb')]",
+				"[concat(variables('workspaceId'), '/datasets/DS_staging_csv')]",
+				"[concat(variables('workspaceId'), '/linkedServices/LS_sqldb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PL_move_files_from_staging_to_raw')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup_metadata",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_metadata",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Loop metadata",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup_metadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup_metadata').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"wildcardFolderPath": {
+													"value": "@{item().SCHEMA_NAME}.@{item().TABLE_NAME}",
+													"type": "Expression"
+												},
+												"wildcardFileName": "*.csv",
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_staging_csv",
+											"type": "DatasetReference",
+											"parameters": {
+												"directoryname": {
+													"value": "@{item().SCHEMA_NAME}.@{item().TABLE_NAME}",
+													"type": "Expression"
+												},
+												"filename": "*.csv"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ADLS_G2_RAW",
+											"type": "DatasetReference",
+											"parameters": {
+												"schema_name": {
+													"value": "@{item().SCHEMA_NAME}",
+													"type": "Expression"
+												},
+												"table_name": {
+													"value": "@{item().TABLE_NAME}",
+													"type": "Expression"
+												},
+												"current_date": {
+													"value": "@pipeline().parameters.currentDate",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Delete from staging",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "Copy data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "DS_Blob_Storage_delete_staging",
+											"type": "DatasetReference",
+											"parameters": {
+												"Directory Name": {
+													"value": "@{item().SCHEMA_NAME}.@{item().TABLE_NAME}",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"currentDate": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/DS_metadata')]",
+				"[concat(variables('workspaceId'), '/datasets/DS_staging_csv')]",
+				"[concat(variables('workspaceId'), '/datasets/DS_ADLS_G2_RAW')]",
+				"[concat(variables('workspaceId'), '/datasets/DS_Blob_Storage_delete_staging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_ADLS_G2_RAW')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_G2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"schema_name": {
+						"type": "string"
+					},
+					"table_name": {
+						"type": "string"
+					},
+					"current_date": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat(dataset().current_date, '/', dataset().schema_name, '.', dataset().table_name)",
+							"type": "Expression"
+						},
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/LS_ADLS_G2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_Blob_Storage_delete_staging')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_Blob_Storage_Staging",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Directory Name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "staging"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/LS_Blob_Storage_Staging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_metadata')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_sqldb",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SCHEMA_NAME",
+						"type": "varchar"
+					},
+					{
+						"name": "TABLE_NAME",
+						"type": "varchar"
+					},
+					{
+						"name": "FULLOAD",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WATER_MARK_COLUMN",
+						"type": "varchar"
+					},
+					{
+						"name": "DATA_FETCHED_TILL_TIMESTAMP",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "tablses_to_copy"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/LS_sqldb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_source_samplesqldb')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_sqldb",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/LS_sqldb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DS_staging_csv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_Blob_Storage_Staging",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directoryname": {
+						"type": "string"
+					},
+					"filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().filename",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directoryname",
+							"type": "Expression"
+						},
+						"container": "staging"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/LS_Blob_Storage_Staging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LS_ADLS_G2')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "this is the linked service to connect to raw and curated zone.",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_G2_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LS_AKV')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LS_AKV_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LS_Blob_Storage_Staging')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "this linked service connect to storage for the staging layer...",
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"serviceEndpoint": "[parameters('LS_Blob_Storage_Staging_properties_typeProperties_serviceEndpoint')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LS_sqldb')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('LS_sqldb_properties_typeProperties_connectionString_secretName')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/linkedServices/LS_AKV')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synwfasthackpt1-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synwfasthackpt1-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synwfasthackpt1-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synwfasthackpt1-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": "[parameters('AutoResolveIntegrationRuntime_properties_typeProperties_computeProperties')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Raw_To_Curated_Full_Load')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "[parameters('Raw_To_Curated_Full_Load_properties_bigDataPool_referenceName')]",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "199dd15a-fd14-42be-a8e7-a0d50143c226"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "[parameters('Raw_To_Curated_Full_Load_properties_metadata_a365ComputeOptions_id')]",
+						"name": "sparkpool",
+						"type": "Spark",
+						"endpoint": "[parameters('Raw_To_Curated_Full_Load_properties_metadata_a365ComputeOptions_endpoint')]",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"date = \"2022-03-29\"\r\n",
+							"schema_name = \"SalesLT\"\r\n",
+							"table_name = \"Address\"\r\n",
+							"datalakeName = \"opnhckadlstorage1\"\r\n",
+							"####"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "markdown",
+						"metadata": {
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"\r\n",
+							"#### printing the parameters\r\n",
+							""
+						]
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"print (f\"Table name: {table_name}\")\r\n",
+							"print(f\"Schema Name: {schema_name}\")\r\n",
+							"print(f\"Date: {date}\")"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from notebookutils import mssparkutils\r\n",
+							"files =mssparkutils.fs.ls(f'abfss://raw@{datalakeName}.dfs.core.windows.net/{date}/{schema_name}.{table_name}')"
+						],
+						"outputs": [],
+						"execution_count": 11
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"files"
+						],
+						"outputs": [],
+						"execution_count": 31
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"filesInfo=[]\r\n",
+							"for f in files:\r\n",
+							"    fileInfo={}\r\n",
+							"    fileInfo[\"Fullpath\"] = f.path\r\n",
+							"    fileInfo[\"Datepart\"] = f.path.split(\"/\")[-1].split(\"_\")[-1].split(\".\")[0].replace(\"-\",\"\").replace(\"T\",\"\")\r\n",
+							"    filesInfo.append(fileInfo)\r\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 35
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"filesInfo\r\n",
+							"sorted_files_info = sorted(filesInfo, key = lambda i: i['Datepart'], reverse=True)\r\n",
+							"sorted_files_info\r\n",
+							"recentfile = sorted_files_info[0]['Fullpath'] # we are taking the recent file only for the full load."
+						],
+						"outputs": [],
+						"execution_count": 42
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"recentfile"
+						],
+						"outputs": [],
+						"execution_count": 43
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"# read the data into dataframe.\r\n",
+							"df = spark.read.load(recentfile, format='csv'\r\n",
+							"## If header exists uncomment line below\r\n",
+							", header=True\r\n",
+							")\r\n",
+							"#display(df.limit(10))"
+						],
+						"outputs": [],
+						"execution_count": 44
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"table_full_name = f\"curated.{schema_name}_{table_name}\"\r\n",
+							"table_delta_file_location = f\"abfss://curated@{datalakeName}.dfs.core.windows.net/{schema_name}.{table_name}\""
+						],
+						"outputs": [],
+						"execution_count": 45
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"#writing the delta table into the curated location\r\n",
+							"df.write.format(\"delta\").mode(\"overwrite\").save(table_delta_file_location)"
+						],
+						"outputs": [],
+						"execution_count": 46
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"create database if not exists curated"
+						],
+						"outputs": [],
+						"execution_count": 47
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"\r\n",
+							"\r\n",
+							"drop_sqltext = f\"DROP TABLE IF EXISTS {table_full_name}\"\r\n",
+							"print (drop_sqltext)\r\n",
+							"spark.sql(drop_sqltext)\r\n",
+							"\r\n",
+							"sqltext = f\"CREATE TABLE IF NOT EXISTS {table_full_name} USING DELTA LOCATION '{table_delta_file_location}'\"\r\n",
+							"print(sqltext)\r\n",
+							"spark.sql(sqltext)\r\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 7
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Raw_To_Curated_Incremental_Load')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "[parameters('Raw_To_Curated_Incremental_Load_properties_bigDataPool_referenceName')]",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "f2ccde07-6950-4748-bf2d-e2a33046936a"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "[parameters('Raw_To_Curated_Incremental_Load_properties_metadata_a365ComputeOptions_id')]",
+						"name": "sparkpool",
+						"type": "Spark",
+						"endpoint": "[parameters('Raw_To_Curated_Incremental_Load_properties_metadata_a365ComputeOptions_endpoint')]",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "3.1",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"date = \"2022-03-29\"\r\n",
+							"schema_name = \"SalesLT\"\r\n",
+							"table_name = \"SalesOrderDetail\"\r\n",
+							"datalakeName = \"opnhckadlstorage\"\r\n",
+							"merge_join_condition = \"source.SalesOrderDetailID = target.SalesOrderDetailID\""
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "markdown",
+						"metadata": {
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"\r\n",
+							"#### printing the parameters\r\n",
+							""
+						]
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"print (f\"Table name: {table_name}\")\r\n",
+							"print(f\"Schema Name: {schema_name}\")\r\n",
+							"print(f\"Date: {date}\")\r\n",
+							"print(f\"merge_join_condition: {merge_join_condition}\")"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from notebookutils import mssparkutils\r\n",
+							"files =mssparkutils.fs.ls(f'abfss://raw@{datalakeName}.dfs.core.windows.net/{date}/{schema_name}.{table_name}')"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"files"
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"filesInfo=[]\r\n",
+							"for f in files:\r\n",
+							"    fileInfo={}\r\n",
+							"    fileInfo[\"Fullpath\"] = f.path\r\n",
+							"    fileInfo[\"Datepart\"] = f.path.split(\"/\")[-1].split(\"_\")[-1].split(\".\")[0].replace(\"-\",\"\").replace(\"T\",\"\")\r\n",
+							"    filesInfo.append(fileInfo)\r\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 5
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"filesInfo\r\n",
+							"sorted_files_info = sorted(filesInfo, key = lambda i: i['Datepart'], reverse=False)\r\n",
+							"sorted_files_info\r\n",
+							"# recentfile = sorted_files_info[0]['Fullpath'] # we are taking the recent file only for the full load."
+						],
+						"outputs": [],
+						"execution_count": 6
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"create database if not exists curated"
+						],
+						"outputs": [],
+						"execution_count": 7
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"table_full_name = f\"curated.{schema_name}_{table_name}\"\r\n",
+							"table_delta_file_location = f\"abfss://curated@{datalakeName}.dfs.core.windows.net/{schema_name}.{table_name}\""
+						],
+						"outputs": [],
+						"execution_count": 8
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"recentfile = sorted_files_info[0]['Fullpath']"
+						],
+						"outputs": [],
+						"execution_count": 9
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"def create_delta_table(\r\n",
+							"    df,\r\n",
+							"    table_full_name,\r\n",
+							"    table_delta_file_location\r\n",
+							"):\r\n",
+							"    isDeltaTableAlreadyPresent = 0\r\n",
+							"    try:\r\n",
+							"        mssparkutils.fs.ls(table_delta_file_location)\r\n",
+							"        isDeltaTableAlreadyPresent = 1\r\n",
+							"    except:\r\n",
+							"    #writing the delta table into the curated location\r\n",
+							"        df.write.format(\"delta\").mode(\"overwrite\").save(table_delta_file_location)\r\n",
+							"        sqltext = f\"CREATE TABLE IF NOT EXISTS {table_full_name} USING DELTA LOCATION '{table_delta_file_location}'\"\r\n",
+							"        print(sqltext)\r\n",
+							"        spark.sql(sqltext)\r\n",
+							"    return  isDeltaTableAlreadyPresent\r\n",
+							"\r\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 10
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"def mergeDeltaTable(\r\n",
+							"    table_full_name,\r\n",
+							"    df,\r\n",
+							"    merge_join_condition\r\n",
+							"):\r\n",
+							"    df.createOrReplaceTempView(\"temp_vw_new_data\")\r\n",
+							"    sqltext = (f'''\r\n",
+							"\r\n",
+							"    MERGE INTO {table_full_name} as source\r\n",
+							"    USING temp_vw_new_data as target\r\n",
+							"    ON {merge_join_condition}    \r\n",
+							"    WHEN MATCHED THEN UPDATE SET *\r\n",
+							"    WHEN NOT MATCHED THEN INSERT *\r\n",
+							"\r\n",
+							"    \r\n",
+							"    \r\n",
+							"    ''')\r\n",
+							"    print(sqltext)\r\n",
+							"    spark.sql(sqltext)"
+						],
+						"outputs": [],
+						"execution_count": 33
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from delta.tables import *\r\n",
+							"\r\n",
+							"\r\n",
+							"def incremental_file_load(\r\n",
+							"    input_full_file_path\r\n",
+							"    ,merge_join_condition\r\n",
+							"    ,table_delta_file_location):\r\n",
+							"\r\n",
+							"        # read the data into dataframe.\r\n",
+							"        df = spark.read.load(input_full_file_path, format='csv'\r\n",
+							"        ## If header exists uncomment line below\r\n",
+							"        , header=True\r\n",
+							"        )\r\n",
+							"        isDeltaTableAlreadyPresent = create_delta_table(\r\n",
+							"        df=df,\r\n",
+							"        table_full_name=table_full_name,\r\n",
+							"        table_delta_file_location=table_delta_file_location\r\n",
+							"        )\r\n",
+							"        print (f\"isDeltaTableAlreadyPresent = {isDeltaTableAlreadyPresent} [[ 0= Not Present, so we created the delta table. 1= present ]], we skip creatioon of the delta table\")\r\n",
+							"        if (isDeltaTableAlreadyPresent==1):\r\n",
+							"            print(\" We are going to merge the new dataframe with the delta table\")\r\n",
+							"            mergeDeltaTable(\r\n",
+							"                merge_join_condition=merge_join_condition,\r\n",
+							"                df=df,\r\n",
+							"                table_full_name=table_full_name\r\n",
+							"            )\r\n",
+							"\r\n",
+							"\r\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 30
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": false
+						},
+						"source": [
+							"for fileinfo in sorted_files_info:\r\n",
+							"    print (fileinfo['Fullpath'])\r\n",
+							"    incremental_file_load(\r\n",
+							"        input_full_file_path=fileinfo['Fullpath'],\r\n",
+							"        merge_join_condition=merge_join_condition,\r\n",
+							"        table_delta_file_location=table_delta_file_location\r\n",
+							"    )"
+						],
+						"outputs": [],
+						"execution_count": 34
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"microsoft": {
+								"language": "sparksql"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%sql\r\n",
+							"\r\n",
+							"select count(*) from curated.saleslt_salesorderdetail"
+						],
+						"outputs": [],
+						"execution_count": 32
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							""
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sparkpool')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 3,
+					"minNodeCount": 3
+				},
+				"nodeCount": 0,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.1",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus"
+		}
+	]
+}

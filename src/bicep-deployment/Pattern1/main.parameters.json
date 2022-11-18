@@ -1,0 +1,27 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+          "value": "ftatoolkit" // This value must be provided.
+        },
+        "resourceLocation": {
+          "value": "eastus" // This value must be provided.
+        },
+        "storageAccountType":{
+          "value": "Standard_LRS"
+        },
+        "synapseManagedResourceGroup": {
+          "value": "P1-AnalyticsFundamentals-Managed-RG"
+        },
+        "sqlAdministratorLogin": {
+          "value" : "sqladminuser"
+        },
+        "sqlAdministratorLoginPassword": {
+          "value": "Xx$$x0xx"
+        },
+        "spObjectId":{
+          "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role (Owner) to deploy the solution)
+        }
+    }
+}

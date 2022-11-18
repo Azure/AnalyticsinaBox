@@ -1,0 +1,51 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "prefix": {
+          "value": "ftatoolkit" // This value must be provided.
+        },
+        "resourceLocation": {
+          "value": "eastus" // This value must be provided.
+        },
+        "storageAccountType":{
+          "value": "Standard_LRS"
+        },
+        "synapseManagedResourceGroup": {
+          "value": "P2-AnalyticsFundamentals-Managed-RG"
+        },
+        "ipaddress": {
+          "value": "xx.xxx.xxx.xx" //This is your local IP address that will allow you to see into your workspace
+        },
+        "sqlAdministratorLogin": {
+          "value" : "sqladminuser"
+        },
+        "sqlAdministratorLoginPassword": {
+          "value": "Xx$$x0xx"
+        },
+        "synapseDedicatedSQLPoolName":{
+          "value": "EnterpriseDW"
+        },
+        "synapseSQLPoolSKU":{
+          "value": "DW100c"
+        },
+        "collation":{
+          "value": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "synapseSparkPoolName": {
+          "value": "SparkPool"
+        },
+        "synapseSparkPoolNodeSize":{
+          "value": "Small"
+        },
+        "synapseSparkPoolMinNodeCount":{
+          "value": 3
+        },
+        "synapseSparkPoolMaxNodeCount":{
+          "value": 3
+        },
+        "spObjectId":{
+          "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" //Service Principal ID or your own User Object ID (Please make sure that this user has high enough Role (Owner) to deploy the solution)
+        }
+    }
+}

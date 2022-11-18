@@ -1,0 +1,110 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+# https://4bes.nl/2021/04/18/step-by-step-deploy-bicep-with-azure-devops-pipelines/
+# https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/add-template-to-azure-pipelines?
+
+name: Pattern2-Deploy-AnalyticsFundamentals
+trigger:
+- none
+
+parameters:
+- name: sqlAdministratorLoginPassword
+  type: string
+- name: spObjectId
+  type: string  
+
+variables:
+  azureSubscription: 'APOps-SubscriptionCnx' 
+  resourceGroupName: 'P2-AnalyticsFundamentals-RG'
+  synapseManagedResourceGroup: 'P2-AnalyticsFundamentals-Managed-RG'
+  prefix: 'ftatoolkit'
+  resourceLocation: 'eastus'
+  storageAccountType: 'Standard_LRS'
+  sqlAdministratorLogin: 'sqladminuser'
+  
+pool:
+  vmImage: windows-2019
+
+stages:
+  - stage: CreateResourceGroup
+    jobs:
+    - job: CreateResourceGroup
+      steps:
+      - task: AzureCLI@2  
+        displayName: 'Create Resource Group' 
+        inputs: 
+          azureSubscription: $(azureSubscription) 
+          scriptType: 'pscore'  
+          scriptLocation: 'inlineScript'  
+          inlineScript: 'az group create --name $(resourceGroupName) --location $(resourceLocation)'  
+
+  - stage: Lint
+    displayName: Lint and Preflight check
+    jobs:
+    - job: LintBicep
+      displayName: Lint Bicep Code
+      steps:
+        - checkout: self
+        - script: |
+            az bicep build --file ./src/bicep-deployment/Pattern2/main.bicep
+          name: LintBicepCode
+          displayName: Run Bicep Linter
+
+  - stage: PreflightValidation
+    jobs:
+    - job: ValidateBicepCode
+      displayName: Validate Bicep Code
+      steps:
+        - task: AzureCli@2
+          name: RunPreflightValidateion
+          displayName: Run Preflight Validation
+          inputs:
+            azureSubscription: $(azureSubscription)
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              echo "PreflightValidation..."
+              echo $(Build.DefinitionName)
+              echo ${{ parameters.spObjectId }}
+              echo $(resourceGroupName)
+              echo $(prefix)
+              echo $(resourceLocation)
+              echo $(storageAccountType)
+              echo $(synapseManagedResourceGroup)
+              echo $(sqlAdministratorLogin)
+              echo ${{ parameters.sqlAdministratorLoginPassword }}
+              az deployment group validate --resource-group $(resourceGroupName) --template-file ./src/bicep-deployment/Pattern2/main.bicep --parameters prefix=$(prefix) resourceLocation=$(resourceLocation) storageAccountType=$(storageAccountType) synapseManagedResourceGroup=$(synapseManagedResourceGroup) sqlAdministratorLogin=$(sqlAdministratorLogin) sqlAdministratorLoginPassword=${{ parameters.sqlAdministratorLoginPassword }} spObjectId=${{ parameters.spObjectId }}
+
+  - stage: CheckOutBicepAndDeployAzureResources
+    displayName: Deploy Azure Resources
+    jobs:
+    - deployment: DevDeployBicep
+      displayName: Deploy Bicep-Infra
+      pool:
+        vmImage: windows-2019
+      environment: dev
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self
+            - task: AzureCLI@2
+              displayName: Running Dev Deployment
+              inputs:
+                azureSubscription: $(azureSubscription)
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  echo "deploying bicep..."
+                  echo "PreflightValidation..."
+                  echo $(Build.DefinitionName)
+                  echo ${{ parameters.spObjectId }}
+                  echo $(resourceGroupName)
+                  echo $(prefix)
+                  echo $(resourceLocation)
+                  echo $(storageAccountType)
+                  echo $(synapseManagedResourceGroup)
+                  echo $(sqlAdministratorLogin)
+                  echo ${{ parameters.sqlAdministratorLoginPassword }}
+                  az --version
+                  az deployment group create --resource-group $(resourceGroupName) --template-file ./src/bicep-deployment/Pattern2/main.bicep --parameters prefix=$(prefix) resourceLocation=$(resourceLocation) storageAccountType=$(storageAccountType) synapseManagedResourceGroup=$(synapseManagedResourceGroup) sqlAdministratorLogin=$(sqlAdministratorLogin) sqlAdministratorLoginPassword=${{ parameters.sqlAdministratorLoginPassword }} spObjectId=${{ parameters.spObjectId }}

@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "fasthack-synapse-pt3"
+		},
+		"fasthack-synapse-pt3-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:fasthack-synapse-pt3.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"LS_AZFunction_properties_typeProperties_functionAppUrl": {
+			"value": "https://fasthack-fnapp-pt3.azurewebsites.net"
+		},
+		"LS_KeyVault_properties_typeProperties_baseUrl": {
+			"value": "https://fasthack-akv-pt3.vault.azure.net/"
+		},
+		"LS_datalake_properties_typeProperties_url": {
+			"value": "https://fasthackadlpt3.dfs.core.windows.net/"
+		},
+		"fasthack-synapse-pt3-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://fasthackadlssynpt3.dfs.core.windows.net"
+		}
+	}
+}

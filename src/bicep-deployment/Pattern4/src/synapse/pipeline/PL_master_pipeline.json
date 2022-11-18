@@ -1,0 +1,116 @@
+{
+	"name": "PL_master_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "SQL to Staging",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_move_data_from_SQL_to_Staging_area",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Staging to Raw",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SQL to Staging",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_move_files_from_staging_to_raw",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentDate": {
+							"value": "@pipeline().parameters.currentDate",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Raw to Curated Full",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Staging to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Curated_Full_Load",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentDate": {
+							"value": "@pipeline().parameters.currentDate",
+							"type": "Expression"
+						},
+						"datalakeName": {
+							"value": "@pipeline().parameters.datalakeName",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Raw to Curated Incremental",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Staging to Raw",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Curated_Incremental_Load",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentDate": {
+							"value": "@pipeline().parameters.currentDate",
+							"type": "Expression"
+						},
+						"datalakeName": {
+							"value": "@pipeline().parameters.datalakeName",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"currentDate": {
+				"type": "string"
+			},
+			"datalakeName": {
+				"type": "string",
+				"defaultValue": "adlfasthackpt11"
+			}
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,436 @@
+{
+	"name": "Raw_To_Curated_Incremental_Load",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkpool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "f2ccde07-6950-4748-bf2d-e2a33046936a"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/rg-fasthackpt1/providers/Microsoft.Synapse/workspaces/synwfasthackpt1/bigDataPools/sparkpool",
+				"name": "sparkpool",
+				"type": "Spark",
+				"endpoint": "https://synwfasthackpt1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.1",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"tags": [
+						"parameters"
+					]
+				},
+				"source": [
+					"date = \"2022-03-29\"\r\n",
+					"schema_name = \"SalesLT\"\r\n",
+					"table_name = \"SalesOrderDetail\"\r\n",
+					"datalakeName = \"opnhckadlstorage\"\r\n",
+					"merge_join_condition = \"source.SalesOrderDetailID = target.SalesOrderDetailID\""
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"\r\n",
+					"#### printing the parameters\r\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"print (f\"Table name: {table_name}\")\r\n",
+					"print(f\"Schema Name: {schema_name}\")\r\n",
+					"print(f\"Date: {date}\")\r\n",
+					"print(f\"merge_join_condition: {merge_join_condition}\")"
+				],
+				"execution_count": 2
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from notebookutils import mssparkutils\r\n",
+					"files =mssparkutils.fs.ls(f'abfss://raw@{datalakeName}.dfs.core.windows.net/{date}/{schema_name}.{table_name}')"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"files"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"filesInfo=[]\r\n",
+					"for f in files:\r\n",
+					"    fileInfo={}\r\n",
+					"    fileInfo[\"Fullpath\"] = f.path\r\n",
+					"    fileInfo[\"Datepart\"] = f.path.split(\"/\")[-1].split(\"_\")[-1].split(\".\")[0].replace(\"-\",\"\").replace(\"T\",\"\")\r\n",
+					"    filesInfo.append(fileInfo)\r\n",
+					""
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"filesInfo\r\n",
+					"sorted_files_info = sorted(filesInfo, key = lambda i: i['Datepart'], reverse=False)\r\n",
+					"sorted_files_info\r\n",
+					"# recentfile = sorted_files_info[0]['Fullpath'] # we are taking the recent file only for the full load."
+				],
+				"execution_count": 6
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"create database if not exists curated"
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "python"
+					}
+				},
+				"source": [
+					"%%pyspark\r\n",
+					"table_full_name = f\"curated.{schema_name}_{table_name}\"\r\n",
+					"table_delta_file_location = f\"abfss://curated@{datalakeName}.dfs.core.windows.net/{schema_name}.{table_name}\""
+				],
+				"execution_count": 8
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"recentfile = sorted_files_info[0]['Fullpath']"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def create_delta_table(\r\n",
+					"    df,\r\n",
+					"    table_full_name,\r\n",
+					"    table_delta_file_location\r\n",
+					"):\r\n",
+					"    isDeltaTableAlreadyPresent = 0\r\n",
+					"    try:\r\n",
+					"        mssparkutils.fs.ls(table_delta_file_location)\r\n",
+					"        isDeltaTableAlreadyPresent = 1\r\n",
+					"    except:\r\n",
+					"    #writing the delta table into the curated location\r\n",
+					"        df.write.format(\"delta\").mode(\"overwrite\").save(table_delta_file_location)\r\n",
+					"        sqltext = f\"CREATE TABLE IF NOT EXISTS {table_full_name} USING DELTA LOCATION '{table_delta_file_location}'\"\r\n",
+					"        print(sqltext)\r\n",
+					"        spark.sql(sqltext)\r\n",
+					"    return  isDeltaTableAlreadyPresent\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"def mergeDeltaTable(\r\n",
+					"    table_full_name,\r\n",
+					"    df,\r\n",
+					"    merge_join_condition\r\n",
+					"):\r\n",
+					"    df.createOrReplaceTempView(\"temp_vw_new_data\")\r\n",
+					"    sqltext = (f'''\r\n",
+					"\r\n",
+					"    MERGE INTO {table_full_name} as source\r\n",
+					"    USING temp_vw_new_data as target\r\n",
+					"    ON {merge_join_condition}    \r\n",
+					"    WHEN MATCHED THEN UPDATE SET *\r\n",
+					"    WHEN NOT MATCHED THEN INSERT *\r\n",
+					"\r\n",
+					"    \r\n",
+					"    \r\n",
+					"    ''')\r\n",
+					"    print(sqltext)\r\n",
+					"    spark.sql(sqltext)"
+				],
+				"execution_count": 33
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"from delta.tables import *\r\n",
+					"\r\n",
+					"\r\n",
+					"def incremental_file_load(\r\n",
+					"    input_full_file_path\r\n",
+					"    ,merge_join_condition\r\n",
+					"    ,table_delta_file_location):\r\n",
+					"\r\n",
+					"        # read the data into dataframe.\r\n",
+					"        df = spark.read.load(input_full_file_path, format='csv'\r\n",
+					"        ## If header exists uncomment line below\r\n",
+					"        , header=True\r\n",
+					"        )\r\n",
+					"        isDeltaTableAlreadyPresent = create_delta_table(\r\n",
+					"        df=df,\r\n",
+					"        table_full_name=table_full_name,\r\n",
+					"        table_delta_file_location=table_delta_file_location\r\n",
+					"        )\r\n",
+					"        print (f\"isDeltaTableAlreadyPresent = {isDeltaTableAlreadyPresent} [[ 0= Not Present, so we created the delta table. 1= present ]], we skip creatioon of the delta table\")\r\n",
+					"        if (isDeltaTableAlreadyPresent==1):\r\n",
+					"            print(\" We are going to merge the new dataframe with the delta table\")\r\n",
+					"            mergeDeltaTable(\r\n",
+					"                merge_join_condition=merge_join_condition,\r\n",
+					"                df=df,\r\n",
+					"                table_full_name=table_full_name\r\n",
+					"            )\r\n",
+					"\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 30
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": false
+				},
+				"source": [
+					"for fileinfo in sorted_files_info:\r\n",
+					"    print (fileinfo['Fullpath'])\r\n",
+					"    incremental_file_load(\r\n",
+					"        input_full_file_path=fileinfo['Fullpath'],\r\n",
+					"        merge_join_condition=merge_join_condition,\r\n",
+					"        table_delta_file_location=table_delta_file_location\r\n",
+					"    )"
+				],
+				"execution_count": 34
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%sql\r\n",
+					"\r\n",
+					"select count(*) from curated.saleslt_salesorderdetail"
+				],
+				"execution_count": 32
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				],
+				"execution_count": null
+			}
+		]
+	}
+}

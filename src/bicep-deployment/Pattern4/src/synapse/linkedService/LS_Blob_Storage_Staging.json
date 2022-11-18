@@ -1,0 +1,15 @@
+{
+	"name": "LS_Blob_Storage_Staging",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"serviceEndpoint": "https://stfasthackpt1.blob.core.windows.net/"
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		},
+		"description": "this linked service connect to storage for the staging layer..."
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"name": "01_PL_Generate_Event",
+	"properties": {
+		"activities": [
+			{
+				"name": "Trigger Azure Function",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "EventGenerator",
+					"method": "POST",
+					"body": {
+						"number_of_events": 80
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_AZFunction",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"annotations": []
+	}
+}

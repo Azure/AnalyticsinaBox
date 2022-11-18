@@ -1,0 +1,55 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "synwfasthackpt1"
+		},
+		"synwfasthackpt1-WorkspaceDefaultSqlServer_connectionString": {
+			"value": ""
+		},
+		"LS_ADLS_G2_properties_typeProperties_url": {
+			"value": ""
+		},
+		"LS_AKV_properties_typeProperties_baseUrl": {
+			"value": ""
+		},
+		"LS_Blob_Storage_Staging_properties_typeProperties_serviceEndpoint": {
+			"value": ""
+		},
+		"LS_sqldb_properties_typeProperties_connectionString_secretName": {
+			"value": "sqlconn-sampledb"
+		},
+		"synwfasthackpt1-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": ""
+		},
+		"AutoResolveIntegrationRuntime_properties_typeProperties_computeProperties": {
+			"value": {
+				"location": "AutoResolve",
+				"dataFlowProperties": {
+					"computeType": "General",
+					"coreCount": 8,
+					"timeToLive": 0
+				}
+			}
+		},
+		"Raw_To_Curated_Full_Load_properties_bigDataPool_referenceName": {
+			"value": "sparkpool"
+		},
+		"Raw_To_Curated_Full_Load_properties_metadata_a365ComputeOptions_id": {
+			"value": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/rg-fasthackpt1/providers/Microsoft.Synapse/workspaces/synwfasthackpt1/bigDataPools/sparkpool"
+		},
+		"Raw_To_Curated_Full_Load_properties_metadata_a365ComputeOptions_endpoint": {
+			"value": "https://synwfasthackpt1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool"
+		},
+		"Raw_To_Curated_Incremental_Load_properties_bigDataPool_referenceName": {
+			"value": "sparkpool"
+		},
+		"Raw_To_Curated_Incremental_Load_properties_metadata_a365ComputeOptions_id": {
+			"value": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/rg-fasthackpt1/providers/Microsoft.Synapse/workspaces/synwfasthackpt1/bigDataPools/sparkpool"
+		},
+		"Raw_To_Curated_Incremental_Load_properties_metadata_a365ComputeOptions_endpoint": {
+			"value": "https://synwfasthackpt1.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool"
+		}
+	}
+}

@@ -1,0 +1,130 @@
+{
+	"name": "PL_Curated_Full_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup_metadata",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_metadata",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Loop metadata",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup_metadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup_metadata').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@bool(item().FULLOAD)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Notebook To Load FullData in Curated Layer",
+										"type": "SynapseNotebook",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"notebook": {
+												"referenceName": "Raw_To_Curated_Full_Load",
+												"type": "NotebookReference"
+											},
+											"parameters": {
+												"schema_name": {
+													"value": {
+														"value": "@{item().SCHEMA_NAME}",
+														"type": "Expression"
+													},
+													"type": "string"
+												},
+												"table_name": {
+													"value": {
+														"value": "@{item().TABLE_NAME}",
+														"type": "Expression"
+													},
+													"type": "string"
+												},
+												"date": {
+													"value": {
+														"value": "@pipeline().parameters.currentDate",
+														"type": "Expression"
+													},
+													"type": "string"
+												},
+												"datalakeName": {
+													"value": {
+														"value": "@pipeline().parameters.datalakeName",
+														"type": "Expression"
+													},
+													"type": "string"
+												}
+											},
+											"snapshot": true,
+											"sparkPool": {
+												"referenceName": "sparkpool",
+												"type": "BigDataPoolReference"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"currentDate": {
+				"type": "string"
+			},
+			"datalakeName": {
+				"type": "string"
+			}
+		},
+		"annotations": []
+	}
+}

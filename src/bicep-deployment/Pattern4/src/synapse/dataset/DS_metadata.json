@@ -1,0 +1,45 @@
+{
+	"name": "DS_metadata",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_sqldb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "SCHEMA_NAME",
+				"type": "varchar"
+			},
+			{
+				"name": "TABLE_NAME",
+				"type": "varchar"
+			},
+			{
+				"name": "FULLOAD",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "WATER_MARK_COLUMN",
+				"type": "varchar"
+			},
+			{
+				"name": "DATA_FETCHED_TILL_TIMESTAMP",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "tablses_to_copy"
+		}
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"name": "query_the_stream_data",
+	"properties": {
+		"content": {
+			"query": "-- Please change the storage account name according to your environment\n\nSelect top 10 a.enqueuedTime,a.body  FROM\n(\nSELECT\n    * \nFROM\n    OPENROWSET(\n        BULK 'https://fasthackadlpt3.dfs.core.windows.net/curated/streaming/spark_structured_streaming_using_synapse/structured_streaming_eh/',\n        FORMAT = 'DELTA'\n    ) AS [result]\n) a \norder by a.enqueuedTime desc\n\n\n-- Select count(*)  FROM\n-- (\n-- SELECT\n--     * \n-- FROM\n--     OPENROWSET(\n--         BULK 'https://fasthackadlpt3.dfs.core.windows.net/curated/streaming/spark_structured_streaming_using_synapse/structured_streaming_eh/',\n--         FORMAT = 'DELTA'\n--     ) AS [result]\n-- ) a \n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

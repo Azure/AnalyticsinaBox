@@ -1,0 +1,116 @@
+{
+    "Microsoft.Synapse/workspaces/notebooks": {
+        "properties": {
+            "bigDataPool": {
+                "referenceName": "="
+            },
+            "metadata":{
+                "a365ComputeOptions":{
+                    "id": "=",
+                    "endpoint": "="
+
+                }
+            }
+        }
+            
+    },
+   
+    "Microsoft.Synapse/workspaces/sqlscripts": {
+        "properties": {
+            "content": {
+                "currentConnection": {
+                    "*": "-"
+                }
+            }
+        }
+    },
+    "Microsoft.Synapse/workspaces/pipelines": {
+        "properties": {
+            "activities": [{
+                "typeProperties": {
+                    "waitTimeInSeconds": "-::int",
+                    "headers": "=::object",
+                    "activities": [
+                        {
+                            "typeProperties": {
+                                "url": "-:-webUrl:string"
+                            }
+                        }
+                    ]
+                }
+            }],
+            "parameters": {
+                "datalakeName": {
+                    "defaultValue":"="
+                }
+            }
+        }
+    },
+    "Microsoft.Synapse/workspaces/integrationRuntimes": {
+        "properties": {
+            "typeProperties": {
+                "*": "="
+            }
+        }
+    },
+    "Microsoft.Synapse/workspaces/triggers": {
+        "properties": {
+            "typeProperties": {
+                "recurrence": {
+                    "*": "=",
+                    "interval": "=:triggerSuffix:int",
+                    "frequency": "=:-freq"
+                },
+                "maxConcurrency": "="
+            }
+        }
+    },
+    "Microsoft.Synapse/workspaces/linkedServices": {
+        "*": {
+            "properties": {
+                "typeProperties": {
+                    "accountName": "=",
+                    "username": "=",
+                    "connectionString": "=",
+                    "secretAccessKey": "|",
+                    "url": "=",
+                    "serviceEndpoint" : "="
+                }
+            }
+        },
+        "AzureDataLakeStore": {
+            "properties": {
+                "typeProperties": {
+                    "dataLakeStoreUri": "="
+                }
+            }
+        },
+        "AzureKeyVault": {
+            "properties": {
+                "typeProperties": {
+                    "baseUrl": "-"
+                },
+                "parameters": {
+                    "KeyVaultURL": {
+                        "type": "=",
+                        "defaultValue": "="
+                    }
+                }
+            }
+        }
+    },
+    "Microsoft.Synapse/workspaces/datasets": {
+        "properties": {
+            "typeProperties": {
+                "*": "="
+            }
+        }
+    },
+    "Microsoft.Synapse/workspaces/credentials" : {
+        "properties": {
+            "typeProperties": {
+                "resourceId": "="
+            }
+        }
+    }
+}

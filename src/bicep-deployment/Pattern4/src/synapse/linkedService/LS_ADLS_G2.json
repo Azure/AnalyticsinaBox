@@ -1,0 +1,15 @@
+{
+	"name": "LS_ADLS_G2",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://adlfasthackpt1.dfs.core.windows.net/"
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		},
+		"description": "this is the linked service to connect to raw and curated zone."
+	}
+}

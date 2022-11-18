@@ -1,0 +1,175 @@
+[
+    {
+        "template": "OpenDatasets",
+        "artifacts" : {
+            "linkedServices":[
+                {
+                    "name": "nyc_tlc_yellow",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/nyc_tlc_yellow.json",
+                    "tokens": []
+                },
+                {
+                    "name": "HttpServerTripDataLinkedService",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/HttpServerTripDataLinkedService.json",
+                    "tokens": []
+                },
+                {
+                    "name": "HttpServerTripFareDataLinkedService",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/HttpServerTripFareDataLinkedService.json",
+                    "tokens": []
+                },
+                {
+                    "name": "keyVaultLinkedservice",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/keyVaultLinkedservice.json",
+                    "tokens": []
+                },
+                {
+                    "name": "TripFaresDataLakeStorageLinkedService",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/linkedService/TripFaresDataLakeStorageLinkedService.json",
+                    "tokens": []
+                }
+            ],
+            "sqlScripts": [
+                {
+                    "name": "01 - Explore Open DataSet with SQL Serverless",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/01.AnalyzeOpenDatasetSQLServerless.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": [
+                        "##azsynapsewks##"
+                    ]
+                },
+                {
+                    "name": "02 - Query Parquet Files",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/02.QueryParquetFiles.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "03 - Query CSV Files",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/03.QueryCSVFiles.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "04 - Query JSON Files",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/04.QueryJSONFiles.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "05 - Query Nested Types in JSON and Parquet Files",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/05.QueryNestedTypes.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "06 - Use file metadata in queries",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/06.UseFileMetadata.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "01 - Load the New York Taxicab dataset",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Dedicated/01.LoadNYCTaxiDataset.sql",
+                    "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
+                    "tokens": []
+                },
+                {
+                    "name": "02 - Row-Level Security for dedicated SQL pools",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Dedicated/02.RowLevelSecurity.sql",
+                    "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
+                    "tokens": []
+                },
+                {
+                    "name": "03 - Scoring machine learning models in dedicated SQL pool",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Dedicated/03.ScoreML.sql",
+                    "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
+                    "tokens": []
+                }
+            ],
+            "notebooks": [
+                {
+                    "name": "01 - Using Azure Open Datasets in Synapse",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/01-UsingOpenDatasetsSynapse.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "02 - Getting Started with Delta Lake",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/02-GettingStartedDeltaLake.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "03 - Data Exploration and ML Modeling using NYC Taxi dataset",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/03-DataExplorationMLModelingNYCTaxi.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "04 - Getting Started with Hyperspace Indexing",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/04-GettingStartedHyperspaceIndexing.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "05 - Read and write data from Azure Data Lake Storage Gen2",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/05-ReadWriteADLSGen2.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "06 - Charting with Synapse Notebooks",
+                    "interface": "powershell",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/06-ChartingSynapseNotebook.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                }
+            ],
+            "datasets":[
+                {
+                    "name": "tripsDataSource",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/tripsDataSource.json",
+                    "tokens": []
+                },
+                {
+                    "name": "faresDataSource",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/faresDataSource.json",
+                    "tokens": []
+                },
+                {
+                    "name": "tripDataSink",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/tripDataSink.json",
+                    "tokens": []
+                },
+                {
+                    "name": "faresDataSink",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/faresDataSink.json",
+                    "tokens": []
+                }
+            ],
+            "pipelines": [
+                {
+                    "name": "TripFaresDataPipeline",
+                    "definitionFilePath": "https://raw.githubusercontent.com/AndresPad/FTAToolkitArtifacts/main/Sample/synapsepoc/pipeline/TripFaresDataPipeline-CSV-to-ADLS.json",
+                    "tokens": []
+                }
+            ]
+        }
+    }
+]

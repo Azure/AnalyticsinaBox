@@ -4,6 +4,10 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # User-specific files
+src/bicep-deployment/Pattern1/main.json
+src/bicep-deployment/Pattern2/main.json
+src/bicep-deployment/Pattern3/main.json
+src/bicep-deployment/Pattern4/main.json
 *.rsuser
 *.suo
 *.user

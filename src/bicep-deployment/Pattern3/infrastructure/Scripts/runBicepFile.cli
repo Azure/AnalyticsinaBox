@@ -1,0 +1,8 @@
+
+ az deployment sub create \
+  --name ExampleDeployment \
+  --location "eastus" \
+  --template-file main.bicep \
+  --parameters location='eastus' prefix='fasthack' postfix='pt3' env='' objectID='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' sqladministratorLoginPassword='D0nt$hare'
+
+

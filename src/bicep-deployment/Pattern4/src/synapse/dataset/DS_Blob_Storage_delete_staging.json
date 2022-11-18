@@ -1,0 +1,22 @@
+{
+	"name": "DS_Blob_Storage_delete_staging",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Blob_Storage_Staging",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Directory Name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "staging"
+			}
+		}
+	}
+}

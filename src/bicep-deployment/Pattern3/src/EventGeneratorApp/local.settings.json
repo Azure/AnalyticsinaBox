@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "EVENT_HUB_NAME_SYNAPSESTREAMING": "synapse-streaming-eh",
+    "EVENT_HUB_CONN_STR_SYNAPSESTREAMING": "Endpoint=sb://YOUREVENTHUBNAMESPACE.servicebus.windows.net/;SharedAccessKeyName=synapse_eh_access_policy;SharedAccessKey=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;EntityPath=synapse-streaming-eh"
+  }
+}
