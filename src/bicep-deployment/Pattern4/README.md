@@ -1,7 +1,4 @@
-## <img src ='https://airsblobstorage.blob.core.windows.net/airstream/bicep.png' alt="FTA Analytics-in-a-Box: Bicep Deployment" width="50px" style="float: left; margin-right:10px;"> Pattern 4: Azure Synapse Data Lake Demo Environment ( Batch )
-
-## <img src="/Assets/images/pattern1-architecture.png" alt="FTA Analytics-in-a-Box: Pattern 1 Deployment" style="float: left; margin-right:10px;" />
-
+# Pattern 4: Azure Synapse Data Lake Demo Environment ( Batch )
 
 ## Prerequisites
 
