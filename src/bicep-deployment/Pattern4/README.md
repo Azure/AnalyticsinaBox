@@ -1,4 +1,4 @@
-# Azure Synapse Data Lake Demo Environment ( Pattern 1)
+# Azure Synapse Data Lake Demo Environment ( Batch )
 
 
 ## Prerequisites
