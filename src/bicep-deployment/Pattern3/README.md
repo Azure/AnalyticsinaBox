@@ -37,7 +37,7 @@ Here are the Azure resources that are being deployed for the streaming pattern.
 
 ## Deployment Steps
 
-1. clone the repo: [https://github.com/Azure/fta-Catalytics.git](https://github.com/Azure/AnalyticsinaBox.git)
+1. clone the repo: https://github.com/Azure/AnalyticsinaBox.git
 2. change the configuration file: ..\src\bicep-deployment\pattern3\config-infra-dev-streaming.yml
 
   - location: eastus 
