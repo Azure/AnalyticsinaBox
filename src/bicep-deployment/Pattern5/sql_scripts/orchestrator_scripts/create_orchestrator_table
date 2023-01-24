@@ -1,0 +1,38 @@
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[PipelineOrchestrator_SQLtoParquet](
+	[pipelinename] [nvarchar](100) NOT NULL,
+	[sqlsourceschema] [nvarchar](50) NOT NULL,
+	[sqlsourcetable] [nvarchar](50) NOT NULL,
+	[sqlsourcedatecolumn] [nvarchar](50) NULL,
+	[sqlstartdate] [smalldatetime] NULL,
+	[sqlenddate] [smalldatetime] NULL,
+	[sinkcontainer] [nvarchar](100) NOT NULL,
+	[sinkbronzefolder] [nvarchar](100) NOT NULL,
+	[sinkformat] [nvarchar](15) NOT NULL,
+	[sinkviewname] [nvarchar](100) NULL,
+	[loadtype] [nvarchar](15) NOT NULL,
+	[checkpointprefix] [nvarchar](50) NULL,
+	[skipload] [bit] NOT NULL,
+	[lastloaddate] [smalldatetime] NULL,
+	[sqlmaxdatetime] [datetime2](7) NULL,
+	[batchloaddatetime] [datetime2](7) NULL,
+	[loadstatus] [nvarchar](15) NULL
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[PipelineOrchestrator_SQLtoParquet] ADD  CONSTRAINT [DF_PipelineOrchestrator_SQLtoParquet_sqlstartdate]  DEFAULT (((1)/(1))/(2012)) FOR [sqlstartdate]
+GO
+
+ALTER TABLE [dbo].[PipelineOrchestrator_SQLtoParquet] ADD  CONSTRAINT [DF_PipelineOrchestrator_SQLtoParquet_sinkformat]  DEFAULT (N'parquet') FOR [sinkformat]
+GO
+
+ALTER TABLE [dbo].[PipelineOrchestrator_SQLtoParquet] ADD  CONSTRAINT [DF_PipelineOrchestrator_SQLtoParquet_loadtype]  DEFAULT (N'full') FOR [loadtype]
+GO
+
+ALTER TABLE [dbo].[PipelineOrchestrator_SQLtoParquet] ADD  CONSTRAINT [DF_PipelineOrchestrator_SQLtoParquet_skipload]  DEFAULT ((0)) FOR [skipload]
+GO
