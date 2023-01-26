@@ -1,0 +1,48 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "sawsaccel"
+		},
+		"SynapseMetadataOrchestration_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"WWISourceDB_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"asaw2b1 serverless_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"sawsaccel-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:sawsaccel.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"sawsaccel-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://saaccel.dfs.core.windows.net"
+		},
+		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorschemaname": {
+			"value": "dbo"
+		},
+		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchstratortablename": {
+			"value": "PipelineOrchestrator_SQLtoParquet"
+		},
+		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratordbname": {
+			"value": "SynapseMetadataOrchestration"
+		},
+		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorfqdn": {
+			"value": "sqlserver2by1.database.windows.net"
+		},
+		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessfqdn": {
+			"value": "sawsaccel-ondemand.sql.azuresynapse.net"
+		},
+		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessdbname": {
+			"value": "wwimporters - serverless"
+		},
+		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcefqdn": {
+			"value": "sqlserver2by1.database.windows.net"
+		},
+		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcedb": {
+			"value": "WWImporters"
+		}
+	}
+}
