@@ -3,8 +3,8 @@ variables:
   # Global
   ap_vm_image: windows-2019
   ap_vm_image_ubuntu: ubuntu-latest
-  location: eastus 
-  prefix: fasthack 
+  location: eastus
+  prefix: fasthack
   postfix: uc35
   environment: dev
 
