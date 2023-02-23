@@ -16,5 +16,6 @@ variables:
   baseName: $(prefix)$(postfix)$(environment)
   resourceGroupName: P5-$(baseName)-RG #You also need to change the ResourceGroupname in main.bicep file
   sqlServerName: $(prefix)-sql-$(postfix)-$(environment)
-  synapseWorkspace: $(prefix)-synapse-$(postfix)-$(environment)
-  synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(environment)
+  synapseWorkSpaceName: $(prefix)-synapse-$(postfix)-$(environment)
+  dataLakeg2SynapseName: $(prefix)adlssyn$(postfix)$(environment)
+  keyVaultName: ${prefix}-akv-${postfix}-${env}

@@ -10,6 +10,7 @@ param env string = 'dev'
 param sqladministratorLoginPassword string
 @description('Pass in the Object ID of the AAD User or Service Principal that will own the KeyVault')
 param objectID string // this is needed for keyvault - pass in the object id of the AAD user
+param userPrincipalSQLAdmin string
 
 //variables
 
@@ -51,6 +52,8 @@ module sqlsvr './modules/sqlserversourceandmetadata.bicep' = {
     administratorLoginPassword: sqladministratorLoginPassword
     databaseNameWWI: 'WideWorldImporters'
     databaseNameMetadata: 'SynapseMetadataOrchestration'
+    objectID: objectID
+    userPrincipalSQLAdmin: userPrincipalSQLAdmin
   }
 }
 

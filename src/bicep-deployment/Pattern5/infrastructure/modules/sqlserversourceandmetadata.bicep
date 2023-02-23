@@ -6,6 +6,8 @@ param administratorLogin string
 param administratorLoginPassword string
 param databaseNameWWI string
 param databaseNameMetadata string
+param objectID string
+param userPrincipalSQLAdmin string
 
 
 
@@ -19,6 +21,13 @@ resource sqlserver 'Microsoft.Sql/servers@2022-05-01-preview' = {
   properties: {
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
+    administrators: {
+      administratorType: 'ActiveDirectory'
+      principalType: 'User'
+      login: userPrincipalSQLAdmin
+      sid: objectID
+      azureADOnlyAuthentication: false
+    }
   }
   resource firewall 'firewallRules' = {
     name: 'allowAll'
