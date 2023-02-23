@@ -27,7 +27,7 @@ stages:
       steps:
         - checkout: self
         - script: |
-            az bicep build --file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep
+            az bicep build --file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep
           name: LintBicepCode
           displayName: Run Bicep Linter
 
@@ -49,11 +49,11 @@ stages:
               echo $(location)
               echo $(prefix)
               echo $(postfix)
-              echo $(enviornment)
+              echo $(environment)
               echo ${{ parameters.sqlserveradminpassword }}
               az deployment sub validate \
                 --name $(Build.DefinitionName) \
-                --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
+                --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
                 --location $(location) \
                 --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=${{ parameters.objectIDofServicePrincipal }} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
 
@@ -82,7 +82,7 @@ stages:
                   az deployment sub create \
                     --name $(Build.DefinitionName) \
                     --location $(location) \
-                    --template-file ./src/bicep-deployment/Pattern4/infrastructure/main.bicep \
+                    --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
                     --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=${{ parameters.objectIDofServicePrincipal }} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }}
 
             - task: AzurePowerShell@5

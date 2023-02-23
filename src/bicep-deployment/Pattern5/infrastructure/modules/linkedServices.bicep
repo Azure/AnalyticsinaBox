@@ -1,4 +1,4 @@
-// linked services
+// linked services - this is not supported as of 2/22/23 in Synapse
 param sqlserverFQDN string
 param sqlserverDBMetadata string
 param workspaceName string

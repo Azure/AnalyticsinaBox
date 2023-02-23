@@ -1,11 +1,15 @@
 targetScope = 'subscription'
 
 param location string = 'westus'
+@description('Prefix to resource name needed for uniqueness')
 param prefix string
+@description('Suffix to resource name needed for uniqueness')
 param postfix string
 param env string = 'dev'
 @secure()
 param sqladministratorLoginPassword string
+@description('Pass in the Object ID of the AAD User or Service Principal that will own the KeyVault')
+param objectID string // this is needed for keyvault - pass in the object id of the AAD user
 
 //variables
 
@@ -25,6 +29,7 @@ var resourceGroupName = 'P5-${baseName}-RG'
 var sqlServerName = '${prefix}-sqlsrc-${postfix}-${env}'
 var synapseWorkSpaceName = '${prefix}-synapse-${postfix}-${env}'
 var dataLakeg2SynapseName = '${prefix}adlssyn${postfix}${env}'
+var keyVaultName = '${prefix}-akv-${postfix}-${env}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: resourceGroupName
@@ -64,6 +69,33 @@ module synapse './modules/synapseworkspace.bicep' = {
     defaultDataLakeStorageFilesystemName: 'root'
     dataLakeUrlFormat: 'https://{0}.dfs.core.windows.net'
     }
+}
+
+
+// key vault  and secret creation
+// key vault needed for SQL connections strings to run SQL scripts to create and load tables from deployments pipelines
+
+module kv './modules/keyvault.bicep' = {
+  name: 'kv'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: keyVaultName
+    location: location
+    tags: tags
+    objectID: objectID
+    synapseManageIdentity: synapse.outputs.synapsemanageidentity
+    administratorLoginPassword : sqladministratorLoginPassword
+    administratorLogin: sqladministratorLogin
+    sqlservername: sqlsvr.outputs.sqlservername
+    sqlserverDBNameWWI: sqlsvr.outputs.sqlserverDBNameWWI
+    sqlconnectionstringWWI: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameWWI};Persist Security Info=False;User ID=${sqladministratorLogin};Password=${sqladministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+    sqlserverDBNameMetadata: sqlsvr.outputs.sqlserverDBNameMetadata
+    sqlconnectionstringMetadata: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameMetadata};Persist Security Info=False;User ID=${sqladministratorLogin};Password=${sqladministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+  }
+  dependsOn:[
+    synapse
+    sqlsvr
+  ]
 }
 
 /* module linkedServices './modules/linkedServices.bicep' = {
