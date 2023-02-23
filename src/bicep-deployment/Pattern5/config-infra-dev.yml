@@ -1,0 +1,24 @@
+variables:
+
+  # Global
+  ap_vm_image: windows-2019
+
+  location: eastus 
+  prefix: fasthack 
+  postfix: uc25
+  environment: dev
+
+  # Azure DevOps 
+  ado_service_connection_rg: Azure-ARM-Dev-SAPA
+
+
+  # IaC
+  baseName: $(prefix)$(postfix)$(environment)
+  resourceGroupName: P4-$(baseName)-RG #You also need to change the ResourceGroupname in main.bicep file
+  storageAccountName: $(prefix)st$(postfix)$(environment)
+  dataLakeAccountName: $(prefix)adl$(postfix)$(environment)
+  sqlServerName: $(prefix)-sql-$(postfix)-$(environment)
+  databaseName: sampledb
+  synapseWorkspace: $(prefix)-synapse-$(postfix)-$(environment)
+  synapsedatalakegen2name: $(prefix)adlssyn$(postfix)$(environment)
+  keyVaultName: $(prefix)-akv-$(postfix)-$(environment)
