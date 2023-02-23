@@ -18,4 +18,4 @@ variables:
   sqlServerName: $(prefix)-sql-$(postfix)-$(environment)
   synapseWorkSpaceName: $(prefix)-synapse-$(postfix)-$(environment)
   dataLakeg2SynapseName: $(prefix)adlssyn$(postfix)$(environment)
-  keyVaultName: ${prefix}-akv-${postfix}-${env}
+  keyVaultName: $(prefix)-akv-$(postfix)-$(env)
