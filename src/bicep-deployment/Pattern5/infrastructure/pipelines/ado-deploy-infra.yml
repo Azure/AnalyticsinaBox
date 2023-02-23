@@ -1,5 +1,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+name: Pattern-5-Serverless-Metadatadriven
+trigger:
+- none
 
 parameters:
 - name: sqlserveradminpassword
@@ -14,8 +17,7 @@ variables:
     # 'develop' or feature branches: DEV environment
     - template: ../../config-infra-dev.yml
 
-trigger:
-- none
+
 
 pool:
   vmImage: $(ap_vm_image)
