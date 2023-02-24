@@ -12,6 +12,8 @@ param sqlserverDBNameWWI string
 param sqlconnectionstringWWI string
 param sqlserverDBNameMetadata string
 param sqlconnectionstringMetadata string
+param sqlconnectionstringMetadataAAD string
+param sqlconnectionstringWWIAAD string
 
 // Key Vault
 resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
@@ -95,6 +97,18 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
     name: 'sqlconn-metadatadb'
     properties: {
       value: sqlconnectionstringMetadata
+    }
+  }
+  resource secret7 'secrets' = {
+    name: 'aadconn-metadatadb'
+    properties: {
+      value: sqlconnectionstringMetadataAAD
+    }
+  }
+  resource secret8 'secrets' = {
+    name: 'aadconn-wwidb'
+    properties: {
+      value: sqlconnectionstringWWIAAD
     }
   }
   tags: tags
