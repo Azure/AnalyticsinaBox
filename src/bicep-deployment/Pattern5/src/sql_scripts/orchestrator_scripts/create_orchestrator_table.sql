@@ -4,6 +4,10 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+DROP TABLE IF EXISTS [dbo].[PipelineOrchestrator_SQLtoParquet];
+
+GO
+
 CREATE TABLE [dbo].[PipelineOrchestrator_SQLtoParquet](
 	[pipelinename] [nvarchar](100) NOT NULL,
 	[sqlsourceschema] [nvarchar](50) NOT NULL,
