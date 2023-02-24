@@ -89,7 +89,7 @@ stages:
                     --name $(Build.DefinitionName) \
                     --location $(location) \
                     --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
-                    --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=${{ parameters.objectIDofServicePrincipal }} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
+                    --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment)  objectIDDevOps=${{ parameters.objectIDofServicePrincipal }} objectIDUser=${{ parameters.objectIDofUser}}  sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
 
             - task: AzurePowerShell@5
               displayName: 'Azure PowerShell script: Deploy SQL Metadata'
