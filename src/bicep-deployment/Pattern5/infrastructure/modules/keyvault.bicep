@@ -1,7 +1,8 @@
 param name string
 param location string
 param tags object
-param objectID string
+param objectIDUser string
+param objectIDDevOps string
 param synapseManageIdentity string
 param administratorLogin string
 @secure()
@@ -24,7 +25,16 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
     }
     accessPolicies: [
       {
-        objectId: objectID
+        objectId: objectIDUser
+        permissions: {          
+          secrets: [
+            'all'
+          ]          
+        }
+        tenantId: subscription().tenantId
+      }
+      {
+        objectId: objectIDDevOps
         permissions: {          
           secrets: [
             'all'

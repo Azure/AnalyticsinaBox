@@ -9,7 +9,8 @@ param env string = 'dev'
 @secure()
 param sqladministratorLoginPassword string
 @description('Pass in the Object ID of the AAD User or Service Principal that will own the KeyVault')
-param objectID string // this is needed for keyvault - pass in the object id of the AAD user
+param objectIDUser string // this is needed for keyvault - pass in the object id of the AAD user
+param objectIDDevOps string // this is needed for keyvault - pass in the object id of the AAD user
 param userPrincipalSQLAdmin string
 
 //variables
@@ -52,7 +53,7 @@ module sqlsvr './modules/sqlserversourceandmetadata.bicep' = {
     administratorLoginPassword: sqladministratorLoginPassword
     databaseNameWWI: 'WideWorldImporters'
     databaseNameMetadata: 'SynapseMetadataOrchestration'
-    objectID: objectID
+    objectID: objectIDUser
     userPrincipalSQLAdmin: userPrincipalSQLAdmin
   }
 }
@@ -85,7 +86,8 @@ module kv './modules/keyvault.bicep' = {
     name: keyVaultName
     location: location
     tags: tags
-    objectID: objectID
+    objectIDUser: objectIDUser
+    objectIDDevOps: objectIDDevOps
     synapseManageIdentity: synapse.outputs.synapsemanageidentity
     administratorLoginPassword : sqladministratorLoginPassword
     administratorLogin: sqladministratorLogin

@@ -11,6 +11,8 @@ parameters:
   type: string
 - name: userPrincipalSQLAdmin
   type: string
+- name: objectIDofUser
+  type: string
 
 
 variables:
@@ -59,7 +61,7 @@ stages:
                 --name $(Build.DefinitionName) \
                 --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
                 --location $(location) \
-                --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectID=${{ parameters.objectIDofServicePrincipal }} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
+                --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectIDDevOps=${{ parameters.objectIDofServicePrincipal }} objectIDUser=${{ parameters.objectIDofUser}} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
 
   - stage: CheckOutBicepAndDeployAzureResources
     displayName: Deploy Azure Resources
