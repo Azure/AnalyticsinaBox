@@ -124,10 +124,10 @@ stages:
                     # Run the Scripts
                     Write-Output "Running the SQL Metadata creation script"
                     Invoke-SqlCmd -ConnectionString $sqlMetadataConnString  -InputFile $scriptPath
-                    Write-Output "Giving Synapse MI access to database"
-                    $synapseWorkSpaceName="$(synapseWorkSpaceName)"
-                    Invoke-SqlCmd -ConnectionString $sqlMetadataConnSTringAAD -Query "CREATE USER [$synapseWorkSpaceName] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]"
-                    Invoke-SqlCmd -ConnectionString $sqlMetadataConnSTringAAD -Query "ALTER ROLE db_owner ADD MEMBER  [$synapseWorkSpaceName]"
+                    # Write-Output "Giving Synapse MI access to database"
+                    # $synapseWorkSpaceName="$(synapseWorkSpaceName)"
+                    # Invoke-SqlCmd -ConnectionString $sqlMetadataConnSTringAAD -Query "CREATE USER [$synapseWorkSpaceName] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]"
+                    # Invoke-SqlCmd -ConnectionString $sqlMetadataConnSTringAAD -Query "ALTER ROLE db_owner ADD MEMBER  [$synapseWorkSpaceName]"
                 azurePowerShellVersion: LatestVersion
 
 

@@ -94,10 +94,10 @@ module kv './modules/keyvault.bicep' = {
     sqlservername: sqlsvr.outputs.sqlservername
     sqlserverDBNameWWI: sqlsvr.outputs.sqlserverDBNameWWI
     sqlconnectionstringWWI: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameWWI};Persist Security Info=False;User ID=${sqladministratorLogin};Password=${sqladministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-    sqlconnectionstringMetadataAAD: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameMetadata};Persist Security Info=False;User ID=${userPrincipalSQLAdmin };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Authentication="Active Directory Integrated";'
+    // sqlconnectionstringMetadataAAD: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameMetadata};Persist Security Info=False;User ID=${userPrincipalSQLAdmin };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Authentication="Active Directory Integrated";'
     sqlserverDBNameMetadata: sqlsvr.outputs.sqlserverDBNameMetadata
     sqlconnectionstringMetadata: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameMetadata};Persist Security Info=False;User ID=${sqladministratorLogin};Password=${sqladministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-    sqlconnectionstringWWIAAD: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameWWI};Persist Security Info=False;User ID=${userPrincipalSQLAdmin };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Authentication="Active Directory Integrated";'  
+    // sqlconnectionstringWWIAAD: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameWWI};Persist Security Info=False;User ID=${userPrincipalSQLAdmin };MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Authentication="Active Directory Integrated";'  
   }
   dependsOn:[
     synapse
