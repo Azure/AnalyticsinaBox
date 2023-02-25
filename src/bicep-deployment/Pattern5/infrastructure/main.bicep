@@ -34,6 +34,15 @@ var dataLakeg2SynapseName = '${prefix}adlssyn${postfix}${env}'
 var storageAccountName = '${prefix}wwibacpac${postfix}${env}'
 var keyVaultName = '${prefix}-akv-${postfix}-${env}'
 
+var subscriptionId = subscription().subscriptionId
+var rdPrefix = '/subscriptions/${subscriptionId}/providers/Microsoft.Authorization/roleDefinitions'
+var role = {
+  Owner: '${rdPrefix}/8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
+  Contributor: '${rdPrefix}/b24988ac-6180-42a0-ab88-20f7382dd24c'
+  StorageBlobDataReader: '${rdPrefix}/2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+  StorageBlobDataContributor: '${rdPrefix}/ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+}
+
 resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
   name: resourceGroupName
   location: location
@@ -77,7 +86,7 @@ module synapse './modules/synapseworkspace.bicep' = {
 }
 
 // Storage Account for WWI bacpac
-module st './modules/deploy_3_storage_account.bicep' = {
+module st './modules/storageAccountForWWIbacpac.bicep' = {
   name: 'st'
   scope: resourceGroup(rg.name)
   params: {
@@ -85,14 +94,10 @@ module st './modules/deploy_3_storage_account.bicep' = {
     location: location
     tags: tags
     roleAssignmentPrincipalID : objectIDDevOps
-    // roleAssignmentPrincipalID : synapse.outputs.synapsemanageidentity
     roleAssignmnetPrincipalType : 'ServicePrincipal'
     roleDefinitionId :  role['StorageBlobDataContributor']
   }
-  dependsOn: [
-    synapse    
-  ]
-}
+ }
 
 
 // key vault  and secret creation
