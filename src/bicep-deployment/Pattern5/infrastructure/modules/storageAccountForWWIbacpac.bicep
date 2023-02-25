@@ -62,7 +62,7 @@ resource raw_container 'Microsoft.Storage/storageAccounts/blobServices/container
 } 
 
 // create storage account for bacpac -- too big so will hae to load in YAML
-resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+/* resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'deployscript-upload-blob-${utcValue}'
   location: location
   kind: 'AzureCLI'
@@ -79,10 +79,10 @@ resource deploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         name: 'AZURE_STORAGE_KEY'
         secureValue: stoacct.listKeys().keys[0].value
       }
-     /* {
+      {
         name: 'CONTENT'
         value: loadFileAsBase64('../data/WWIStd.bacpac')
-      }*/
+     
     ]
   }
-}
+} }*/
