@@ -103,7 +103,7 @@ stages:
 
                   echo "Get storage account key"
                   key=$(az storage account keys list --account-name $(storageAccountName) \
-                  --resource-group $(resourceGroupName) p -o json --query [0].value | tr -d '"')
+                  --resource-group $(resourceGroupName) -o json --query [0].value | tr -d '"')
                   
                   echo "Import wwi database"  
                   az sql db import \
