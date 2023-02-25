@@ -111,7 +111,7 @@ stages:
                   --admin-user rootuser \
                   --storage-key $key \
                   --storage-key-type StorageAccessKey \
-                  --storage-uri https://$storage.blob.core.windows.net/$(containerName)/WWIStd.bacpac \
+                  --storage-uri https://$(storageAccountName).blob.core.windows.net/$(containerName)/WWIStd.bacpac \
                   --name WideWorldImporters \
                   --resource-group $(resourceGroupName) \
                   --server $(sqlServerName)
