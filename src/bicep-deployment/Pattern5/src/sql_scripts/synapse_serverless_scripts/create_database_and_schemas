@@ -1,3 +1,0 @@
-CREATE DATABASE yoursynapseserverlesssdatabasename
-CREATE SCHEMA BRONZE
-CREATE SCHEMA SILVER

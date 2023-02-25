@@ -1,3 +1,5 @@
+-- This script is run as part of the deployment pipeline
+
 SET ANSI_NULLS ON
 GO
 

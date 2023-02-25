@@ -1,4 +1,6 @@
 /****** Object:  View [Application].[CitiesNoGeography]    Script Date: 1/24/2023 4:05:18 PM ******/
+
+-- these views are created after the WWI dacpac deployment
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
