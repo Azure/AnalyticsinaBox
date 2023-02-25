@@ -15,7 +15,7 @@ variables:
   # IaC
   baseName: $(prefix)$(postfix)$(environment)
   resourceGroupName: P5-$(baseName)-RG #You also need to change the ResourceGroupname in main.bicep file
-  sqlServerName: $(prefix)-sql-$(postfix)-$(environment)
+  sqlServerName: $(prefix)-sasql-$(postfix)-$(environment)
   synapseWorkSpaceName: $(prefix)-synapse-$(postfix)-$(environment)
   dataLakeg2SynapseName: $(prefix)adlssyn$(postfix)$(environment)
   storageAccountName : $(prefix)wwibacpac$(postfix)$(environment)
