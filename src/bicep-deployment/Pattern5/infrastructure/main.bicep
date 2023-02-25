@@ -31,6 +31,7 @@ var resourceGroupName = 'P5-${baseName}-RG'
 var sqlServerName = '${prefix}-sqlsrc-${postfix}-${env}'
 var synapseWorkSpaceName = '${prefix}-synapse-${postfix}-${env}'
 var dataLakeg2SynapseName = '${prefix}adlssyn${postfix}${env}'
+var storageAccountName = '${prefix}wwibacpac${postfix}${env}'
 var keyVaultName = '${prefix}-akv-${postfix}-${env}'
 
 resource rg 'Microsoft.Resources/resourceGroups@2020-06-01' = {
@@ -73,6 +74,24 @@ module synapse './modules/synapseworkspace.bicep' = {
     defaultDataLakeStorageFilesystemName: 'root'
     dataLakeUrlFormat: 'https://{0}.dfs.core.windows.net'
     }
+}
+
+// Storage Account for WWI bacpac
+module st './modules/deploy_3_storage_account.bicep' = {
+  name: 'st'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: storageAccountName
+    location: location
+    tags: tags
+    roleAssignmentPrincipalID : objectIDDevOps
+    // roleAssignmentPrincipalID : synapse.outputs.synapsemanageidentity
+    roleAssignmnetPrincipalType : 'ServicePrincipal'
+    roleDefinitionId :  role['StorageBlobDataContributor']
+  }
+  dependsOn: [
+    synapse    
+  ]
 }
 
 
