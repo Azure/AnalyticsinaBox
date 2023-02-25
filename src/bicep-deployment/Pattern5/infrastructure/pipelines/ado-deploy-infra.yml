@@ -99,11 +99,11 @@ stages:
                 scriptLocation: inlineScript
                 inlineScript: |
                   echo "Upload wwi bacpac"
-                  echo "$(storageAccountName)"
-                  echo "$(containerName)"
+                  echo "sa32wwibacpacjh64dev"
+                  echo "wwibacpac"
                   az storage blob upload \
-                    --account-name $(storageAccountName) \
-                    --container-name $(containerName) \
+                    --account-name sa32wwibacpacjh64dev \
+                    --container-name wwibacpac \
                     --name WWIStd.bacpac \
                     --file ./src/bicep-deployment/Pattern5/infrastructure/data/WWIStd.bacpac \
                     --overwrite         
