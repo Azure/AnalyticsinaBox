@@ -52,7 +52,7 @@ resource blob 'Microsoft.Storage/storageAccounts/blobServices@2021-09-01' = {
 
 // creating the raw container
 resource raw_container 'Microsoft.Storage/storageAccounts/blobServices/containers@2021-09-01' = {
-  name: '${stoacct.name}/default/wwidacpac'
+  name: '${stoacct.name}/default/wwibacpac'
   properties: {
     publicAccess: 'None'
   }

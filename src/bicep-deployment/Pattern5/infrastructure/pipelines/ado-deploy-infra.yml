@@ -91,6 +91,13 @@ stages:
                     --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
                     --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment)  objectIDDevOps=${{ parameters.objectIDofServicePrincipal }} objectIDUser=${{ parameters.objectIDofUser}}  sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
 
+                  az storage blob upload \
+                    --account-name $(storageAccountName) \
+                    --container-name $(containerName) \
+                    --name WWIStd.bacpac \
+                    --file ./src/bicep-deployment/Pattern5/infrastructure/data/WWIStd.bacpac \
+                    --overwrite 
+    
             - task: AzurePowerShell@5
               displayName: 'Azure PowerShell script: Deploy SQL Metadata'
               inputs:
