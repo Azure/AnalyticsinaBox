@@ -12,8 +12,6 @@ param sqlserverDBNameWWI string
 param sqlconnectionstringWWI string
 param sqlserverDBNameMetadata string
 param sqlconnectionstringMetadata string
-// param sqlconnectionstringMetadataAAD string can't do AAD connection
-// param sqlconnectionstringWWIAAD string
 
 // Key Vault
 resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
@@ -99,18 +97,6 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
       value: sqlconnectionstringMetadata
     }
   }
- /* resource secret7 'secrets' = {
-    name: 'aadconn-metadatadb'
-    properties: {
-      value: sqlconnectionstringMetadataAAD
-    }
-  }
-  resource secret8 'secrets' = {
-    name: 'aadconn-wwidb'
-    properties: {
-      value: sqlconnectionstringWWIAAD
-    }
-  } */
   tags: tags
 }
 

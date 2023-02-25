@@ -99,8 +99,9 @@ stages:
                 Inline: |
                     $keyVaultname="$(keyVaultName)"
                     $keyVaultSecretnameSqlMetadataConnString="sqlconn-metadatadb"
-                    $keyVaultSecretSqlMetadataAADConnString="aadconn-metadatadb"
+                    # $keyVaultSecretnameSqlWWIConnString=="sqlconn-wwidb'"
                     $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/orchestrator_scripts/create_orchestrator_table.sql"
+                    # $scriptPathWWI="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
                     # Installing the SQLServer Module
                     
                     if (!(Get-Module -Name SQLServer)){
@@ -113,21 +114,19 @@ stages:
                     else{
                     Write-Output "SQL Server Module is present"
                     }
-                    
-                    
+                                        
                     # Get the secret of the sql server Module
                     Write-Output $keyVaultName
-                    Write-Output "Fetching the key vault secret"
+                    Write-Output "Fetching the key vault secret for metadata and wwi databases"
                     $sqlMetadataConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlMetadataConnString -AsPlainText
-                    $sqlMetadataConnSTringAAD = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretSqlMetadataAADConnString -AsPlainText
+                    # $sqlWWIConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlWWIConnString -AsPlainText                    
                     
                     # Run the Scripts
                     Write-Output "Running the SQL Metadata creation script"
                     Invoke-SqlCmd -ConnectionString $sqlMetadataConnString  -InputFile $scriptPath
-                    # Write-Output "Giving Synapse MI access to database"
-                    # $synapseWorkSpaceName="$(synapseWorkSpaceName)"
-                    # Invoke-SqlCmd -ConnectionString $sqlMetadataConnSTringAAD -Query "CREATE USER [$synapseWorkSpaceName] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]"
-                    # Invoke-SqlCmd -ConnectionString $sqlMetadataConnSTringAAD -Query "ALTER ROLE db_owner ADD MEMBER  [$synapseWorkSpaceName]"
+                    # Write-Output "Create views needed in the WWI database "
+                    # Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPath
+
                 azurePowerShellVersion: LatestVersion
 
 
