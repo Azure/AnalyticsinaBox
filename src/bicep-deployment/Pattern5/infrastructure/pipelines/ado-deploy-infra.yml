@@ -91,7 +91,7 @@ stages:
                     --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
                     --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment)  objectIDDevOps=${{ parameters.objectIDofServicePrincipal }} objectIDUser=${{ parameters.objectIDofUser}}  sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
 
-                  echo "Upload wwi bacpac"
+                  echo "Upload wwi bacpac to storage account"
                   echo "Storage account $(storageAccountName)"
                   echo " Container $(containerName)"
                   az storage blob upload \
@@ -100,6 +100,21 @@ stages:
                     --name WWIStd.bacpac \
                     --file ./src/bicep-deployment/Pattern5/infrastructure/data/WWIStd.bacpac \
                     --overwrite         
+
+                  echo "Get storage account key"
+                  key=$(az storage account keys list --account-name $(storageAccountName) \
+                  --resource-group $(resourceGroupName) p -o json --query [0].value | tr -d '"')
+                  
+                  echo "Import wwi database"  
+                  az sql db import \
+                  --admin-password ${{ parameters.sqlserveradminpassword }} \
+                  --admin-user rootuser \
+                  --storage-key $key \
+                  --storage-key-type StorageAccessKey \
+                  --storage-uri https://$storage.blob.core.windows.net/$(containerName)/WWIStd.bacpac \
+                  --name WideWorldImporters \
+                  --resource-group $(resourceGroupName) \
+                  --server $(sqlServerName)
     
             - task: AzurePowerShell@5
               displayName: 'Azure PowerShell script: Deploy SQL Metadata'
