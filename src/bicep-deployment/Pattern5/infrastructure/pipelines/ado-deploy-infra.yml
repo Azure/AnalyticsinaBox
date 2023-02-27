@@ -117,16 +117,16 @@ stages:
                   --server $(sqlServerName)
     
             - task: AzurePowerShell@5
-              displayName: 'Azure PowerShell script: Deploy SQL Metadata'
+              displayName: 'Azure PowerShell script: Deploy SQL Metadata and WWI views'
               inputs:
                 azureSubscription: $(ado_service_connection_rg)
                 ScriptType: InlineScript
                 Inline: |
                     $keyVaultname="$(keyVaultName)"
                     $keyVaultSecretnameSqlMetadataConnString="sqlconn-metadatadb"
-                    # $keyVaultSecretnameSqlWWIConnString=="sqlconn-wwidb'"
+                    $keyVaultSecretnameSqlWWIConnString=="sqlconn-wwidb"
                     $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/orchestrator_scripts/create_orchestrator_table.sql"
-                    # $scriptPathWWI="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
+                    $scriptPathWWI="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
                     # Installing the SQLServer Module
                     
                     if (!(Get-Module -Name SQLServer)){
@@ -142,32 +142,33 @@ stages:
                                         
                     # Get the secret of the sql server Module
                     Write-Output $keyVaultName
-                    Write-Output "Fetching the key vault secret for metadata and wwi databases"
+                    Write-Output "Fetching the key vault secrets for metadata and wwi databases"
                     $sqlMetadataConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlMetadataConnString -AsPlainText
-                    # $sqlWWIConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlWWIConnString -AsPlainText                    
+                    $sqlWWIConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlWWIConnString -AsPlainText                    
                     
                     # Run the Scripts
                     Write-Output "Running the SQL Metadata creation script"
                     Invoke-SqlCmd -ConnectionString $sqlMetadataConnString  -InputFile $scriptPath
-                    # Write-Output "Create views needed in the WWI database "
-                    # Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPath
+
+                    Write-Output "Create views needed in the WWI database "
+                    Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPath
 
                 azurePowerShellVersion: LatestVersion
 
 
-  #- stage: SynapseArtifactsDeployment
-  #  displayName: Synapse pipelines/notebook/linkedservices/dataset deployment
-   # jobs:
- #   - job: _job_SynapseArtifactsDeployment
-   #   displayName: synapse artifacts deployment
-    #  steps:
-  #    - checkout: self
-   #   - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
-     #   displayName: 'Synapse deployment task for workspace: $(synapseWorkSpaceName) '
-    #    inputs:
-   #       TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_4/TemplateForWorkspace.json'
-     #     ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_4/TemplateParametersForWorkspace.json'
-    #      azureSubscription: $(ado_service_connection_rg)
-      #    ResourceGroupName: $(resourceGroupName)
-    #      TargetWorkspaceName: $(synapseWorkSpaceName)
-     #     OverrideArmParameters: '-workspaceName $(synapseWorkSpaceName) -LS_ADLS_G2_properties_typeProperties_url "https://$(dataLakeAccountName).dfs.core.windows.net"           -LS_AKV_properties_typeProperties_baseUrl "https://$(keyVaultName).vault.azure.net"            -LS_Blob_Storage_Staging_properties_typeProperties_serviceEndpoint "https://$(storageAccountName).blob.core.windows.net"            -Raw_To_Curated_Full_Load_properties_metadata_a365ComputeOptions_id "/subscriptions/$(subscriptionId)/resourceGroups/$(resourceGroupName)/providers/Microsoft.Synapse/workspaces/$(synapseWorkSpaceName)/bigDataPools/sparkpool"            -Raw_To_Curated_Full_Load_properties_metadata_a365ComputeOptions_endpoint "https://$(synapseWorkSpaceName).dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool"            -Raw_To_Curated_Incremental_Load_properties_metadata_a365ComputeOptions_id "/subscriptions/$(subscriptionId)/resourceGroups/$(resourceGroupName)/providers/Microsoft.Synapse/workspaces/$(synapseWorkspace)/bigDataPools/sparkpool"           -Raw_To_Curated_Incremental_Load_properties_metadata_a365ComputeOptions_endpoint "https://$(synapseWorkspace).dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkpool"            -PL_master_pipeline_properties_parameters_datalakeName_defaultValue $(dataLakeAccountName)' 
+  - stage: SynapseArtifactsDeployment
+    displayName: Synapse pipelines/notebook/linkedservices/dataset deployment
+    jobs:
+    - job: _job_SynapseArtifactsDeployment
+      displayName: synapse artifacts deployment
+      steps:
+    - checkout: self
+    - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
+      displayName: 'Synapse deployment task for workspace: $(synapseWorkSpaceName) '
+      inputs:
+        TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateForWorkspace.json'
+        ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateParametersForWorkspace.json'
+        azureSubscription: $(ado_service_connection_rg)
+        ResourceGroupName: $(resourceGroupName)
+        TargetWorkspaceName: $(synapseWorkSpaceName)
+        OverrideArmParameters: '-workspaceName $(synapseWorkSpaceName) ' 

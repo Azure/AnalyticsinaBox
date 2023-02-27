@@ -5,7 +5,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-Create View [Application].[CitiesNoGeography] as
+Create or Alter View [Application].[CitiesNoGeography] as
 SELECT [CityID]
       ,[CityName]
       ,[StateProvinceID]
@@ -22,7 +22,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-Create View [Application].[CountriesNoGeography] AS
+Create or Alter View [Application].[CountriesNoGeography] AS
 SELECT [CountryID]
       ,[CountryName]
       ,[FormalName]
@@ -45,7 +45,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-Create View [Application].[StateProvincesNoGeography] as
+Create or Alter View [Application].[StateProvincesNoGeography] as
 SELECT [StateProvinceID]
       ,[StateProvinceCode]
       ,[StateProvinceName]
@@ -64,7 +64,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-Create View [Purchasing].[SuppliersNoGeography] as
+Create or Alter View [Purchasing].[SuppliersNoGeography] as
 
 SELECT [SupplierID]
       ,[SupplierName]
@@ -103,7 +103,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-Create View [Sales].[CustomersNoGeography] as
+Create or Alter View [Sales].[CustomersNoGeography] as
 SELECT [CustomerID]
       ,[CustomerName]
       ,[BillToCustomerID]

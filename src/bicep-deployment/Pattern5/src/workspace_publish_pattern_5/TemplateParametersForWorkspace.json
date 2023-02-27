@@ -3,7 +3,7 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"workspaceName": {
-			"value": "sawsaccel"
+			"value": ""
 		},
 		"SynapseMetadataOrchestration_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
@@ -15,10 +15,10 @@
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
 		},
 		"sawsaccel-WorkspaceDefaultSqlServer_connectionString": {
-			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:sawsaccel.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+			"value": ""
 		},
 		"sawsaccel-WorkspaceDefaultStorage_properties_typeProperties_url": {
-			"value": "https://saaccel.dfs.core.windows.net"
+			"value": ""
 		},
 		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorschemaname": {
 			"value": "dbo"
@@ -30,19 +30,19 @@
 			"value": "SynapseMetadataOrchestration"
 		},
 		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorfqdn": {
-			"value": "sqlserver2by1.database.windows.net"
+			"value": ""
 		},
 		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessfqdn": {
-			"value": "sawsaccel-ondemand.sql.azuresynapse.net"
+			"value": ""
 		},
 		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessdbname": {
-			"value": "wwimporters - serverless"
+			"value": "SynapseServerless"
 		},
 		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcefqdn": {
-			"value": "sqlserver2by1.database.windows.net"
+			"value": ""
 		},
 		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcedb": {
-			"value": "WWImporters"
+			"value": "WideWorldImporters "
 		}
 	}
 }
