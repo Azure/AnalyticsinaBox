@@ -151,7 +151,7 @@ stages:
                     Invoke-SqlCmd -ConnectionString $sqlMetadataConnString  -InputFile $scriptPath
 
                     Write-Output "Create views needed in the WWI database "
-                    Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPath
+                    Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPathWWI
 
                 azurePowerShellVersion: LatestVersion
 
@@ -170,4 +170,4 @@ stages:
             azureSubscription: $(ado_service_connection_rg)
             ResourceGroupName: $(resourceGroupName)
             TargetWorkspaceName: $(synapseWorkSpaceName)
-            OverrideArmParameters: '-workspaceName $(synapseWorkSpaceName) -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn $(sqlServerName).database.windows.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn $(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn $(sqlServerName).database.windows.net' 
+             OverrideArmParameters: '-workspaceName $(synapseWorkSpaceName) -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn $(sqlServerName).database.windows.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn $(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn $(sqlServerName).database.windows.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_defaultstoragefqdn $(dataLakeg2SynapseName).dfs.core.windows.net' 
