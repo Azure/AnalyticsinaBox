@@ -42,7 +42,10 @@
 			"value": ""
 		},
 		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb": {
-			"value": "WideWorldImporters "
+			"value": "WideWorldImporters"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_defaultstoragefqdn": {
+			"value": ""
 		}
 	}
 }

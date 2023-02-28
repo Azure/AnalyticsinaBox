@@ -62,6 +62,10 @@
 		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb": {
 			"type": "string",
 			"defaultValue": "WWImporters"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_defaultstoragefqdn": {
+			"type": "string",
+			"defaultValue": "saaccel.dfs.core.windows.net"
 		}
 	},
 	"variables": {
@@ -347,6 +351,10 @@
 								"orchestratortablename": {
 									"value": "@pipeline().parameters.orchestratortablename",
 									"type": "Expression"
+								},
+								"defaultstoragefqdn": {
+									"value": "@pipeline().parameters.defaultstoragefqdn",
+									"type": "Expression"
 								}
 							}
 						}
@@ -358,32 +366,25 @@
 				},
 				"parameters": {
 					"sqlsourceschema": {
-						"type": "string",
-						"defaultValue": "sales"
+						"type": "string"
 					},
 					"sqlsourcetable": {
-						"type": "string",
-						"defaultValue": "CustomerCategories"
+						"type": "string"
 					},
 					"sqlsourcedatecolumn": {
-						"type": "string",
-						"defaultValue": "ValidFrom"
+						"type": "string"
 					},
 					"sqlstartdate": {
-						"type": "string",
-						"defaultValue": "2013-01-01"
+						"type": "string"
 					},
 					"sinkcontainer": {
-						"type": "string",
-						"defaultValue": "adls2b1fs"
+						"type": "string"
 					},
 					"sinkbronzefolder": {
-						"type": "string",
-						"defaultValue": "bronze parquet - wwi"
+						"type": "string"
 					},
 					"sinkviewname": {
-						"type": "string",
-						"defaultValue": "CustomerCategories"
+						"type": "string"
 					},
 					"batchloaddatetime": {
 						"type": "string"
@@ -392,28 +393,22 @@
 						"type": "string"
 					},
 					"serverlessfqdn": {
-						"type": "string",
-						"defaultValue": "sawsaccel-ondemand.sql.azuresynapse.net"
+						"type": "string"
 					},
 					"serverlessdbname": {
-						"type": "string",
-						"defaultValue": "wwimporters - serverless"
+						"type": "string"
 					},
 					"orchestratordbname": {
-						"type": "string",
-						"defaultValue": "SynapseMetadataOrchestration"
+						"type": "string"
 					},
 					"orchestratorfqdn": {
-						"type": "string",
-						"defaultValue": "sqlserver2by1.database.windows.net"
+						"type": "string"
 					},
 					"sourcefqdn": {
-						"type": "string",
-						"defaultValue": "sqlserver2by1.database.windows.net"
+						"type": "string"
 					},
 					"sourcedb": {
-						"type": "string",
-						"defaultValue": "WWImporters"
+						"type": "string"
 					},
 					"orchestratorschemaname": {
 						"type": "string",
@@ -422,6 +417,10 @@
 					"orchestratortablename": {
 						"type": "string",
 						"defaultValue": "PipelineOrchestrator_SQLtoParquet_Load"
+					},
+					"defaultstoragefqdn": {
+						"type": "string",
+						"defaultValue": "saaccel.dfs.core.windows.net"
 					}
 				},
 				"variables": {
@@ -517,6 +516,10 @@
 								"orchestratortablename": {
 									"value": "@pipeline().parameters.orchestratortablename",
 									"type": "Expression"
+								},
+								"defaultstoragefqdn": {
+									"value": "@pipeline().parameters.defaultstoragefqdn",
+									"type": "Expression"
 								}
 							}
 						}
@@ -584,6 +587,10 @@
 								},
 								"orchestratortablename": {
 									"value": "@pipeline().parameters.orchestratortablename",
+									"type": "Expression"
+								},
+								"defaultstoragefqdn": {
+									"value": "@pipeline().parameters.defaultstoragefqdn",
 									"type": "Expression"
 								}
 							}
@@ -682,67 +689,52 @@
 				},
 				"parameters": {
 					"sqlsourceschema": {
-						"type": "string",
-						"defaultValue": "Sales"
+						"type": "string"
 					},
 					"sqlsourcetable": {
-						"type": "string",
-						"defaultValue": "Orders"
+						"type": "string"
 					},
 					"sqlsourcedatecolumn": {
-						"type": "string",
-						"defaultValue": "LastEditedWhen"
+						"type": "string"
 					},
 					"sqlstartdate": {
-						"type": "string",
-						"defaultValue": "2013-01-01"
+						"type": "string"
 					},
 					"sqlenddate": {
-						"type": "string",
-						"defaultValue": "2014-01-01"
+						"type": "string"
 					},
 					"sinkcontainer": {
-						"type": "string",
-						"defaultValue": "adls2b1fs"
+						"type": "string"
 					},
 					"sinkbronzefolder": {
-						"type": "string",
-						"defaultValue": "bronze parquet - wwi"
+						"type": "string"
 					},
 					"sinkviewname": {
-						"type": "string",
-						"defaultValue": "Orders"
+						"type": "string"
 					},
 					"checkpointprefix": {
-						"type": "string",
-						"defaultValue": "Orders3"
+						"type": "string"
 					},
 					"batchloaddatetime": {
 						"type": "string"
 					},
 					"serverlessfqdn": {
-						"type": "string",
-						"defaultValue": "sawsaccel-ondemand.sql.azuresynapse.net"
+						"type": "string"
 					},
 					"serverlessdbname": {
-						"type": "string",
-						"defaultValue": "wwimporters - serverless"
+						"type": "string"
 					},
 					"orchestratordbname": {
-						"type": "string",
-						"defaultValue": "SynapseMetadataOrchestration"
+						"type": "string"
 					},
 					"orchestratorfqdn": {
-						"type": "string",
-						"defaultValue": "sqlserver2by1.database.windows.net"
+						"type": "string"
 					},
 					"sourcefqdn": {
-						"type": "string",
-						"defaultValue": "sqlserver2by1.database.windows.net"
+						"type": "string"
 					},
 					"sourcedbname": {
-						"type": "string",
-						"defaultValue": "WWImporters"
+						"type": "string"
 					},
 					"orchestratorschemaname": {
 						"type": "string",
@@ -751,6 +743,9 @@
 					"orchestratortablename": {
 						"type": "string",
 						"defaultValue": "PipelineOrchestrator_SQLtoParquet_Load"
+					},
+					"defaultstoragefqdn": {
+						"type": "string"
 					}
 				},
 				"folder": {
@@ -933,6 +928,10 @@
 														"orchestratortablename": {
 															"value": "@pipeline().parameters.orchstratortablename",
 															"type": "Expression"
+														},
+														"defaultstoragefqdn": {
+															"value": "@pipeline().parameters.defaultstoragefqdn",
+															"type": "Expression"
 														}
 													}
 												}
@@ -1014,6 +1013,10 @@
 														"orchestratortablename": {
 															"value": "@pipeline().parameters.orchstratortablename",
 															"type": "Expression"
+														},
+														"defaultstoragefqdn": {
+															"value": "@pipeline().parameters.defaultstoragefqdn",
+															"type": "Expression"
 														}
 													}
 												}
@@ -1056,24 +1059,22 @@
 						"defaultValue": "SynapseMetadataOrchestration"
 					},
 					"orchestratorfqdn": {
-						"type": "string",
-						"defaultValue": "sqlserver2by1.database.windows.net"
+						"type": "string"
 					},
 					"serverlessfqdn": {
-						"type": "string",
-						"defaultValue": "sawsaccel-ondemand.sql.azuresynapse.net"
+						"type": "string"
 					},
 					"serverlessdbname": {
-						"type": "string",
-						"defaultValue": "wwimporters - serverless"
+						"type": "string"
 					},
 					"sourcefqdn": {
-						"type": "string",
-						"defaultValue": "sqlserver2by1.database.windows.net"
+						"type": "string"
 					},
 					"sourcedb": {
-						"type": "string",
-						"defaultValue": "WWImporters"
+						"type": "string"
+					},
+					"defaultstoragefqdn": {
+						"type": "string"
 					}
 				},
 				"variables": {
@@ -1249,52 +1250,6 @@
 					{
 						"name": "create view",
 						"type": "Script",
-						"dependsOn": [
-							{
-								"activity": "drop view",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"linkedServiceName": {
-							"referenceName": "asaw2b1 serverless",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"fqdn": {
-									"value": "@pipeline().parameters.serverlessfqdn",
-									"type": "Expression"
-								},
-								"dbname": {
-									"value": "@pipeline().parameters.serverlessdbname",
-									"type": "Expression"
-								}
-							}
-						},
-						"typeProperties": {
-							"scripts": [
-								{
-									"type": "NonQuery",
-									"text": {
-										"value": "CREATE View Bronze.@{pipeline().parameters.sinkviewname} as SELECT * FROM OPENROWSET(BULK 'https://saaccel.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/@{pipeline().parameters.sinkviewname}/**',FORMAT = 'PARQUET') AS [result]",
-										"type": "Expression"
-									}
-								}
-							],
-							"scriptBlockExecutionTimeout": "02:00:00"
-						}
-					},
-					{
-						"name": "drop view",
-						"type": "Script",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -1323,7 +1278,7 @@
 								{
 									"type": "NonQuery",
 									"text": {
-										"value": "IF Object_ID('Bronze.@{pipeline().parameters.sinkviewname}') IS NOT NULL DROP VIEW Bronze.@{pipeline().parameters.sinkviewname};\n\n",
+										"value": "CREATE or ALTER View Bronze.@{pipeline().parameters.sinkviewname} as SELECT * FROM OPENROWSET(BULK 'https://@{pipeline().parameters.defaultstoragefqdn}/adls2b1fs/bronze parquet - wwi/@{pipeline().parameters.sinkviewname}/**',FORMAT = 'PARQUET') AS [result]",
 										"type": "Expression"
 									}
 								}
@@ -1377,6 +1332,9 @@
 						"type": "string"
 					},
 					"orchestratortablename": {
+						"type": "string"
+					},
+					"defaultstoragefqdn": {
 						"type": "string"
 					}
 				},
@@ -1445,24 +1403,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/WWISourceDB')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/DataDestinationStore')]",
-			"type": "Microsoft.Synapse/workspaces/datasets",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"description": "Connection to your Azure Synapse Analytics.",
-				"linkedServiceName": {
-					"referenceName": "sawsaccel-WorkspaceDefaultSqlServer",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlDWTable",
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/sawsaccel-WorkspaceDefaultSqlServer')]"
 			]
 		},
 		{
@@ -1706,7 +1646,8 @@
 							"serverlessfqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn')]",
 							"serverlessdbname": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessdbname')]",
 							"sourcefqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn')]",
-							"sourcedb": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb')]"
+							"sourcedb": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb')]",
+							"defaultstoragefqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_defaultstoragefqdn')]"
 						}
 					}
 				],
@@ -1838,98 +1779,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/Create View  StockItems')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.StockItems as\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/StockItems/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View Bronze InvoiceLines')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.InvoiceLines as \nSELECT *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/InvoiceLines/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View Bronze Invoices')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.Invoices as \nSELECT *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/Invoices/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View BuyingGroups')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.BuyingGroups as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/BuyingGroups/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/Create View Calendar')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -1953,144 +1802,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/Create View Cities')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "CREATE View Bronze.Cities as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/Cities/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View Colors')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.Colors as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/Colors/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View Countries')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "\nCREATE View Bronze.Countries as \nSELECT\n   *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/Countries/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View CustomerCategories')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.CustomerCategories as\nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/CustomerCategories/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View Customers')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "CREATE View Bronze.Customers as\nSELECT\n     *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/Customers/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View DeliveryMethods')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.DeliveryMethods as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/DeliveryMethods/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/Create View OpenOrders')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
@@ -2100,98 +1811,6 @@
 				},
 				"content": {
 					"query": "CREATE View Silver.OpenOrders as \nselect CustomerID\n,SalesPersonPersonID\n,ContactPersonID\n,StockItemID\n,PackageTypeID\n,Cast(OrderDate as Date) as OrderDate\n,Quantity \n,Quantity * UnitPrice as ExtendedPrice\n,DATEDIFF(DD,Cast(OrderDate as Date),Cast(getdate() as Date)) as DaysOpen\nfrom Bronze.OrderLines ol\ninner join Bronze.Orders o on ol.OrderID = o.OrderID\nwhere ol.PickingCompletedWhen is  null and o.PickingCompletedWhen is NULL\n\n\n\n\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View OrderLines')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.OrderLines as \nSELECT\n    *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/OrderLines/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View Orders')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.Orders as \nSELECT\n *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/Orders/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View PackageTypes')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.PackageTypes as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/PackageTypes/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View People')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.People as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/People/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -2330,167 +1949,6 @@
 				},
 				"content": {
 					"query": "IF Object_ID('Silver.StockItems') IS NOT NULL\n    DROP VIEW Silver.StockItems;\nGO\nCreate View Silver.StockItems as\nSELECT  SI_A.StockItemID,\nSI_A.StockItemName,\n--SG.StockGroupName,\nS.SupplierID,\nS.SupplierName,\nSC.SupplierCategoryID,\nSC.SupplierCategoryName,\nC.ColorID,\nSI_A.UnitPackageID as [Selling Package],\nSP_A.PackageTypeName,\nSI_A.OuterPackageID as [Buying Package],\nSI_A.Brand,\nSI_A.Size,\nSI_A.LeadTimeDays,\nSI_A.QuantityPerOuter,\nSI_A.IsChillerStock,\nSI_A.Barcode,\nSI_A.TaxRate,\nSI_A.UnitPrice,\nSI_A.RecommendedRetailPrice,\nSI_A.TypicalWeightPerUnit,\nSI_A.MarketingComments,\nSI_A.InternalComments,\nSI_A.Photo, \nSI_A.CustomFields,\nSI_A.Tags,\nSI_A.SearchDetails,\nSI_A.LastEditedBy,\nSI_A.ValidFrom,\nSI_A.ValidTo\nFrom Bronze.StockItems as SI_A\nINNER JOIN Bronze.Suppliers S ON SI_A.SupplierID = S.SupplierID\nINNER JOIN Bronze.Colors C on SI_A.ColorID = C.ColorID\nINNER JOIN Bronze.PackageTypes SP_A on SP_A.PackageTypeID = SI_A.UnitPackageID\nINNER JOIN Bronze.SupplierCategories SC on S.SupplierCategoryID = SC.SupplierCategoryID\n--INNER JOIN Bronze.StockItemStockGroups SISG on SISG.StockItemID = SI_A.StockItemID\n--INNER JOIN Bronze.StockGroups SG on SG.StockGroupID = SISG.StockGroupID",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View StateProvinces')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "CREATE View Bronze.StateProvinces as \nSELECT *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/StateProvinces/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View StockGroups')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.StockGroups as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/StockGroups/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View StockItemStockGroups')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.StockItemStockGroups AS\nSELECT * \nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/StockItemStockGroups/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View SupplierCategories')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "Create View Bronze.SupplierCategories as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/SupplierCategories/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create View Suppliers')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "CREATE View Bronze.Suppliers as \nSELECT\n*\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronze parquet - wwi/Suppliers/**',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create schemas')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "\nCREATE SCHEMA Bronze\n\nGO\n\nCREATE SCHEMA Silver",
-					"metadata": {
-						"language": "sql"
-					},
-					"currentConnection": {
-						"databaseName": "wwimporters - serverless",
-						"poolName": "Built-in"
-					},
-					"resultLimit": 5000
-				},
-				"type": "SqlQuery"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/Create view Bronze StockIndexData')]",
-			"type": "Microsoft.Synapse/workspaces/sqlscripts",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"folder": {
-					"name": "Bronze Views"
-				},
-				"content": {
-					"query": "CREATE View Bronze.StockIndexData as\nSELECT\n   *\nFROM\n    OPENROWSET(\n        BULK 'https://adls2b1.dfs.core.windows.net/adls2b1fs/bronzetextsandp/**',\n        FORMAT = 'CSV',\n        HEADER_ROW = TRUE,\n        PARSER_VERSION = '2.0'\n    ) AS [result]\n",
 					"metadata": {
 						"language": "sql"
 					},
