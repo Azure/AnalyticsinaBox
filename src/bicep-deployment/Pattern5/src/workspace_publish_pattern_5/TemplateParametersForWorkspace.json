@@ -20,28 +20,28 @@
 		"sawsaccel-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": ""
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorschemaname": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorschemaname": {
 			"value": "dbo"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchstratortablename": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchstratortablename": {
 			"value": "PipelineOrchestrator_SQLtoParquet"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratordbname": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratordbname": {
 			"value": "SynapseMetadataOrchestration"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorfqdn": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn": {
 			"value": ""
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessfqdn": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn": {
 			"value": ""
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessdbname": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessdbname": {
 			"value": "SynapseServerless"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcefqdn": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn": {
 			"value": ""
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcedb": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb": {
 			"value": "WideWorldImporters "
 		}
 	}

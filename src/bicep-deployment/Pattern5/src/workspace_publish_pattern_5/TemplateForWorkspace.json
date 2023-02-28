@@ -31,35 +31,35 @@
 			"type": "string",
 			"defaultValue": "https://saaccel.dfs.core.windows.net"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorschemaname": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorschemaname": {
 			"type": "string",
 			"defaultValue": "dbo"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchstratortablename": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchstratortablename": {
 			"type": "string",
 			"defaultValue": "PipelineOrchestrator_SQLtoParquet"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratordbname": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratordbname": {
 			"type": "string",
 			"defaultValue": "SynapseMetadataOrchestration"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorfqdn": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn": {
 			"type": "string",
 			"defaultValue": "sqlserver2by1.database.windows.net"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessfqdn": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn": {
 			"type": "string",
 			"defaultValue": "sawsaccel-ondemand.sql.azuresynapse.net"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessdbname": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessdbname": {
 			"type": "string",
 			"defaultValue": "wwimporters - serverless"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcefqdn": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn": {
 			"type": "string",
 			"defaultValue": "sqlserver2by1.database.windows.net"
 		},
-		"Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcedb": {
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb": {
 			"type": "string",
 			"defaultValue": "WWImporters"
 		}
@@ -1699,14 +1699,14 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"orchestratorschemaname": "[parameters('Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorschemaname')]",
-							"orchstratortablename": "[parameters('Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchstratortablename')]",
-							"orchestratordbname": "[parameters('Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratordbname')]",
-							"orchestratorfqdn": "[parameters('Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_orchestratorfqdn')]",
-							"serverlessfqdn": "[parameters('Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessfqdn')]",
-							"serverlessdbname": "[parameters('Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_serverlessdbname')]",
-							"sourcefqdn": "[parameters('Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcefqdn')]",
-							"sourcedb": "[parameters('Scheduled Trigger_properties_orchestrator Load Source SQL to Bronze ADLS_parameters_sourcedb')]"
+							"orchestratorschemaname": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorschemaname')]",
+							"orchstratortablename": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchstratortablename')]",
+							"orchestratordbname": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratordbname')]",
+							"orchestratorfqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn')]",
+							"serverlessfqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn')]",
+							"serverlessdbname": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessdbname')]",
+							"sourcefqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn')]",
+							"sourcedb": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb')]"
 						}
 					}
 				],
