@@ -155,20 +155,19 @@ stages:
 
                 azurePowerShellVersion: LatestVersion
 
-
   - stage: SynapseArtifactsDeployment
     displayName: Synapse pipelines/notebook/linkedservices/dataset deployment
     jobs:
     - job: _job_SynapseArtifactsDeployment
       displayName: synapse artifacts deployment
       steps:
-    - checkout: self
-    - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
-      displayName: 'Synapse deployment task for workspace: $(synapseWorkSpaceName) '
-      inputs:
-        TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateForWorkspace.json'
-        ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateParametersForWorkspace.json'
-        azureSubscription: $(ado_service_connection_rg)
-        ResourceGroupName: $(resourceGroupName)
-        TargetWorkspaceName: $(synapseWorkSpaceName)
-        OverrideArmParameters: '-workspaceName $(synapseWorkSpaceName) ' 
+        - checkout: self
+        - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
+          displayName: 'Synapse deployment task for workspace: $(synapseWorkSpaceName) '
+          inputs:
+            TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateForWorkspace.json'
+            ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateParametersForWorkspace.json'
+            azureSubscription: $(ado_service_connection_rg)
+            ResourceGroupName: $(resourceGroupName)
+            TargetWorkspaceName: $(synapseWorkSpaceName)
+            OverrideArmParameters: '-workspaceName $(synapseWorkSpaceName) -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn $(sqlServerName).database.windows.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn $(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn $(sqlServerName).database.windows.net' 
