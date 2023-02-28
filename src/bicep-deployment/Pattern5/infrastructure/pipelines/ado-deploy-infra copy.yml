@@ -25,7 +25,6 @@ pool:
   vmImage: $(ap_vm_image)
 
 stages:
- 
   - stage: SynapseArtifactsDeployment
     displayName: Synapse pipelines/notebook/linkedservices/dataset deployment
     jobs:
