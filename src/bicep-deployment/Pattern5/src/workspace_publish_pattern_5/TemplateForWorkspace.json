@@ -355,6 +355,14 @@
 								"defaultstoragefqdn": {
 									"value": "@pipeline().parameters.defaultstoragefqdn",
 									"type": "Expression"
+								},
+								"sinkcontainer": {
+									"value": "@pipeline().parameters.sinkcontainer",
+									"type": "Expression"
+								},
+								"sinkbronzefolder": {
+									"value": "@pipeline().parameters.sinkbronzefolder",
+									"type": "Expression"
 								}
 							}
 						}
@@ -520,6 +528,14 @@
 								"defaultstoragefqdn": {
 									"value": "@pipeline().parameters.defaultstoragefqdn",
 									"type": "Expression"
+								},
+								"sinkcontainer": {
+									"value": "@pipeline().parameters.sinkcontainer",
+									"type": "Expression"
+								},
+								"sinkbronzefolder": {
+									"value": "@pipeline().parameters.sinkbronzefolder",
+									"type": "Expression"
 								}
 							}
 						}
@@ -591,6 +607,14 @@
 								},
 								"defaultstoragefqdn": {
 									"value": "@pipeline().parameters.defaultstoragefqdn",
+									"type": "Expression"
+								},
+								"sinkcontainer": {
+									"value": "@pipeline().parameters.sinkcontainer",
+									"type": "Expression"
+								},
+								"sinkbronzefolder": {
+									"value": "@pipeline().parameters.sinkbronzefolder",
 									"type": "Expression"
 								}
 							}
@@ -1278,7 +1302,7 @@
 								{
 									"type": "NonQuery",
 									"text": {
-										"value": "CREATE or ALTER View Bronze.@{pipeline().parameters.sinkviewname} as SELECT * FROM OPENROWSET(BULK 'https://@{pipeline().parameters.defaultstoragefqdn}/adls2b1fs/bronze parquet - wwi/@{pipeline().parameters.sinkviewname}/**',FORMAT = 'PARQUET') AS [result]",
+										"value": "CREATE or ALTER View Bronze.@{pipeline().parameters.sinkviewname} as SELECT * FROM OPENROWSET(BULK 'https://@{pipeline().parameters.defaultstoragefqdn}/@{pipeline().parameters.sinkcontainer}/@{pipeline().parameters.sinkbronzefolder}/@{pipeline().parameters.sinkviewname}/**',FORMAT = 'PARQUET') AS [result]",
 										"type": "Expression"
 									}
 								}
@@ -1335,6 +1359,12 @@
 						"type": "string"
 					},
 					"defaultstoragefqdn": {
+						"type": "string"
+					},
+					"sinkcontainer": {
+						"type": "string"
+					},
+					"sinkbronzefolder": {
 						"type": "string"
 					}
 				},
@@ -1631,7 +1661,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Stopped",
+				"runtimeState": "Started",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -1654,18 +1684,10 @@
 				"type": "ScheduleTrigger",
 				"typeProperties": {
 					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
+						"frequency": "Minute",
+						"interval": 5,
 						"startTime": "2022-12-20T00:00:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								0
-							]
-						}
+						"timeZone": "UTC"
 					}
 				}
 			},
