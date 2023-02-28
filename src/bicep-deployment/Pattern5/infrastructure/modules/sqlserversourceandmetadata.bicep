@@ -73,5 +73,4 @@ resource sqlserverdatabaseMetadata 'Microsoft.Sql/servers/databases@2021-11-01-p
 output sqlservername string = sqlserver.properties.fullyQualifiedDomainName
 output sqlserverDBNameWWI  string =sqlserverdatabaseWWI.name
 output sqlserverDBNameMetadata string = sqlserverdatabaseMetadata.name
-
 output sqlserverFQDN string = sqlserver.properties.fullyQualifiedDomainName
