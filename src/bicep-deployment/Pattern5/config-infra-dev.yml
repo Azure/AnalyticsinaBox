@@ -4,7 +4,7 @@ variables:
   ap_vm_image: windows-2019
 
   location: eastus 
-  prefix: sa32
+  prefix: sa33
   postfix: jh64
   environment: dev
 
