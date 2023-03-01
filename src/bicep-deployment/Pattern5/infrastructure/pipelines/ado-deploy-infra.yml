@@ -124,7 +124,7 @@ stages:
                 Inline: |
                     $keyVaultname="$(keyVaultName)"
                     $keyVaultSecretnameSqlMetadataConnString="sqlconn-metadatadb"
-                    $keyVaultSecretnameSqlWWIConnString=="sqlconn-wwidb"
+                    $keyVaultSecretnameSqlWWIConnString="sqlconn-wwidb"
                     $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/orchestrator_scripts/create_orchestrator_table.sql"
                     $scriptPathWWI="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
                     # Installing the SQLServer Module
