@@ -284,7 +284,7 @@
 							{
 								"activity": "copy data sql to parquet",
 								"dependencyConditions": [
-									"Completed"
+									"Succeeded"
 								]
 							}
 						],
@@ -362,6 +362,65 @@
 								},
 								"sinkbronzefolder": {
 									"value": "@pipeline().parameters.sinkbronzefolder",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "execute log status failed",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "copy data sql to parquet",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "log status failed",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sqlsourcedatecolumn": {
+									"value": "@pipeline().parameters.sqlsourcedatecolumn",
+									"type": "Expression"
+								},
+								"sinkviewname": {
+									"value": "@pipeline().parameters.sinkviewname",
+									"type": "Expression"
+								},
+								"batchloaddatetime": {
+									"value": "@pipeline().parameters.batchloaddatetime",
+									"type": "Expression"
+								},
+								"sqlsourceschema": {
+									"value": "@pipeline().parameters.sqlsourceschema",
+									"type": "Expression"
+								},
+								"sqlsourcetable": {
+									"value": "@pipeline().parameters.sqlsourcetable",
+									"type": "Expression"
+								},
+								"loadstatus": "Failed",
+								"orchestratorfqdn": {
+									"value": "@pipeline().parameters.orchestratorfqdn",
+									"type": "Expression"
+								},
+								"orchestratordbname": {
+									"value": "@pipeline().parameters.orchestratordbname",
+									"type": "Expression"
+								},
+								"orchestratorschemaname": {
+									"value": "@pipeline().parameters.orchestratorschemaname",
+									"type": "Expression"
+								},
+								"orchestratortablename": {
+									"value": "@pipeline().parameters.orchestratortablename",
 									"type": "Expression"
 								}
 							}
@@ -451,7 +510,8 @@
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/datasets/AzureSqlSource')]",
 				"[concat(variables('workspaceId'), '/datasets/adlsparquet')]",
-				"[concat(variables('workspaceId'), '/pipelines/update dates and load status')]"
+				"[concat(variables('workspaceId'), '/pipelines/update dates and load status')]",
+				"[concat(variables('workspaceId'), '/pipelines/log status failed')]"
 			]
 		},
 		{
@@ -541,7 +601,7 @@
 						}
 					},
 					{
-						"name": "execute update dates and load status - failed",
+						"name": "execute log status failed",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
@@ -554,7 +614,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "update dates and load status",
+								"referenceName": "log status failed",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
@@ -580,15 +640,6 @@
 									"type": "Expression"
 								},
 								"loadstatus": "Failed",
-								"isincremental": true,
-								"serverlessfqdn": {
-									"value": "@pipeline().parameters.serverlessfqdn",
-									"type": "Expression"
-								},
-								"serverlessdbname": {
-									"value": "@pipeline().parameters.serverlessdbname",
-									"type": "Expression"
-								},
 								"orchestratorfqdn": {
 									"value": "@pipeline().parameters.orchestratorfqdn",
 									"type": "Expression"
@@ -603,18 +654,6 @@
 								},
 								"orchestratortablename": {
 									"value": "@pipeline().parameters.orchestratortablename",
-									"type": "Expression"
-								},
-								"defaultstoragefqdn": {
-									"value": "@pipeline().parameters.defaultstoragefqdn",
-									"type": "Expression"
-								},
-								"sinkcontainer": {
-									"value": "@pipeline().parameters.sinkcontainer",
-									"type": "Expression"
-								},
-								"sinkbronzefolder": {
-									"value": "@pipeline().parameters.sinkbronzefolder",
 									"type": "Expression"
 								}
 							}
@@ -780,6 +819,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/pipelines/update dates and load status')]",
+				"[concat(variables('workspaceId'), '/pipelines/log status failed')]",
 				"[concat(variables('workspaceId'), '/dataflows/IncrementalLoad')]"
 			]
 		},
@@ -1661,7 +1701,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -1983,6 +2023,102 @@
 				"type": "SqlQuery"
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/log status failed')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "update date fields",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "SynapseMetadataOrchestration",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"fqdn": {
+									"value": "@pipeline().parameters.orchestratorfqdn",
+									"type": "Expression"
+								},
+								"dbname": {
+									"value": "@pipeline().parameters.orchestratordbname",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": {
+										"value": "update @{pipeline().parameters.orchestratorschemaname}.@{pipeline().parameters.orchestratortablename} set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}',  loadstatus = '@{pipeline().parameters.loadstatus}', sqlenddate=null,lastloaddate = cast('@{pipeline().parameters.batchloaddatetime}' as date),  where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}'",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sqlsourcedatecolumn": {
+						"type": "string"
+					},
+					"sinkviewname": {
+						"type": "string"
+					},
+					"batchloaddatetime": {
+						"type": "string"
+					},
+					"sqlsourceschema": {
+						"type": "string"
+					},
+					"sqlsourcetable": {
+						"type": "string"
+					},
+					"loadstatus": {
+						"type": "string"
+					},
+					"orchestratorfqdn": {
+						"type": "string"
+					},
+					"orchestratordbname": {
+						"type": "string"
+					},
+					"orchestratorschemaname": {
+						"type": "string"
+					},
+					"orchestratortablename": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"nextupdatedate": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Load Bronze/child pipelines"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T21:21:24Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseMetadataOrchestration')]"
+			]
 		}
 	]
 }
