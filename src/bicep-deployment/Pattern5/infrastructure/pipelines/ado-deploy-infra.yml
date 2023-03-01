@@ -153,6 +153,12 @@ stages:
                     Write-Output "Create views needed in the WWI database "
                     Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPathWWI
 
+                    Write-Output "Giving MI access to Metadata Database"
+                    $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net).Token
+
+                    Invoke-SqlCmd -ServerInstance "$(sqlServerName)" -DatabaseName "SynapseMetadataOrchestration" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
+
+
                 azurePowerShellVersion: LatestVersion
 
   - stage: SynapseArtifactsDeployment
