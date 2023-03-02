@@ -157,8 +157,8 @@ stages:
                     $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net).Token
                     Write-Output "Giving MI access to Metadata Database"
                     Write-Output "$(sqlServerName)"
-                    $ssName =  "$(sqlServerName)"
-                    Invoke-SqlCmd -ServerInstance "sa33-sqlsrc-jh64-dev" -Database "SynapseMetadataOrchestration" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
+                    $ssInstance =  "$(sqlServerName).database.windows.net"
+                    Invoke-SqlCmd -ServerInstance "sa33-sqlsrc-jh64-dev.database.windows.net" -Database "SynapseMetadataOrchestration" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
                     Write-Output "Giving MI access to WWI Database"
                     Invoke-SqlCmd -ServerInstance $ssName -Database "WideWorldImporters" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
 
