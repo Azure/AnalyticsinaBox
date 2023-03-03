@@ -5,7 +5,7 @@ variables:
 
   location: eastus 
   prefix: sa33
-  postfix: jh64
+  postfix: jh33
   environment: dev
 
   # Azure DevOps 
