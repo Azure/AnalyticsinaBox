@@ -125,8 +125,14 @@ stages:
                     $keyVaultname="$(keyVaultName)"
                     $keyVaultSecretnameSqlMetadataConnString="sqlconn-metadatadb"
                     $keyVaultSecretnameSqlWWIConnString="sqlconn-wwidb"
+                    $serverlessConnStringMaster = "Server=tcp:$(synapseWorkspace)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=Master;Persist Security Info=False;User ID=${sqladministratorLogin};Password=${sqladministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+                    $serverlessConnStringServerless = "Server=tcp:$(synapseWorkspace)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=SynapseServerless;Persist Security Info=False;User ID=${sqladministratorLogin};Password=${sqladministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
                     $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/orchestrator_scripts/create_orchestrator_table.sql"
                     $scriptPathWWI="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
+
+                    $scriptPathServerless="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/synapse_serverless_scripts/create_source_views.sql"
+                    
                     # Installing the SQLServer Module
                     
                     if (!(Get-Module -Name SQLServer)){
@@ -145,7 +151,7 @@ stages:
                     Write-Output "Fetching the key vault secrets for metadata and wwi databases"
                     $sqlMetadataConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlMetadataConnString -AsPlainText
                     $sqlWWIConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlWWIConnString -AsPlainText                    
-                    
+
                     # Run the Scripts
                     Write-Output "Running the SQL Metadata creation script"
                     Invoke-SqlCmd -ConnectionString $sqlMetadataConnString  -InputFile $scriptPath
@@ -153,14 +159,19 @@ stages:
                     Write-Output "Create views needed in the WWI database "
                     Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPathWWI
 
-                    Write-Output "Get token for SS"
-                    $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net).Token
-                    Write-Output "Giving MI access to Metadata Database"
-                    Write-Output "$(sqlServerName)"
-                    $ssInstance =  "$(sqlServerName).database.windows.net"
-                    Invoke-SqlCmd -ServerInstance "sa33-sqlsrc-jh64-dev.database.windows.net" -Database "SynapseMetadataOrchestration" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
-                    Write-Output "Giving MI access to WWI Database"
-                    Invoke-SqlCmd -ServerInstance $ssName -Database "WideWorldImporters" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
+                    Write-Output "Create Serverless DB"
+                    Invoke-SqlCmd -ConnectionString $serverlessConnStringMaster -query 'CREATE DATABASE SynapseServerless'
+                    Write-Output "Create Serverless Schemas"
+                    Invoke-SqlCmd -ConnectionString $serverlessConnStringServerless -query 'CREATE SCHEMA Bronze'
+                    Invoke-SqlCmd -ConnectionString $serverlessConnStringServerless -query 'CREATE SCHEMA Silver'
+                   # Write-Output "Get token for SS"
+                   # $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net).Token
+                   # Write-Output "Giving MI access to Metadata Database"
+                   # Write-Output "$(sqlServerName)"
+                   # $ssInstance =  "$(sqlServerName).database.windows.net"
+                   # Invoke-SqlCmd -ServerInstance "sa33-sqlsrc-jh64-dev.database.windows.net" -Database "SynapseMetadataOrchestration" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
+                   ## Write-Output "Giving MI access to WWI Database"
+                   # Invoke-SqlCmd -ServerInstance $ssName -Database "WideWorldImporters" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
 
                 azurePowerShellVersion: LatestVersion
 
