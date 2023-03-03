@@ -125,10 +125,10 @@ stages:
                     $keyVaultname="$(keyVaultName)"
                     $keyVaultSecretnameSqlMetadataConnString="sqlconn-metadatadb"
                     $keyVaultSecretnameSqlWWIConnString="sqlconn-wwidb"
-                    
+
                     Write-Output "Setting Serverless Connection Strings"
-                    $serverlessConnStringMaster = "Server=tcp:$(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=Master;Persist Security Info=False;User ID=$(sqladministratorLogin);Password=$(sqladministratorLoginPassword);MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-                    $serverlessConnStringServerless = "Server=tcp:$(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=SynapseServerless;Persist Security Info=False;User ID=$(sqladministratorLogin);Password=$(sqladministratorLoginPassword);MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+                    $serverlessConnStringMaster = "Server=tcp:$(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=Master;Persist Security Info=False;User ID=${{parameters.userPrincipalSQLAdmin}};Password=${{ parameters.sqlserveradminpassword }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+                    $serverlessConnStringServerless = "Server=tcp:$(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=SynapseServerless;Persist Security Info=False;User ID=${{parameters.userPrincipalSQLAdmin}};Password=${{ parameters.sqlserveradminpassword }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
                     $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/orchestrator_scripts/create_orchestrator_table.sql"
                     $scriptPathWWI="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
