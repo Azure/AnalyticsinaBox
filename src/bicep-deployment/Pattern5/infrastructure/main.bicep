@@ -82,23 +82,10 @@ module synapse './modules/synapseworkspace.bicep' = {
     datalakegen2name: dataLakeg2SynapseName
     defaultDataLakeStorageFilesystemName: 'root'
     dataLakeUrlFormat: 'https://{0}.dfs.core.windows.net'
-    }
-}
-
-// Storage Account for WWI bacpac
-module st './modules/storageAccountForWWIbacpac.bicep' = {
-  name: 'st'
-  scope: resourceGroup(rg.name)
-  params: {
-    name: storageAccountName
-    location: location
-    tags: tags
-    roleAssignmentPrincipalID : objectIDDevOps
-    roleAssignmnetPrincipalType : 'ServicePrincipal'
-    roleDefinitionId :  role['StorageBlobDataContributor']
+    userPrincipalSQLAdmin: userPrincipalSQLAdmin
+    objectIDUser: objectIDUser
   }
- }
-
+}
 
 // key vault  and secret creation
 // key vault needed for SQL connections strings to run SQL scripts to create and load tables from deployments pipelines
@@ -121,12 +108,25 @@ module kv './modules/keyvault.bicep' = {
     sqlserverDBNameMetadata: sqlsvr.outputs.sqlserverDBNameMetadata
     sqlconnectionstringMetadata: 'Server=tcp:${sqlsvr.outputs.sqlservername},1433;Initial Catalog=${sqlsvr.outputs.sqlserverDBNameMetadata};Persist Security Info=False;User ID=${sqladministratorLogin};Password=${sqladministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
     }
-  dependsOn:[
-    synapse
-    sqlsvr
+   dependsOn:[
+   synapse
+   sqlsvr
   ]
 }
 
+// Storage Account for WWI bacpac
+module st './modules/storageAccountForWWIbacpac.bicep' = {
+  name: 'st'
+  scope: resourceGroup(rg.name)
+  params: {
+    name: storageAccountName
+    location: location
+    tags: tags
+    roleAssignmentPrincipalID : objectIDDevOps
+    roleAssignmnetPrincipalType : 'ServicePrincipal'
+    roleDefinitionId :  role['StorageBlobDataContributor']
+  }
+ }
 /* module linkedServices './modules/linkedServices.bicep' = {
   scope: resourceGroup(rg.name)
   name: 'linkedServices'

@@ -4,6 +4,9 @@ param tags object
 param administratorLogin string
 @secure()
 param administratorLoginPassword string
+param userPrincipalSQLAdmin string
+param objectIDUser string 
+  
 
 
 param datalakegen2name string
@@ -12,7 +15,7 @@ param dataLakeUrlFormat  string
 
 var storageBlobDataContributorRoleID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 var storageRoleUniqueId = guid(resourceId('Microsoft.Storage/storageAccounts', synapseName), datalakegen2name)
-//var storageRoleUserUniqueId = guid(resourceId('Microsoft.Storage/storageAccounts', synapseName), userObjectId)
+var storageRoleUserUniqueId = guid(resourceId('Microsoft.Storage/storageAccounts', synapseName), objectIDUser)
 
 
 // creating the storage.
@@ -67,8 +70,20 @@ resource synapse 'Microsoft.Synapse/workspaces@2021-06-01' = {
       endIpAddress: '255.255.255.255'
     }
   }
+
+  //resource userAAD 'administrators@2021-06-01' = {
+  // name: 'activeDirectory'
+  // properties: {
+  //  administratorType: 'User'
+  //  login: userPrincipalSQLAdmin
+   //  sid: objectIDUser -- this isn't right
+      
+  //  }
+ // }
   tags: tags
 }
+
+
 output synapsemanageidentity string = synapse.identity.principalId
 
 // giving storage blob data contributor access to adls gen2 for the synapse manage identity.
@@ -78,6 +93,16 @@ resource synapseroleassing 'Microsoft.Authorization/roleAssignments@2020-10-01-p
   properties:{
     principalId: synapse.identity.principalId
     principalType: 'ServicePrincipal'
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleID)
+  }
+}
+
+resource synapseroleuser 'Microsoft.Authorization/roleAssignments@2020-10-01-preview' = {
+  name: storageRoleUserUniqueId
+  scope: datalakegen2
+  properties:{
+    principalId: objectIDUser
+    principalType: 'User'
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleID)
   }
 }
