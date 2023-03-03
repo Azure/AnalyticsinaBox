@@ -162,6 +162,8 @@ stages:
                     Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPathWWI
 
                     Write-Output "Create Serverless DB"
+                    Write-Output $serverlessConnStringMaster
+                    Write-Output $serverlessConnStringServerless
                     Invoke-SqlCmd -ConnectionString $serverlessConnStringMaster -query 'CREATE DATABASE SynapseServerless'
                     Write-Output "Create Serverless Schemas"
                     Invoke-SqlCmd -ConnectionString $serverlessConnStringServerless -query 'CREATE SCHEMA Bronze'
