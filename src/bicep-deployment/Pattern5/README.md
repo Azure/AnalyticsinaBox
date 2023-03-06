@@ -16,7 +16,7 @@ Below is a high-level diagram of the solution.
 
 ## Prerequisites
 * An active Azure subscription.
-* An Azure Active Directory user account for Azure Active Directory(AAD) access to Azure SQL DB and Azure Storage Account. Make note of the object id of this account. This can be found by looking up the user in AAD or by running the Azure CLI command:
+* The object ID of your Azure Active Directory(AAD) user account. This is used to give yourself admin rights to to Azure SQL DB and access to the Azure Storage Account. This can be found by looking up the user in AAD or by running the Azure CLI command with your email:
 
     ```azurecli-interactive
         az ad user show --id useremail@xxx123.com --query id
@@ -34,7 +34,7 @@ If "Owner" access can't be given, then assign it to a custom role which has acce
 * [Create a github service connection](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#github-service-connection) to connect to the github repo.
 
 ## Azure Resources
-Here are the Azure resources that are being deployed for the streaming pattern.
+Here are the Azure resources that are being deployed for the metadata-driven pattern.
 
 1. **Azure Resource Group** - A new Azure Resource group for all resources deployed in this solution.
 1. **Azure SQL DB** - An Azure SQL DB Server is deployed with two  Azure SQL Databases:
@@ -68,15 +68,15 @@ Here are the Azure resources that are being deployed for the streaming pattern.
 
 1. Go to the Azure DevOps and create a new Pipeline. Choose Github and map the yml file from the Github repo
    ![yml_pipeline](./images/DevopsPipeline.jpg)
-1. Save and Run. The pipeline will prompt SQL Server password, the Object ID of the Service Principal, the User Email for SQL AAD authentication, and the Object ID for that same user.
+1. Save and Run. The pipeline will prompt for SQL Server password, the Object ID of the Service Principal, your AAD user email SQL AAD authentication, and the Object ID for your user account.
    ![pipeline_parameter](./images/RunParameters.jpg)
 1. Here are the resources that will be created after deployment:
 ![Azure_Resources](./images/Resources.jpg)
 
 ## Post Deployment
 
-1. Give the AAD user account Owner access to the Synapse Workspace in the Azure portal. Wait a few minutes to give your tenant time to update the access before continuing to the next step.
-1. Add the AAD use account as the Synapse Workspace Admin in Synapse Studio. Otherwise, the user will not be able to see the pipelines and the other components when you open the synapse workspace. Synapse workspace > Access Control -> add your logged in account as "Synapse Administrator"
+1. Give your AAD user account Owner access to the Synapse Workspace in the Azure portal. Wait a few minutes to give your tenant time to update the access before continuing to the next step.
+1. Add your AAD use account as the Synapse Workspace Admin in Synapse Studio. Otherwise, you will not be able to see the pipelines and the other artifacts when you open the Synapse workspace. Synapse workspace > Access Control -> add your logged in account as "Synapse Administrator"
 1. Give the Synapse Managed Identity access to the Azure SQL DBs.
     1. Connect to the Azure SQL DB Server in SQL Server Management Studio or Azure Data Studio ***using AAD authentication***.
     1. Connect to the WideWorldImporters database and run the following commands:
