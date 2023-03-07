@@ -17,18 +17,21 @@ Here are the Azure resources that are going to be deployed using the devops pipe
 ![Component Diagram](.images/Component_Diagram.jpg)
 
 ## Deployment Steps
-### Fork repository and update configuration file
+### Clone / Fork repository
+1. Clone or Fork the repo: https://github.com/Azure/AnalyticsinaBox/tree/main/src/bicep-deployment/Pattern4 to your own git repo
+1. If not already done, create a Service Connection from Azure DevOps to Azure. Record the name of the Service Connection for the next step.
 
-1. Fork the repo: https://github.com/Azure/AnalyticsinaBox/tree/main/src/bicep-deployment/Pattern4/infrastructure to your git repo
-1. Change the configuration file: .\src\bicep-deployment\Pattern 4\config-infra-dev.yml
-
-Update the below parameters (examples provided): </br>
-location: eastus </br>
-prefix: P3Analytics </br>
-postfix: uc1 </br>
-environment: dev </br>
-objectID: '<< object ID of the service principal >>' </br>
-ado_service_connection_rg: Azure-ARM-Dev-SAPA </br>
+### Update configuration file
+1. Edit the configuration file (within your copy of the repo) and update the parameters listed below (examples provided): 
+.\src\bicep-deployment\Pattern 4\config-infra-dev.yml
+</br>
+</br>
+**location**: eastus </br>
+**prefix**: P3Analytics </br>
+**postfix**: uc1 </br>
+**environment**: dev </br>
+**objectID**: '<< object ID of the service principal >>' </br>
+**ado_service_connection_rg**: Azure-ARM-Dev-SAPA </br>
 
 ### Deploy to Azure DevOps
 1. If not already done, create a new Project in Azure DevOps.
@@ -38,7 +41,7 @@ ado_service_connection_rg: Azure-ARM-Dev-SAPA </br>
    ![yml_pipeline](.images/yml_pipeline.jpg)
 1. Save and Run. 
 1. You will receive a prompt for the below parameters:
-    1. SQL Server password (please be aware of advanced complexity requirements)
+    1. SQL Server password (please be aware of advanced complexity requirements). Do not use '@' or '$' symbols in the password.
     1. objectIDofServicePrincipal
 1. Four stages are going to executed.  
      ![pipeline_stages](.images/pipeline_stages.jpg)

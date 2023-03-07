@@ -3,8 +3,8 @@
 ## Prerequisites
 * An active Azure subscription.
 * An active Azure DevOps account.
-* Service Principal has to be created and should be given Owner access over subscription, so that it can create new resource group and resources during the deployment. 
-If "Owner" access can't be given, then assign it to a custom role which has access to the following: </br> Microsoft.Authorization/roleAssignments/
+* Service Principal that has "Owner" privilege over your subscription so that it can create a new resource group and resources during the deployment.
+If "Owner" cannot be given, then assign it to a custom role which has access to the following: </br> Microsoft.Authorization/roleAssignments/
 * [Create an Azure Resource Manager service connection](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#create-a-service-connection) from the Azure DevOps pipeline to connect the Azure subscription. 
 * [Create a github service connection](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#github-service-connection) to connect to the github repo.
 
@@ -15,34 +15,37 @@ Below is a high-level diagram of the solution.
 ## Azure Resources
 Here are the Azure resources that are being deployed for the streaming pattern. 
 
-1. **Azure function App** - The Azure function App is going to generate events. In real-world scenarios, the function can be replaced with IoT hub or any kind of event generator.
-1. **Event Hub** - Azure Event Hubs is a big data streaming platform and event ingestion service. It can receive and process millions of events per second. In our case, Event hub is receiving the data from the Azure function app.
+1. **Azure Function App** - The Azure function app is going to generate events. In real-world scenarios, the function can be replaced with IoT hub or any kind of event generator.
+1. **Event Hub** - Azure Event Hub is a big data streaming platform and event ingestion service. It can receive and process millions of events per second. In this scenario, the Event hub is receiving data from the Azure function app.
 1. **Azure Synapse Workspace** - The following components from the Azure Synapse workspace are being used:
-   - *Azure Synapse Spark Notebook*: The Notebook will leverage Spark structured streaming to process the stream data.
+   - *Azure Synapse Spark Notebook*: The Notebook will leverage Spark structured streaming to process the streaming data.
    - *Azure Synapse Spark Pool*: The compute to run the Spark Notebook.
    - *Azure Synapse Pipeline*: The pipeline is used to orchestrate the solution.
-   - *Azure Synapse Serverless SQL pool*: A TSQL endpoint to query the delta tables hosted on ADLSv2.
+   - *Azure Synapse Serverless SQL pool*: A T-SQL endpoint to query the delta tables hosted on Azure Data Lake Storage v2.
 1.  **Azure Data Lake Storage v2 (ADLSv2)** - Location to store the ingested data in delta format.
 1.  **Azure Key Vault** - Secret store.
-1.  **Azure Devops pipeline** - A CI/CD pipeline to deploy all of the components in the solution into Azure.
-
+1.  **Azure Devops pipeline** - A CI/CD pipeline to deploy all of the components in the solution to Azure.
 
 ## Deployment Steps
-
-1. Clone the repo: https://github.com/BennyHarding/AnalyticsinaBox/tree/main/src/bicep-deployment/Pattern3
+1. Clone or fork the repo: https://github.com/Azure/AnalyticsinaBox/tree/main/src/bicep-deployment/Pattern3
 1. Update the configuration file: ..\src\bicep-deployment\pattern3\config-infra-dev-streaming.yml
-    - location: eastus 
-    - prefix: fasthack 
+    - location: eastus
+    - prefix: fasthack
     - postfix: pt3
     - environment: dev
     - ado_service_connection_rg: < *Name of ADO Service Connection* >
-
-1. Go to the Azure DevOps and map the yml file from the repo
-   ![yml_pipeline](./.images/02_pipelinepath.jpg)
-1. Save and Run. The pipeline will prompt SQL Server password and Object ID of the Service Principal. Provide the values. 
+1. Go to 'Pipelines' within Azure DevOps 
+1. Create a new Pipeline
+1. If you have cloned the repo into Azure Devops, select 'Azure Repos Git'
+1. Select 'Existing Azure Pipelines YAML file
+1. In the path field, enter: src/bicep-deployment/Pattern3/infrastructure/pipelines/ado-deploy-infra-streaming.yml
+1. You will receive a prompt for the below parameters:
+    1. SQL Server password (please be aware of advanced complexity requirements). Do not use '@' or '$' symbols in the password.
+    1. objectIDofServicePrincipal
    ![pipeline_parameter](./.images/03_.pielineParameterjpg.jpg)
 1.  Below stages are going to executed.  
      ![pipeline_stages](./.images/04_pipeline_stages.jpg)
+1. On the first execution, the pipeline will prompt for permission to the 'dev' environment. Grant this permission.
 1. Here are the resource that are going to get created post the deployment.
 ![Azure_Resources](./.images/05_AzureResourcesjpg.jpg)
 
