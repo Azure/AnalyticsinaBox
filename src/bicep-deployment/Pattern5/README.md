@@ -110,7 +110,7 @@ Consider the ideas below for futher exploration and enhancement to the solution
 
 ### Learn more about parameterization and dynamic expressions for metadata driven pipelines
 
-Review all the linked services, data integration sets, and activities in the Synapse Studio solution. See how values from the metadata database as well as from activity outputs and trigger values are leveraged throughout in dynamic expressions and parameters.
+Review all the linked services, data integration sets, and activities in the Synapse Studio solution. See how values from the metadata database as well as from activity outputs and trigger values are leveraged throughout in dynamic expressions and parameters. Explore the orchestrator table, PipelineOrchestrator_SQLtoParquet. in the SynapseMetadataOrchestration database - what other ways other aspects could you parameterize in your pipeline or data flow? 
 
 [Build metadata driven pipelines in ADF](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/build-metadata-driven-pipelines-in-azure-data-factory/ba-p/3443328)
 
