@@ -1,4 +1,4 @@
-# Pattern 5: Azure Synapse Analytics Metadata Driven Pipelines with Synapse Serverless Logical Data Warehouse
+# Pattern 5: Azure Synapse Analytics Metadata Driven Pipelines with Synapse Serverless Enterprise Data Warehouse
 
 ## Description
 Synapse Analytics and Azure Data Factory pipelines give data engineers the capability to build reuseable metadata-driven pipelines that are fun to create, save hours of development time, are easy to maintain, and are CI/CD friendly. Additionally, 
@@ -59,16 +59,16 @@ Here are the Azure resources that are being deployed for the metadata-driven pat
 ## Deployment Steps
 
 1. Clone the repo: https://github.com/Azure/AnalyticsinaBox/tree/main/src/bicep-deployment/Pattern5
-1. Update the configuration file with new values: ..\src\bicep-deployment\pattern5\config-infra-dev-streaming.yml
+1. Update the configuration file with new values: ..\src\bicep-deployment\pattern5\config-infra-dev.yml
     - location: eastus 
     - prefix: xxx
     - postfix: x12
     - environment: dev
     - ado_service_connection_rg: < *Name of ADO Service Connection* >
 
-1. Go to the Azure DevOps and create a new Pipeline. Choose Github and map the yml file from the Github repo
+1. Go to Azure DevOps and create a new Pipeline. Choose Github and map the yml file from the Github repo
    ![yml_pipeline](./images/DevopsPipeline.jpg)
-1. Save and Run. The pipeline will prompt for SQL Server password, the Object ID of the Service Principal, your AAD user email SQL AAD authentication, and the Object ID for your user account.
+1. Save and Run. The pipeline will prompt for SQL Server password, the Object ID of the Service Principal, your AAD user email and the Object ID for your AAD user account.
    ![pipeline_parameter](./images/RunParameters.jpg)
 1. Here are the resources that will be created after deployment:
 ![Azure_Resources](./images/Resources.jpg)
@@ -76,7 +76,7 @@ Here are the Azure resources that are being deployed for the metadata-driven pat
 ## Post Deployment
 
 1. Give your AAD user account Owner access to the Synapse Workspace in the Azure portal. Wait a few minutes to give your tenant time to update the access before continuing to the next step.
-1. Add your AAD use account as the Synapse Workspace Admin in Synapse Studio. Otherwise, you will not be able to see the pipelines and the other artifacts when you open the Synapse workspace. Synapse workspace > Access Control -> add your logged in account as "Synapse Administrator"
+1. Add your AAD use account as the Synapse Workspace Admin in Synapse Analytics Studio. Otherwise, you will not be able to see the pipelines and the other artifacts when you open the Synapse workspace. Synapse workspace > Access Control -> add your logged in account as "Synapse Administrator"
 1. Give the Synapse Managed Identity access to the Azure SQL DBs.
     1. Connect to the Azure SQL DB Server in SQL Server Management Studio or Azure Data Studio ***using AAD authentication***.
     1. Connect to the WideWorldImporters database and run the following commands:
@@ -92,8 +92,8 @@ Here are the Azure resources that are being deployed for the metadata-driven pat
 1. Click on **Trigger -> New/Edit**
 1. Click on the number 9 in the Parameters column: ![Trigger](./images/trigger1.png)
 1. Review the parameter values. You can see that the parameter values are populated with the Azure resources you deployed.![Parameter values](./images/parametervalues.png)
-1. You now have 2 options for running the pipeline.
-    1. You can either copy the parameter values from the trigger and paste them in as pipeline defaults and run the pipeline in debug:
+1. You now have 2 options for running the Synapse pipeline.
+    1. You can either copy the parameter values from the trigger and paste them in as pipeline default values and run the pipeline in debug:
     ![parms](./images/pipelineparms.png)
     **OR**
     1. Go to the Scheduled Trigger in the Manage -> Triggers section, click the Start button, then select Publish all: ![Publish](./images/triggerpublish.png) The trigger will start in about 5 minutes. ***But as soon you see that the trigger has started in the Monitor Pane, go back to Manage Triggers,press Stop then Publish all again. If you choose this option, you must stop the trigger to avoid excess charges.***
