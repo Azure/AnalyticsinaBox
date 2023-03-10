@@ -1,0 +1,23 @@
+variables:
+
+  # Global
+  ap_vm_image: windows-2019
+
+  location: eastus 
+  prefix: sa33
+  postfix: jh33
+  environment: dev
+
+  # Azure DevOps 
+  ado_service_connection_rg: JHAnalyticsbox
+
+
+  # IaC
+  baseName: $(prefix)$(postfix)$(environment)
+  resourceGroupName: P5-$(baseName)-RG #You also need to change the ResourceGroupname in main.bicep file
+  sqlServerName: $(prefix)-sqlsrc-$(postfix)-$(environment)
+  synapseWorkSpaceName: $(prefix)-synapse-$(postfix)-$(environment)
+  dataLakeg2SynapseName: $(prefix)adlssyn$(postfix)$(environment)
+  storageAccountName : $(prefix)wwibacpac$(postfix)$(environment)
+  containerName : wwibacpac
+  keyVaultName: $(prefix)-akv-$(postfix)-$(environment)

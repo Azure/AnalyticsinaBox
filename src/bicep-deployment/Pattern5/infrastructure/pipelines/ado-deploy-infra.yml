@@ -1,0 +1,196 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+name: Pattern-5-Serverless-Metadatadriven
+trigger:
+- none
+
+parameters:
+- name: sqlserveradminpassword
+  type: string
+- name: objectIDofServicePrincipal
+  type: string
+- name: userPrincipalSQLAdmin
+  type: string
+- name: objectIDofUser
+  type: string
+
+
+variables:
+    # 'develop' or feature branches: DEV environment
+    - template: ../../config-infra-dev.yml
+
+
+
+pool:
+  vmImage: $(ap_vm_image)
+
+stages:
+  - stage: Lint
+    displayName: Lint and Preflight check
+    jobs:
+    - job: LintBicep
+      displayName: Lint Bicep Code
+      steps:
+        - checkout: self
+        - script: |
+            az bicep build --file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep
+          name: LintBicepCode
+          displayName: Run Bicep Linter
+
+  - stage: PreflightValidation
+    jobs:
+    - job: ValidateBicepCode
+      displayName: Validate Bicep Code
+      steps:
+        - task: AzureCli@2
+          name: RunPreflightValidateion
+          displayName: Run Preflight Validation
+          inputs:
+            azureSubscription: $(ado_service_connection_rg)
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              echo "PreflightValidation..."
+              echo $(Build.DefinitionName)
+              echo $(location)
+              echo $(prefix)
+              echo $(postfix)
+              echo $(environment)
+              echo ${{ parameters.sqlserveradminpassword }}
+              az deployment sub validate \
+                --name $(Build.DefinitionName) \
+                --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
+                --location $(location) \
+                --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectIDDevOps=${{ parameters.objectIDofServicePrincipal }} objectIDUser=${{ parameters.objectIDofUser}} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
+
+  - stage: CheckOutBicepAndDeployAzureResources
+    displayName: Deploy Azure Resources
+    jobs:
+    - deployment: DevDeployBicep
+      displayName: Deploy Infra
+      pool:
+        vmImage: $(ap_vm_image)
+      environment: $(environment)
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - checkout: self
+            - task: AzureCLI@2
+              displayName: Running Dev Deployment
+              inputs:
+                azureSubscription: $(ado_service_connection_rg)
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az --version
+                  echo "deploying bicep..."
+                  az deployment sub create \
+                    --name $(Build.DefinitionName) \
+                    --location $(location) \
+                    --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
+                    --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment)  objectIDDevOps=${{ parameters.objectIDofServicePrincipal }} objectIDUser=${{ parameters.objectIDofUser}}  sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
+
+                  echo "Upload wwi bacpac to storage account"
+                  echo "Storage account $(storageAccountName)"
+                  echo " Container $(containerName)"
+                  az storage blob upload \
+                    --account-name $(storageAccountName) \
+                    --container-name $(containerName) \
+                    --name WWIStd.bacpac \
+                    --file ./src/bicep-deployment/Pattern5/infrastructure/data/WWIStd.bacpac \
+                    --overwrite         
+
+                  echo "Get storage account key"
+                  key=$(az storage account keys list --account-name $(storageAccountName) \
+                  --resource-group $(resourceGroupName) -o json --query [0].value | tr -d '"')
+                  
+                  echo "Import wwi database"  
+                  az sql db import \
+                  --admin-password ${{ parameters.sqlserveradminpassword }} \
+                  --admin-user rootuser \
+                  --storage-key $key \
+                  --storage-key-type StorageAccessKey \
+                  --storage-uri https://$(storageAccountName).blob.core.windows.net/$(containerName)/WWIStd.bacpac \
+                  --name WideWorldImporters \
+                  --resource-group $(resourceGroupName) \
+                  --server $(sqlServerName)
+    
+            - task: AzurePowerShell@5
+              displayName: 'Azure PowerShell script: Deploy SQL Metadata and WWI views'
+              inputs:
+                azureSubscription: $(ado_service_connection_rg)
+                ScriptType: InlineScript
+                Inline: |
+                    $keyVaultname="$(keyVaultName)"
+                    $keyVaultSecretnameSqlMetadataConnString="sqlconn-metadatadb"
+                    $keyVaultSecretnameSqlWWIConnString="sqlconn-wwidb"
+
+                    Write-Output "Setting Serverless Connection Strings"
+                    $serverlessConnStringMaster = "Server=tcp:$(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=Master;Persist Security Info=False;User ID=rootuser;Password=${{ parameters.sqlserveradminpassword }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+                    $serverlessConnStringServerless = "Server=tcp:$(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=SynapseServerless;Persist Security Info=False;User ID=rootuser;Password=${{ parameters.sqlserveradminpassword }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
+                    $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/orchestrator_scripts/create_orchestrator_table.sql"
+                    $scriptPathWWI="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
+
+                    $scriptPathServerless="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/synapse_serverless_scripts/create_source_views.sql"
+                    
+                    # Installing the SQLServer Module
+                    
+                    if (!(Get-Module -Name SQLServer)){
+                        Write-Output "Installing the SQL Server Module"
+                        Install-Module -Name SQLServer
+                        Write-Output "Importing the SQL Server Module"
+                        Import-Module SQLServer
+                    }
+                    
+                    else{
+                    Write-Output "SQL Server Module is present"
+                    }
+                                        
+                    # Get the secret of the sql server Module
+                    Write-Output $keyVaultName
+                    Write-Output "Fetching the key vault secrets for metadata and wwi databases"
+                    $sqlMetadataConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlMetadataConnString -AsPlainText
+                    $sqlWWIConnString = Get-AzKeyVaultSecret -VaultName $keyVaultname -Name $keyVaultSecretnameSqlWWIConnString -AsPlainText                    
+
+                    # Run the Scripts
+                    Write-Output "Running the SQL Metadata creation script"
+                    Invoke-SqlCmd -ConnectionString $sqlMetadataConnString  -InputFile $scriptPath
+
+                    Write-Output "Create views needed in the WWI database "
+                    Invoke-SqlCmd -ConnectionString $sqlWWIConnString  -InputFile $scriptPathWWI
+
+                    Write-Output "Create Serverless DB"
+
+                    Invoke-SqlCmd -ConnectionString $serverlessConnStringMaster -query 'CREATE DATABASE SynapseServerless'
+                    Write-Output "Create Serverless Schemas"
+                    Invoke-SqlCmd -ConnectionString $serverlessConnStringServerless -query 'CREATE SCHEMA Bronze'
+                    Invoke-SqlCmd -ConnectionString $serverlessConnStringServerless -query 'CREATE SCHEMA Silver'
+                   # Write-Output "Get token for SS"
+                   # $token = (Get-AzAccessToken -ResourceUrl https://database.windows.net).Token
+                   # Write-Output "Giving MI access to Metadata Database"
+                   # Write-Output "$(sqlServerName)"
+                   # $ssInstance =  "$(sqlServerName).database.windows.net"
+                   # Invoke-SqlCmd -ServerInstance "sa33-sqlsrc-jh64-dev.database.windows.net" -Database "SynapseMetadataOrchestration" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
+                   ## Write-Output "Giving MI access to WWI Database"
+                   # Invoke-SqlCmd -ServerInstance $ssName -Database "WideWorldImporters" -AccessToken $token -query 'CREATE USER [$(synapseWorkSpaceName)] FROM  EXTERNAL PROVIDER  WITH DEFAULT_SCHEMA=[dbo]; ALTER ROLE db_owner ADD MEMBER [$(synapseWorkSpaceName)]'
+
+                azurePowerShellVersion: LatestVersion
+
+  - stage: SynapseArtifactsDeployment
+    displayName: Synapse pipelines/notebook/linkedservices/dataset deployment
+    jobs:
+    - job: _job_SynapseArtifactsDeployment
+      displayName: synapse artifacts deployment
+      steps:
+        - checkout: self
+        - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
+          displayName: 'Synapse deployment task for workspace: $(synapseWorkSpaceName) '
+          inputs:
+            TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateForWorkspace.json'
+            ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateParametersForWorkspace.json'
+            azureSubscription: $(ado_service_connection_rg)
+            ResourceGroupName: $(resourceGroupName)
+            TargetWorkspaceName: $(synapseWorkSpaceName)
+            OverrideArmParameters: '-workspaceName $(synapseWorkSpaceName) -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn $(sqlServerName).database.windows.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn $(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn $(sqlServerName).database.windows.net -Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_defaultstoragefqdn $(dataLakeg2SynapseName).dfs.core.windows.net' 

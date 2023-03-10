@@ -1,0 +1,51 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": ""
+		},
+		"SynapseMetadataOrchestration_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"WWISourceDB_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"asaw2b1 serverless_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"sawsaccel-WorkspaceDefaultSqlServer_connectionString": {
+			"value": ""
+		},
+		"sawsaccel-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": ""
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorschemaname": {
+			"value": "dbo"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchstratortablename": {
+			"value": "PipelineOrchestrator_SQLtoParquet"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratordbname": {
+			"value": "SynapseMetadataOrchestration"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn": {
+			"value": ""
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn": {
+			"value": ""
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessdbname": {
+			"value": "SynapseServerless"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn": {
+			"value": ""
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb": {
+			"value": "WideWorldImporters"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_defaultstoragefqdn": {
+			"value": ""
+		}
+	}
+}

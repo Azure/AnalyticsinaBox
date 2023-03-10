@@ -1,0 +1,2124 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "sawsaccel"
+		},
+		"SynapseMetadataOrchestration_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SynapseMetadataOrchestration'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"WWISourceDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'WWISourceDB'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"asaw2b1 serverless_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'asaw2b1 serverless'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().fqdn};Initial Catalog=@{linkedService().dbname}"
+		},
+		"sawsaccel-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'sawsaccel-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:sawsaccel.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"sawsaccel-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://saaccel.dfs.core.windows.net"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorschemaname": {
+			"type": "string",
+			"defaultValue": "dbo"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchstratortablename": {
+			"type": "string",
+			"defaultValue": "PipelineOrchestrator_SQLtoParquet"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratordbname": {
+			"type": "string",
+			"defaultValue": "SynapseMetadataOrchestration"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn": {
+			"type": "string",
+			"defaultValue": "sqlserver2by1.database.windows.net"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn": {
+			"type": "string",
+			"defaultValue": "sawsaccel-ondemand.sql.azuresynapse.net"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessdbname": {
+			"type": "string",
+			"defaultValue": "wwimporters - serverless"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn": {
+			"type": "string",
+			"defaultValue": "sqlserver2by1.database.windows.net"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb": {
+			"type": "string",
+			"defaultValue": "WWImporters"
+		},
+		"Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_defaultstoragefqdn": {
+			"type": "string",
+			"defaultValue": "saaccel.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/child full copy data')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "copy data sql to parquet",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "if folder exists - delete it",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AzureSqlSource",
+								"type": "DatasetReference",
+								"parameters": {
+									"schemaname": {
+										"value": "@pipeline().parameters.sqlsourceschema",
+										"type": "Expression"
+									},
+									"tablename": {
+										"value": "@pipeline().parameters.sqlsourcetable",
+										"type": "Expression"
+									},
+									"sourcedb": {
+										"value": "@pipeline().parameters.sourcedb",
+										"type": "Expression"
+									},
+									"sourcefqdn": {
+										"value": "@pipeline().parameters.sourcefqdn",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "adlsparquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.sinkcontainer",
+										"type": "Expression"
+									},
+									"folder": {
+										"value": "@variables('varsinkfoldernamefull')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "set sink folder name",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "varsinkfoldernamefull",
+							"value": {
+								"value": "@{pipeline().parameters.sinkbronzefolder}/@{pipeline().parameters.sinkviewname}/@{pipeline().parameters.sqlstartdate}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "check existence of folder",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "set sink folder name",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "adlsparquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"container": {
+										"value": "@pipeline().parameters.sinkcontainer",
+										"type": "Expression"
+									},
+									"folder": {
+										"value": "@variables('varsinkfoldernamefull')",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "if folder exists - delete it",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "check existence of folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@activity('check existence of folder').output.exists",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "delete folder",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "adlsparquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"container": {
+													"value": "@pipeline().parameters.sinkcontainer",
+													"type": "Expression"
+												},
+												"folder": {
+													"value": "@variables('varsinkfoldernamefull')",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"wildcardFileName": "*.*",
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "execute update dates and load status",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "copy data sql to parquet",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "update dates and load status",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sqlsourcedatecolumn": {
+									"value": "@pipeline().parameters.sqlsourcedatecolumn",
+									"type": "Expression"
+								},
+								"sinkviewname": {
+									"value": "@pipeline().parameters.sinkviewname",
+									"type": "Expression"
+								},
+								"batchloaddatetime": {
+									"value": "@pipeline().parameters.batchloaddatetime",
+									"type": "Expression"
+								},
+								"sqlsourceschema": {
+									"value": "@pipeline().parameters.sqlsourceschema",
+									"type": "Expression"
+								},
+								"sqlsourcetable": {
+									"value": "@pipeline().parameters.sqlsourcetable",
+									"type": "Expression"
+								},
+								"loadstatus": {
+									"value": "@activity('copy data sql to parquet').output.executionDetails[0].status",
+									"type": "Expression"
+								},
+								"isincremental": {
+									"value": "false",
+									"type": "Expression"
+								},
+								"sqlstartdate": {
+									"value": "@pipeline().parameters.sqlstartdate",
+									"type": "Expression"
+								},
+								"serverlessfqdn": {
+									"value": "@pipeline().parameters.serverlessfqdn",
+									"type": "Expression"
+								},
+								"serverlessdbname": {
+									"value": "@pipeline().parameters.serverlessdbname",
+									"type": "Expression"
+								},
+								"orchestratorfqdn": {
+									"value": "@pipeline().parameters.orchestratorfqdn",
+									"type": "Expression"
+								},
+								"orchestratordbname": {
+									"value": "@pipeline().parameters.orchestratordbname",
+									"type": "Expression"
+								},
+								"orchestratorschemaname": {
+									"value": "@pipeline().parameters.orchestratorschemaname",
+									"type": "Expression"
+								},
+								"orchestratortablename": {
+									"value": "@pipeline().parameters.orchestratortablename",
+									"type": "Expression"
+								},
+								"defaultstoragefqdn": {
+									"value": "@pipeline().parameters.defaultstoragefqdn",
+									"type": "Expression"
+								},
+								"sinkcontainer": {
+									"value": "@pipeline().parameters.sinkcontainer",
+									"type": "Expression"
+								},
+								"sinkbronzefolder": {
+									"value": "@pipeline().parameters.sinkbronzefolder",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "execute log status failed",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "copy data sql to parquet",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "log status failed",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sqlsourcedatecolumn": {
+									"value": "@pipeline().parameters.sqlsourcedatecolumn",
+									"type": "Expression"
+								},
+								"sinkviewname": {
+									"value": "@pipeline().parameters.sinkviewname",
+									"type": "Expression"
+								},
+								"batchloaddatetime": {
+									"value": "@pipeline().parameters.batchloaddatetime",
+									"type": "Expression"
+								},
+								"sqlsourceschema": {
+									"value": "@pipeline().parameters.sqlsourceschema",
+									"type": "Expression"
+								},
+								"sqlsourcetable": {
+									"value": "@pipeline().parameters.sqlsourcetable",
+									"type": "Expression"
+								},
+								"loadstatus": "Failed",
+								"orchestratorfqdn": {
+									"value": "@pipeline().parameters.orchestratorfqdn",
+									"type": "Expression"
+								},
+								"orchestratordbname": {
+									"value": "@pipeline().parameters.orchestratordbname",
+									"type": "Expression"
+								},
+								"orchestratorschemaname": {
+									"value": "@pipeline().parameters.orchestratorschemaname",
+									"type": "Expression"
+								},
+								"orchestratortablename": {
+									"value": "@pipeline().parameters.orchestratortablename",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sqlsourceschema": {
+						"type": "string"
+					},
+					"sqlsourcetable": {
+						"type": "string"
+					},
+					"sqlsourcedatecolumn": {
+						"type": "string"
+					},
+					"sqlstartdate": {
+						"type": "string"
+					},
+					"sinkcontainer": {
+						"type": "string"
+					},
+					"sinkbronzefolder": {
+						"type": "string"
+					},
+					"sinkviewname": {
+						"type": "string"
+					},
+					"batchloaddatetime": {
+						"type": "string"
+					},
+					"sqlenddate": {
+						"type": "string"
+					},
+					"serverlessfqdn": {
+						"type": "string"
+					},
+					"serverlessdbname": {
+						"type": "string"
+					},
+					"orchestratordbname": {
+						"type": "string"
+					},
+					"orchestratorfqdn": {
+						"type": "string"
+					},
+					"sourcefqdn": {
+						"type": "string"
+					},
+					"sourcedb": {
+						"type": "string"
+					},
+					"orchestratorschemaname": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"orchestratortablename": {
+						"type": "string",
+						"defaultValue": "PipelineOrchestrator_SQLtoParquet_Load"
+					},
+					"defaultstoragefqdn": {
+						"type": "string",
+						"defaultValue": "saaccel.dfs.core.windows.net"
+					}
+				},
+				"variables": {
+					"varsinkfoldernamefull": {
+						"type": "String"
+					},
+					"copyupdate": {
+						"type": "String"
+					},
+					"test": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Load Bronze/child pipelines"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T21:21:58Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/AzureSqlSource')]",
+				"[concat(variables('workspaceId'), '/datasets/adlsparquet')]",
+				"[concat(variables('workspaceId'), '/pipelines/update dates and load status')]",
+				"[concat(variables('workspaceId'), '/pipelines/log status failed')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/child incremental dataflow')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "execute update dates and load status - success",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DF Load Incremental",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "update dates and load status",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sqlsourcedatecolumn": {
+									"value": "@pipeline().parameters.sqlsourcedatecolumn",
+									"type": "Expression"
+								},
+								"sinkviewname": {
+									"value": "@pipeline().parameters.sinkviewname",
+									"type": "Expression"
+								},
+								"batchloaddatetime": {
+									"value": "@pipeline().parameters.batchloaddatetime",
+									"type": "Expression"
+								},
+								"sqlsourceschema": {
+									"value": "@pipeline().parameters.sqlsourceschema",
+									"type": "Expression"
+								},
+								"sqlsourcetable": {
+									"value": "@pipeline().parameters.sqlsourcetable",
+									"type": "Expression"
+								},
+								"loadstatus": "Succeeded",
+								"isincremental": true,
+								"serverlessfqdn": {
+									"value": "@pipeline().parameters.serverlessfqdn",
+									"type": "Expression"
+								},
+								"serverlessdbname": {
+									"value": "@pipeline().parameters.serverlessdbname",
+									"type": "Expression"
+								},
+								"orchestratorfqdn": {
+									"value": "@pipeline().parameters.orchestratorfqdn",
+									"type": "Expression"
+								},
+								"orchestratordbname": {
+									"value": "@pipeline().parameters.orchestratordbname",
+									"type": "Expression"
+								},
+								"orchestratorschemaname": {
+									"value": "@pipeline().parameters.orchestratorschemaname",
+									"type": "Expression"
+								},
+								"orchestratortablename": {
+									"value": "@pipeline().parameters.orchestratortablename",
+									"type": "Expression"
+								},
+								"defaultstoragefqdn": {
+									"value": "@pipeline().parameters.defaultstoragefqdn",
+									"type": "Expression"
+								},
+								"sinkcontainer": {
+									"value": "@pipeline().parameters.sinkcontainer",
+									"type": "Expression"
+								},
+								"sinkbronzefolder": {
+									"value": "@pipeline().parameters.sinkbronzefolder",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "execute log status failed",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DF Load Incremental",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "log status failed",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"sqlsourcedatecolumn": {
+									"value": "@pipeline().parameters.sqlsourcedatecolumn",
+									"type": "Expression"
+								},
+								"sinkviewname": {
+									"value": "@pipeline().parameters.sinkviewname",
+									"type": "Expression"
+								},
+								"batchloaddatetime": {
+									"value": "@pipeline().parameters.batchloaddatetime",
+									"type": "Expression"
+								},
+								"sqlsourceschema": {
+									"value": "@pipeline().parameters.sqlsourceschema",
+									"type": "Expression"
+								},
+								"sqlsourcetable": {
+									"value": "@pipeline().parameters.sqlsourcetable",
+									"type": "Expression"
+								},
+								"loadstatus": "Failed",
+								"orchestratorfqdn": {
+									"value": "@pipeline().parameters.orchestratorfqdn",
+									"type": "Expression"
+								},
+								"orchestratordbname": {
+									"value": "@pipeline().parameters.orchestratordbname",
+									"type": "Expression"
+								},
+								"orchestratorschemaname": {
+									"value": "@pipeline().parameters.orchestratorschemaname",
+									"type": "Expression"
+								},
+								"orchestratortablename": {
+									"value": "@pipeline().parameters.orchestratortablename",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "DF Load Incremental",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "IncrementalLoad",
+								"type": "DataFlowReference",
+								"parameters": {
+									"sqlsourceschema": {
+										"value": "'@{pipeline().parameters.sqlsourceschema}'",
+										"type": "Expression"
+									},
+									"sqlsourcetable": {
+										"value": "'@{pipeline().parameters.sqlsourcetable}'",
+										"type": "Expression"
+									},
+									"sqlsourcedatecolumn": {
+										"value": "'@{pipeline().parameters.sqlsourcedatecolumn}'",
+										"type": "Expression"
+									},
+									"sqlstartdate": {
+										"value": "'@{pipeline().parameters.sqlstartdate}'",
+										"type": "Expression"
+									},
+									"sqlenddate": {
+										"value": "'@{coalesce(pipeline().parameters.sqlenddate,'2040-01-01')}'",
+										"type": "Expression"
+									},
+									"sinkcontainer": {
+										"value": "'@{pipeline().parameters.sinkcontainer}'",
+										"type": "Expression"
+									},
+									"sinkbronzefolder": {
+										"value": "'@{pipeline().parameters.sinkbronzefolder}'",
+										"type": "Expression"
+									},
+									"sinkviewname": {
+										"value": "'@{pipeline().parameters.sinkviewname}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"sqlquerysourceinc": {
+										"schemaname": {
+											"value": "@pipeline().parameters.sqlsourceschema",
+											"type": "Expression"
+										},
+										"tablename": {
+											"value": "@pipeline().parameters.sqlsourcetable",
+											"type": "Expression"
+										},
+										"sourcedb": {
+											"value": "@pipeline().parameters.sourcedbname",
+											"type": "Expression"
+										},
+										"sourcefqdn": {
+											"value": "@pipeline().parameters.sourcefqdn",
+											"type": "Expression"
+										}
+									},
+									"parquetsink": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine",
+							"continuationSettings": {
+								"customizedCheckpointKey": {
+									"value": "@pipeline().parameters.checkpointprefix",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sqlsourceschema": {
+						"type": "string"
+					},
+					"sqlsourcetable": {
+						"type": "string"
+					},
+					"sqlsourcedatecolumn": {
+						"type": "string"
+					},
+					"sqlstartdate": {
+						"type": "string"
+					},
+					"sqlenddate": {
+						"type": "string"
+					},
+					"sinkcontainer": {
+						"type": "string"
+					},
+					"sinkbronzefolder": {
+						"type": "string"
+					},
+					"sinkviewname": {
+						"type": "string"
+					},
+					"checkpointprefix": {
+						"type": "string"
+					},
+					"batchloaddatetime": {
+						"type": "string"
+					},
+					"serverlessfqdn": {
+						"type": "string"
+					},
+					"serverlessdbname": {
+						"type": "string"
+					},
+					"orchestratordbname": {
+						"type": "string"
+					},
+					"orchestratorfqdn": {
+						"type": "string"
+					},
+					"sourcefqdn": {
+						"type": "string"
+					},
+					"sourcedbname": {
+						"type": "string"
+					},
+					"orchestratorschemaname": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"orchestratortablename": {
+						"type": "string",
+						"defaultValue": "PipelineOrchestrator_SQLtoParquet_Load"
+					},
+					"defaultstoragefqdn": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Load Bronze/child pipelines"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T21:21:59Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/update dates and load status')]",
+				"[concat(variables('workspaceId'), '/pipelines/log status failed')]",
+				"[concat(variables('workspaceId'), '/dataflows/IncrementalLoad')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/orchestrator Load Source SQL to Bronze ADLS')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "get tables to load",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "set batch start time",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "orchestratortable",
+								"type": "DatasetReference",
+								"parameters": {
+									"schemaname": {
+										"value": "@pipeline().parameters.orchestratorschemaname",
+										"type": "Expression"
+									},
+									"tablename": {
+										"value": "@pipeline().parameters.orchstratortablename",
+										"type": "Expression"
+									},
+									"fqdn": {
+										"value": "@pipeline().parameters.orchestratorfqdn",
+										"type": "Expression"
+									},
+									"dbname": {
+										"value": "@pipeline().parameters.orchestratordbname",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "for each table to load",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "get tables to load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('get tables to load').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "check loadtype",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().loadtype,'full')",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "execute pipeline - execute incremental dataflow",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "child incremental dataflow",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"sqlsourceschema": {
+															"value": "@item().sqlsourceschema",
+															"type": "Expression"
+														},
+														"sqlsourcetable": {
+															"value": "@item().sqlsourcetable",
+															"type": "Expression"
+														},
+														"sqlsourcedatecolumn": {
+															"value": "@item().sqlsourcedatecolumn",
+															"type": "Expression"
+														},
+														"sqlstartdate": {
+															"value": "@item().sqlstartdate",
+															"type": "Expression"
+														},
+														"sqlenddate": {
+															"value": "@item().sqlenddate",
+															"type": "Expression"
+														},
+														"sinkcontainer": {
+															"value": "@item().sinkcontainer",
+															"type": "Expression"
+														},
+														"sinkbronzefolder": {
+															"value": "@item().sinkbronzefolder",
+															"type": "Expression"
+														},
+														"sinkviewname": {
+															"value": "@item().sinkviewname",
+															"type": "Expression"
+														},
+														"checkpointprefix": {
+															"value": "@item().checkpointprefix",
+															"type": "Expression"
+														},
+														"batchloaddatetime": {
+															"value": "@variables('batchloadtimedatetime')",
+															"type": "Expression"
+														},
+														"serverlessfqdn": {
+															"value": "@pipeline().parameters.serverlessfqdn",
+															"type": "Expression"
+														},
+														"serverlessdbname": {
+															"value": "@pipeline().parameters.serverlessdbname",
+															"type": "Expression"
+														},
+														"orchestratordbname": {
+															"value": "@pipeline().parameters.orchestratordbname",
+															"type": "Expression"
+														},
+														"orchestratorfqdn": {
+															"value": "@pipeline().parameters.orchestratorfqdn",
+															"type": "Expression"
+														},
+														"sourcefqdn": {
+															"value": "@pipeline().parameters.sourcefqdn",
+															"type": "Expression"
+														},
+														"sourcedbname": {
+															"value": "@pipeline().parameters.sourcedb",
+															"type": "Expression"
+														},
+														"orchestratorschemaname": {
+															"value": "@pipeline().parameters.orchestratorschemaname",
+															"type": "Expression"
+														},
+														"orchestratortablename": {
+															"value": "@pipeline().parameters.orchstratortablename",
+															"type": "Expression"
+														},
+														"defaultstoragefqdn": {
+															"value": "@pipeline().parameters.defaultstoragefqdn",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "execute pipeline - child full copy data",
+												"type": "ExecutePipeline",
+												"dependsOn": [],
+												"userProperties": [],
+												"typeProperties": {
+													"pipeline": {
+														"referenceName": "child full copy data",
+														"type": "PipelineReference"
+													},
+													"waitOnCompletion": true,
+													"parameters": {
+														"sqlsourceschema": {
+															"value": "@item().sqlsourceschema",
+															"type": "Expression"
+														},
+														"sqlsourcetable": {
+															"value": "@item().sqlsourcetable",
+															"type": "Expression"
+														},
+														"sqlsourcedatecolumn": {
+															"value": "@item().sqlsourcedatecolumn",
+															"type": "Expression"
+														},
+														"sqlstartdate": {
+															"value": "@item().sqlstartdate",
+															"type": "Expression"
+														},
+														"sinkcontainer": {
+															"value": "@item().sinkcontainer",
+															"type": "Expression"
+														},
+														"sinkbronzefolder": {
+															"value": "@item().sinkbronzefolder",
+															"type": "Expression"
+														},
+														"sinkviewname": {
+															"value": "@item().sinkviewname",
+															"type": "Expression"
+														},
+														"batchloaddatetime": {
+															"value": "@variables('batchloadtimedatetime')",
+															"type": "Expression"
+														},
+														"serverlessfqdn": {
+															"value": "@pipeline().parameters.serverlessfqdn",
+															"type": "Expression"
+														},
+														"serverlessdbname": {
+															"value": "@pipeline().parameters.serverlessdbname",
+															"type": "Expression"
+														},
+														"orchestratordbname": {
+															"value": "@pipeline().parameters.orchestratordbname",
+															"type": "Expression"
+														},
+														"orchestratorfqdn": {
+															"value": "@pipeline().parameters.orchestratorfqdn",
+															"type": "Expression"
+														},
+														"sourcefqdn": {
+															"value": "@pipeline().parameters.sourcefqdn",
+															"type": "Expression"
+														},
+														"sourcedb": {
+															"value": "@pipeline().parameters.sourcedb",
+															"type": "Expression"
+														},
+														"orchestratorschemaname": {
+															"value": "@pipeline().parameters.orchestratorschemaname",
+															"type": "Expression"
+														},
+														"orchestratortablename": {
+															"value": "@pipeline().parameters.orchstratortablename",
+															"type": "Expression"
+														},
+														"defaultstoragefqdn": {
+															"value": "@pipeline().parameters.defaultstoragefqdn",
+															"type": "Expression"
+														}
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "set batch start time",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "batchloadtimedatetime",
+							"value": {
+								"value": "@utcnow()",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"orchestratorschemaname": {
+						"type": "string",
+						"defaultValue": "dbo"
+					},
+					"orchstratortablename": {
+						"type": "string",
+						"defaultValue": "PipelineOrchestrator_SQLtoParquet"
+					},
+					"orchestratordbname": {
+						"type": "string",
+						"defaultValue": "SynapseMetadataOrchestration"
+					},
+					"orchestratorfqdn": {
+						"type": "string"
+					},
+					"serverlessfqdn": {
+						"type": "string"
+					},
+					"serverlessdbname": {
+						"type": "string"
+					},
+					"sourcefqdn": {
+						"type": "string"
+					},
+					"sourcedb": {
+						"type": "string"
+					},
+					"defaultstoragefqdn": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"batchloadtimedatetime": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Load Bronze/orchestrators"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T21:22:02Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/orchestratortable')]",
+				"[concat(variables('workspaceId'), '/pipelines/child incremental dataflow')]",
+				"[concat(variables('workspaceId'), '/pipelines/child full copy data')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/update dates and load status')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "get maxdate of data",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "create view",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "asaw2b1 serverless",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"fqdn": {
+									"value": "@pipeline().parameters.serverlessfqdn",
+									"type": "Expression"
+								},
+								"dbname": {
+									"value": "@pipeline().parameters.serverlessdbname",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "maxdate",
+											"type": "Datetime",
+											"value": "",
+											"direction": "Output"
+										}
+									],
+									"type": "Query",
+									"text": {
+										"value": "select max(@{pipeline().parameters.sqlsourcedatecolumn}) as maxdate from Bronze.@{pipeline().parameters.sinkviewname}",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "update date fields",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "If incremental set next updatedate",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "SynapseMetadataOrchestration",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"fqdn": {
+									"value": "@pipeline().parameters.orchestratorfqdn",
+									"type": "Expression"
+								},
+								"dbname": {
+									"value": "@pipeline().parameters.orchestratordbname",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": {
+										"value": "update @{pipeline().parameters.orchestratorschemaname}.@{pipeline().parameters.orchestratortablename} set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', sqlstartdate ='@{variables('nextupdatedate')} ', loadstatus = '@{pipeline().parameters.loadstatus}', sqlenddate=null,lastloaddate = cast('@{pipeline().parameters.batchloaddatetime}' as date), sqlmaxdatetime = '@{activity('get maxdate of data').output.resultSets[0].rows[0].maxdate}' where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}'",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "If incremental set next updatedate",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "get maxdate of data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@pipeline().parameters.isincremental",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Set next update startdate - full",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "nextupdatedate",
+										"value": {
+											"value": "@pipeline().parameters.sqlstartdate",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Set next update startdate - incremental",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "nextupdatedate",
+										"value": {
+											"value": "@activity('get maxdate of data').output.resultSets[0].rows[0].maxdate",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "create view",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "asaw2b1 serverless",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"fqdn": {
+									"value": "@pipeline().parameters.serverlessfqdn",
+									"type": "Expression"
+								},
+								"dbname": {
+									"value": "@pipeline().parameters.serverlessdbname",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": {
+										"value": "CREATE or ALTER View Bronze.@{pipeline().parameters.sinkviewname} as SELECT * FROM OPENROWSET(BULK 'https://@{pipeline().parameters.defaultstoragefqdn}/@{pipeline().parameters.sinkcontainer}/@{pipeline().parameters.sinkbronzefolder}/@{pipeline().parameters.sinkviewname}/**',FORMAT = 'PARQUET') AS [result]",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sqlsourcedatecolumn": {
+						"type": "string"
+					},
+					"sinkviewname": {
+						"type": "string"
+					},
+					"batchloaddatetime": {
+						"type": "string"
+					},
+					"sqlsourceschema": {
+						"type": "string"
+					},
+					"sqlsourcetable": {
+						"type": "string"
+					},
+					"loadstatus": {
+						"type": "string"
+					},
+					"isincremental": {
+						"type": "bool"
+					},
+					"sqlstartdate": {
+						"type": "string"
+					},
+					"serverlessfqdn": {
+						"type": "string"
+					},
+					"serverlessdbname": {
+						"type": "string"
+					},
+					"orchestratorfqdn": {
+						"type": "string"
+					},
+					"orchestratordbname": {
+						"type": "string"
+					},
+					"orchestratorschemaname": {
+						"type": "string"
+					},
+					"orchestratortablename": {
+						"type": "string"
+					},
+					"defaultstoragefqdn": {
+						"type": "string"
+					},
+					"sinkcontainer": {
+						"type": "string"
+					},
+					"sinkbronzefolder": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"nextupdatedate": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Load Bronze/child pipelines"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T21:21:24Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/asaw2b1 serverless')]",
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseMetadataOrchestration')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureSqlSource')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "WWISourceDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"fqdn": {
+							"value": "@dataset().sourcefqdn",
+							"type": "Expression"
+						},
+						"dbname": {
+							"value": "@dataset().sourcedb",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"schemaname": {
+						"type": "string"
+					},
+					"tablename": {
+						"type": "string"
+					},
+					"sourcedb": {
+						"type": "string"
+					},
+					"sourcefqdn": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schemaname",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tablename",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/WWISourceDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/adlsparquet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sawsaccel-WorkspaceDefaultStorage",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"container": {
+						"type": "string"
+					},
+					"folder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().folder",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().container",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sawsaccel-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/orchestratortable')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SynapseMetadataOrchestration",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"fqdn": {
+							"value": "@dataset().fqdn",
+							"type": "Expression"
+						},
+						"dbname": {
+							"value": "@dataset().dbname",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"schemaname": {
+						"type": "string"
+					},
+					"tablename": {
+						"type": "string"
+					},
+					"fqdn": {
+						"type": "string"
+					},
+					"dbname": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schemaname",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tablename",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseMetadataOrchestration')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SynapseMetadataOrchestration')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"fqdn": {
+						"type": "string",
+						"defaultValue": "sqlserver2by1.database.windows.net"
+					},
+					"dbname": {
+						"type": "string",
+						"defaultValue": "SynapseMetadataOrchestration"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('SynapseMetadataOrchestration_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WWISourceDB')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"fqdn": {
+						"type": "string",
+						"defaultValue": "sqlserver2by1.database.windows.net"
+					},
+					"dbname": {
+						"type": "string",
+						"defaultValue": "WWImporters"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('WWISourceDB_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/asaw2b1 serverless')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"fqdn": {
+						"type": "string",
+						"defaultValue": "sawsaccel-ondemand.sql.azuresynapse.net"
+					},
+					"dbname": {
+						"type": "string",
+						"defaultValue": "wwimporters - serverless"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('asaw2b1 serverless_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sawsaccel-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('sawsaccel-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sawsaccel-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('sawsaccel-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Scheduled Trigger')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "orchestrator Load Source SQL to Bronze ADLS",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"orchestratorschemaname": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorschemaname')]",
+							"orchstratortablename": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchstratortablename')]",
+							"orchestratordbname": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratordbname')]",
+							"orchestratorfqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_orchestratorfqdn')]",
+							"serverlessfqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessfqdn')]",
+							"serverlessdbname": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_serverlessdbname')]",
+							"sourcefqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcefqdn')]",
+							"sourcedb": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_sourcedb')]",
+							"defaultstoragefqdn": "[parameters('Scheduled_Trigger_properties_orchestrator_Load_Source_SQL_to_Bronze_ADLS_parameters_defaultstoragefqdn')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 5,
+						"startTime": "2022-12-20T00:00:00Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/orchestrator Load Source SQL to Bronze ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/IncrementalLoad')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "AzureSqlSource",
+								"type": "DatasetReference"
+							},
+							"name": "sqlquerysourceinc"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "sawsaccel-WorkspaceDefaultStorage",
+								"type": "LinkedServiceReference"
+							},
+							"name": "parquetsink"
+						}
+					],
+					"transformations": [
+						{
+							"name": "addYearAndMonthColumns"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     sqlsourceschema as string,",
+						"     sqlsourcetable as string,",
+						"     sqlsourcedatecolumn as string,",
+						"     sqlstartdate as string,",
+						"     sqlenddate as string,",
+						"     sinkcontainer as string,",
+						"     sinkbronzefolder as string,",
+						"     sinkviewname as string",
+						"}",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     enableCdc: true,",
+						"     mode: 'read',",
+						"     skipInitialLoad: false,",
+						"     waterMarkColumn: ('UpdateDate'),",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     query: (\"select *,\" + $sqlsourcedatecolumn + \" as UpdateDate from  \" + $sqlsourceschema + \".\" + $sqlsourcetable +\" where \" + $sqlsourcedatecolumn + \">= '\" +$sqlstartdate+ \"' and \"+ $sqlsourcedatecolumn + \"<= '\" + $sqlenddate +\"'\"),",
+						"     format: 'query') ~> sqlquerysourceinc",
+						"sqlquerysourceinc derive(yearnum = year(toDate(byName('UpdateDate'))),",
+						"          monthnum = month(toDate(byName('UpdateDate')))) ~> addYearAndMonthColumns",
+						"addYearAndMonthColumns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     fileSystem: ($sinkcontainer),",
+						"     folderPath: ($sinkbronzefolder +\"/\" + $sinkviewname),",
+						"     compressionCodec: 'snappy',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('key',",
+						"          0,",
+						"          yearnum,",
+						"          monthnum",
+						"     )) ~> parquetsink"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/AzureSqlSource')]",
+				"[concat(variables('workspaceId'), '/linkedServices/sawsaccel-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View Calendar')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Silver Views"
+				},
+				"content": {
+					"query": "CREATE VIEW Silver.Calendar as \nWith dates(date) as (\nSELECT d\nFROM\n(\n  SELECT d = DATEADD(DAY, rn - 1, '2013-01-01')\n  FROM \n  (\n    SELECT TOP (DATEDIFF(DAY, '2013-01-01', '2025-12-31')) \n      rn = ROW_NUMBER() OVER (ORDER BY s1.[object_id])\n    FROM sys.all_objects AS s1\n    CROSS JOIN sys.all_objects AS s2\n    -- on my system this would support > 5 million days\n    ORDER BY s1.[object_id]\n  ) AS x\n) AS y)\nselect\n date,\n day(date) as daynum,\n DATEPART(dw,date) dayofweeknum,\n DATENAME(dw,date) dayofweekname,\n MONTH(date) as monthnum,\n DATENAME(Month,date) as monthname,\n DATEPART(QUARTER,date) as quarternum,\n 'Q' +  ltrim(DATEPART(QUARTER,date)) as quartername,\n year(date) as year\n from dates",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "wwimporters - serverless",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View OpenOrders')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Silver Views"
+				},
+				"content": {
+					"query": "CREATE View Silver.OpenOrders as \nselect CustomerID\n,SalesPersonPersonID\n,ContactPersonID\n,StockItemID\n,PackageTypeID\n,Cast(OrderDate as Date) as OrderDate\n,Quantity \n,Quantity * UnitPrice as ExtendedPrice\n,DATEDIFF(DD,Cast(OrderDate as Date),Cast(getdate() as Date)) as DaysOpen\nfrom Bronze.OrderLines ol\ninner join Bronze.Orders o on ol.OrderID = o.OrderID\nwhere ol.PickingCompletedWhen is  null and o.PickingCompletedWhen is NULL\n\n\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "wwimporters - serverless",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View PickedOrders')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Silver Views"
+				},
+				"content": {
+					"query": "Create View [Silver].[PickedOrders] as \nselect   CustomerID\n,SalesPersonPersonID\n,ContactPersonID\n,StockItemID\n,PackageTypeID\n,Cast(OrderDate as Date) as OrderDate\n,Cast(ol.PickingCompletedWhen as Date) as PickedDate\n,PickedQuantity \n,PickedQuantity * UnitPrice as ExtendedPrice\n,(PickedQuantity * UnitPrice) * (TaxRate/100) as SalesTaxAmt\n,(PickedQuantity * UnitPrice) + ((PickedQuantity * UnitPrice) * (TaxRate/100)) TotalSalesAmt\n,DATEDIFF(DD,Cast(OrderDate as Date),Cast(ol.PickingCompletedWhen as Date)) as DaysToPick\nfrom Bronze.OrderLines ol\ninner join Bronze.Orders o on ol.OrderID = o.OrderID\nwhere ol.PickingCompletedWhen is not null\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "wwimporters - serverless",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View Salesperson')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Silver Views"
+				},
+				"content": {
+					"query": "Create View Silver.Salesperson as \nselect \nPersonID\n,FullName\n,JSON_VALUE(CustomFields,'$.Title') AS Title\n,JSON_VALUE(CustomFields,'$.PrimarySalesTerritory') AS SalesTerritory\n,EmailAddress\nfrom Bronze.People\nwhere IsSalesperson=1",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "wwimporters - serverless",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View Silver Invoices')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Silver Views"
+				},
+				"content": {
+					"query": "Create View Silver.Invoices as \nSELECT CustomerID\n,BillToCustomerID\n,SalesPersonPersonID\n,StockItemID\n,CAST(InvoiceDate as Date) as InvoiceDate\n,Quantity as InvoiceQuantity\n,ExtendedPrice\n,TaxAmount\n,LineProfit\nFrom Bronze.Invoices i\ninner JOIN Bronze.InvoiceLines il \non i.InvoiceID = il.InvoiceID",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "wwimporters - serverless",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View Silver-Customers')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Silver Views"
+				},
+				"content": {
+					"query": "Create View Silver.Customers as\nSELECT  C.[CustomerID]\n,C.[CustomerName]\n,C.[BillToCustomerID]\n,B.[CustomerName] as BillToCustomerName\n--,C.[CustomerCategoryID]\n,CC.[CustomerCategoryName]\n--,C.[BuyingGroupID]\n,BG.[BuyingGroupName]\n,C.[PostalAddressLine1]\n,C.[PostalAddressLine2]\n,C.[PostalPostalCode]\n,C.[WebsiteURL]\n,C.[DeliveryAddressLine1]\n,C.[DeliveryAddressLine2]\n,C.[DeliveryPostalCode]\n,C.[StandardDiscountPercentage]\n,C.[IsStatementSent]\n,C.[IsOnCreditHold]\n,C.[PaymentDays]\n,SUBSTRING(C.[PhoneNumber],2,3) as AreaCode\n--,C.[DeliveryMethodID]\n,DM.[DeliveryMethodName]\n,C.[CreditLimit]\n,C.[AccountOpenedDate]\n\n-- Ship To Columns\n,DC.CityName as ShipToCity\n,DSP.StateProvinceCode as ShipToStateProvinceCode\n,DSP.StateProvinceName as ShipToStateProvinceName\n,DCO.CountryName as ShipToCountryName\n,DCO.IsoAlpha3Code as ShipToCountryCode\n,DSP.SalesTerritory\n,DCO.Continent\n,DCO.Region\n,DCO.Subregion\n\n-- Postal Columns\n,PC.CityName as PostalCity\n,PSP.StateProvinceCode as PostalStateProvinceCode\n,PSP.StateProvinceName as PostalStateProvinceName\n,PCO.CountryName as PostalCountryName \n,PCO.IsoAlpha3Code as PostalCountryCode\n FROM [Bronze].[Customers] as C\n INNER JOIN [Bronze].[Customers]  B on C.BillToCustomerID = B.CustomerID\n INNER JOIN Bronze.CustomerCategories  CC on C.CustomerCategoryID = CC.CustomerCategoryID\n INNER JOIN Bronze.BuyingGroups  BG on C.BuyingGroupID = BG.BuyingGroupID\n INNER JOIN Bronze.DeliveryMethods  DM on C.DeliveryMethodID = DM. DeliveryMethodID\n -- Ship To Joins\n INNER JOIN Bronze.Cities DC on C.[DeliveryCityID] = DC.CityID\n INNER JOIN Bronze.StateProvinces DSP on DC.[StateProvinceID] = DSP.StateProvinceID\n INNER JOIN Bronze.Countries DCO on DSP.CountryID = DCO.CountryID\n -- Postal Joins\n INNER JOIN Bronze.Cities PC on C.[PostalCityID] = PC.CityID\n INNER JOIN Bronze.StateProvinces PSP on PC.[StateProvinceID] = PSP.StateProvinceID\n INNER JOIN Bronze.Countries PCO on PSP.CountryID = PCO.CountryID\n \n \n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "wwimporters - serverless",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View Silver-StockItemGroups')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Silver Views"
+				},
+				"content": {
+					"query": "IF Object_ID('Silver.StockItemGroups') IS NOT NULL\n    DROP VIEW Silver.StockItemGroups;\nGO\nCreate View Silver.StockItemGroups as\nSELECT  SISG.StockItemID,\nSG.StockGroupName\nFrom Bronze.StockItemStockGroups SISG\nINNER JOIN Bronze.StockGroups SG on SG.StockGroupID = SISG.StockGroupID",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "wwimporters - serverless",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Create View Silver-StockItems')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"folder": {
+					"name": "Silver Views"
+				},
+				"content": {
+					"query": "IF Object_ID('Silver.StockItems') IS NOT NULL\n    DROP VIEW Silver.StockItems;\nGO\nCreate View Silver.StockItems as\nSELECT  SI_A.StockItemID,\nSI_A.StockItemName,\n--SG.StockGroupName,\nS.SupplierID,\nS.SupplierName,\nSC.SupplierCategoryID,\nSC.SupplierCategoryName,\nC.ColorID,\nSI_A.UnitPackageID as [Selling Package],\nSP_A.PackageTypeName,\nSI_A.OuterPackageID as [Buying Package],\nSI_A.Brand,\nSI_A.Size,\nSI_A.LeadTimeDays,\nSI_A.QuantityPerOuter,\nSI_A.IsChillerStock,\nSI_A.Barcode,\nSI_A.TaxRate,\nSI_A.UnitPrice,\nSI_A.RecommendedRetailPrice,\nSI_A.TypicalWeightPerUnit,\nSI_A.MarketingComments,\nSI_A.InternalComments,\nSI_A.Photo, \nSI_A.CustomFields,\nSI_A.Tags,\nSI_A.SearchDetails,\nSI_A.LastEditedBy,\nSI_A.ValidFrom,\nSI_A.ValidTo\nFrom Bronze.StockItems as SI_A\nINNER JOIN Bronze.Suppliers S ON SI_A.SupplierID = S.SupplierID\nINNER JOIN Bronze.Colors C on SI_A.ColorID = C.ColorID\nINNER JOIN Bronze.PackageTypes SP_A on SP_A.PackageTypeID = SI_A.UnitPackageID\nINNER JOIN Bronze.SupplierCategories SC on S.SupplierCategoryID = SC.SupplierCategoryID\n--INNER JOIN Bronze.StockItemStockGroups SISG on SISG.StockItemID = SI_A.StockItemID\n--INNER JOIN Bronze.StockGroups SG on SG.StockGroupID = SISG.StockGroupID",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "wwimporters - serverless",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/log status failed')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "update date fields",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "SynapseMetadataOrchestration",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"fqdn": {
+									"value": "@pipeline().parameters.orchestratorfqdn",
+									"type": "Expression"
+								},
+								"dbname": {
+									"value": "@pipeline().parameters.orchestratordbname",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": {
+										"value": "update @{pipeline().parameters.orchestratorschemaname}.@{pipeline().parameters.orchestratortablename} set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}',  loadstatus = '@{pipeline().parameters.loadstatus}', sqlenddate=null,lastloaddate = cast('@{pipeline().parameters.batchloaddatetime}' as date),  where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}'",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"sqlsourcedatecolumn": {
+						"type": "string"
+					},
+					"sinkviewname": {
+						"type": "string"
+					},
+					"batchloaddatetime": {
+						"type": "string"
+					},
+					"sqlsourceschema": {
+						"type": "string"
+					},
+					"sqlsourcetable": {
+						"type": "string"
+					},
+					"loadstatus": {
+						"type": "string"
+					},
+					"orchestratorfqdn": {
+						"type": "string"
+					},
+					"orchestratordbname": {
+						"type": "string"
+					},
+					"orchestratorschemaname": {
+						"type": "string"
+					},
+					"orchestratortablename": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"nextupdatedate": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Load Bronze/child pipelines"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T21:21:24Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SynapseMetadataOrchestration')]"
+			]
+		}
+	]
+}
