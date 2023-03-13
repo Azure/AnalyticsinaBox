@@ -12,6 +12,7 @@ This project aims to provide an “Synapse Easy Button” for common scenarios. 
 | Kathryn Varrall | | kavarral@microsoft.com | 
 | Situmalli Chandra Mohan | @svchandramohan | schandra@microsoft.com |
 | Ben Harding | @BennyHarding | ben.harding@microsoft.com
+| Jean Hayes | @jehayesms | jean.hayes@microsoft.com
 
 ## Architecture
 The below architecture diagram is an example of a complex data analytics deployment, using many Azure services and technologies. While this may be an end-state architecture, it is likely too complex to build in a 'big bang' approach which is why this repository has broken this architecture into small **patterns** that can be deployed independently.  
@@ -25,4 +26,4 @@ This repository contains several scenarios, or, 'patterns' for you to deploy int
 * **Pattern 2**: Azure Synapse Analytics workspace with a Data Lake, Serverless & Dedicated SQL Pools and Spark Pools.
 * **Pattern 3**: Streaming solution with an Azure Function (Event Generator), Event Hubs, Synapse with Spark Pool and Streaming Notebook and a Data Lake (ADLSv2). Deployed via Azure DevOps.
 * **Pattern 4**: Batch loading example from a source SQL database through to a Data Lake using Synapse Spark.
-
+* **Pattern 5**: Metadata Driven Synapse Pipelines with Azure SQL DB Source, Data Lake/Parquet Sink and Synapse Serverless Star Schema
