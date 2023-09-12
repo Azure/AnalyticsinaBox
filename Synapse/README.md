@@ -5,15 +5,6 @@ Getting up and running with Synapse can be a complex undertaking with some organ
 
 This project aims to provide an “Synapse Easy Button” for common scenarios. Something that shows how the pieces fit together in easy to deploy templates. Using the **patterns** available here, engineers will be able to quickly setup a Synapse environment which optionally includes streaming & batch ingestion, Data Lake with zones, Delta tables as well as meta-driven pipelines.
 
-| Key Contacts | GitHub ID | Email |
-|--------------|------|-----------|
-| Samarendra Panda | @Sam-Panda | sapa@microsoft.com | 
-| Neeraj Jhaveri | @neerajjhaveri | neeraj.jhaveri@microsoft.com | 
-| Andrés Padilla | @AndresPad | andres.padilla@microsoft.com | 
-| Ben Harding | @BennyHarding | ben.harding@microsoft.com
-| Jean Hayes | @jehayesms | jean.hayes@microsoft.com |
-| Thiago Rotta | @rottathiago | thiago.rotta@microsoft.com |
-
 ## Architecture
 The below architecture diagram is an example of a complex data analytics deployment, using many Azure services and technologies. While this may be an end-state architecture, it is likely too complex to build in a 'big bang' approach which is why this repository has broken this architecture into small **patterns** that can be deployed independently.  
 
