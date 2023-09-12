@@ -1,4 +1,4 @@
-## <img src="Assets/images/ftaanalyticsinabox.png" alt="FTA Analytics-in-a-Box: Deployment Accelerator" style="float: left; margin-right:10px;" />
+## <img src="/Assets/images/ftaanalyticsinabox.png" alt="FTA Analytics-in-a-Box: Deployment Accelerator" style="float: left; margin-right:10px;" />
 &nbsp;
 
 Getting up and running with Synapse can be a complex undertaking with some organizations and engineers getting blocked on their first scenario. Having an easy to understand and intuitive template that they can rely on that will demonstrate what the overall life cycle can look like, how the ingestion pipelines should be set up, and how the data goes from raw to curated in their Delta Lake.  
