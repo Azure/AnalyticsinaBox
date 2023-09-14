@@ -144,7 +144,7 @@ az deployment group create --resource-group ${rgName} --template-file ${BicepFil
 
 ## Azure DevOps Deployment
 
-1. Fork the repo: https://github.com/Azure/fasthackonsynapse.git to your git repo
+1. Fork the repo: https://github.com/Azure/AnalyticsinaBox.git to your git repo
 1. Create a Service Connection in Azure DevOps to your Azure Subscription
     ![Bicep and CI/CD](/Assets/images/devops1-serviceconnection.png)
     ![Bicep and CI/CD](/Assets/images/devops2-serviceconnection.png)
