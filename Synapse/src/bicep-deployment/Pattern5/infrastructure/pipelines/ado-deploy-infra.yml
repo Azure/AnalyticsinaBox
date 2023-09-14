@@ -17,7 +17,7 @@ parameters:
 
 variables:
     # 'develop' or feature branches: DEV environment
-    - template: ../../config-infra-dev.yml
+    - template: ../../../config-infra-dev.yml
 
 
 
@@ -33,7 +33,7 @@ stages:
       steps:
         - checkout: self
         - script: |
-            az bicep build --file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep
+            az bicep build --file ./Synapse/src/bicep-deployment/Pattern5/infrastructure/main.bicep
           name: LintBicepCode
           displayName: Run Bicep Linter
 
@@ -59,7 +59,7 @@ stages:
               echo ${{ parameters.sqlserveradminpassword }}
               az deployment sub validate \
                 --name $(Build.DefinitionName) \
-                --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
+                --template-file ./Synapse/src/bicep-deployment/Pattern5/infrastructure/main.bicep \
                 --location $(location) \
                 --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment) objectIDDevOps=${{ parameters.objectIDofServicePrincipal }} objectIDUser=${{ parameters.objectIDofUser}} sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
 
@@ -88,7 +88,7 @@ stages:
                   az deployment sub create \
                     --name $(Build.DefinitionName) \
                     --location $(location) \
-                    --template-file ./src/bicep-deployment/Pattern5/infrastructure/main.bicep \
+                    --template-file ./Synapse/src/bicep-deployment/Pattern5/infrastructure/main.bicep \
                     --parameters location=$(location) prefix=$(prefix) postfix=$(postfix) env=$(environment)  objectIDDevOps=${{ parameters.objectIDofServicePrincipal }} objectIDUser=${{ parameters.objectIDofUser}}  sqladministratorLoginPassword=${{ parameters.sqlserveradminpassword }} userPrincipalSQLAdmin=${{parameters.userPrincipalSQLAdmin}}
 
                   echo "Upload wwi bacpac to storage account"
@@ -98,7 +98,7 @@ stages:
                     --account-name $(storageAccountName) \
                     --container-name $(containerName) \
                     --name WWIStd.bacpac \
-                    --file ./src/bicep-deployment/Pattern5/infrastructure/data/WWIStd.bacpac \
+                    --file ./Synapse/src/bicep-deployment/Pattern5/infrastructure/data/WWIStd.bacpac \
                     --overwrite         
 
                   echo "Get storage account key"
@@ -130,10 +130,10 @@ stages:
                     $serverlessConnStringMaster = "Server=tcp:$(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=Master;Persist Security Info=False;User ID=rootuser;Password=${{ parameters.sqlserveradminpassword }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
                     $serverlessConnStringServerless = "Server=tcp:$(synapseWorkSpaceName)-ondemand.sql.azuresynapse.net,1433;Initial Catalog=SynapseServerless;Persist Security Info=False;User ID=rootuser;Password=${{ parameters.sqlserveradminpassword }};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
-                    $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/orchestrator_scripts/create_orchestrator_table.sql"
-                    $scriptPathWWI="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
+                    $scriptPath="$(System.DefaultWorkingDirectory)/Synapse/src/bicep-deployment/Pattern5/src/sql_scripts/orchestrator_scripts/create_orchestrator_table.sql"
+                    $scriptPathWWI="$(System.DefaultWorkingDirectory)/Synapse/src/bicep-deployment/Pattern5/src/sql_scripts/wwi_source_scripts/create_source_views.sql"
 
-                    $scriptPathServerless="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/sql_scripts/synapse_serverless_scripts/create_source_views.sql"
+                    $scriptPathServerless="$(System.DefaultWorkingDirectory)/Synapse/src/bicep-deployment/Pattern5/src/sql_scripts/synapse_serverless_scripts/create_source_views.sql"
                     
                     # Installing the SQLServer Module
                     
@@ -188,8 +188,8 @@ stages:
         - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
           displayName: 'Synapse deployment task for workspace: $(synapseWorkSpaceName) '
           inputs:
-            TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateForWorkspace.json'
-            ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateParametersForWorkspace.json'
+            TemplateFile: '$(System.DefaultWorkingDirectory)/Synapse/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateForWorkspace.json'
+            ParametersFile: '$(System.DefaultWorkingDirectory)/Synapse/src/bicep-deployment/Pattern5/src/workspace_publish_pattern_5/TemplateParametersForWorkspace.json'
             azureSubscription: $(ado_service_connection_rg)
             ResourceGroupName: $(resourceGroupName)
             TargetWorkspaceName: $(synapseWorkSpaceName)
