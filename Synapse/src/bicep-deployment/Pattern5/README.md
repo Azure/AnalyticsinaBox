@@ -23,7 +23,7 @@ Below is a high-level diagram of the solution.
     ```
 
 * An active Azure DevOps account.
-* Service Principal has to be created and should be given Owner access over subscription, so that it can create new resource group and resources during the deployment. 
+* Service Principal has to be created and should be given Owner access over subscription, so that it can create new resource group and resources during the deployment.
 If "Owner" access can't be given, then assign it to a custom role which has access to the following: </br> Microsoft.Authorization/roleAssignments/
 * [Create an Azure Resource Manager service connection](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml#create-a-service-connection) from the Azure DevOps pipeline to connect the Azure subscription. Make note of the service principal object id. This can be found by going to AAD-> App Registrations then select the app registration display name, then select the display name again under "Managed application in local directory" or by running the Azure CLI command: 
 
@@ -58,8 +58,8 @@ Here are the Azure resources that are being deployed for the metadata-driven pat
 
 ## Deployment Steps
 
-1. Clone the repo: https://github.com/Azure/AnalyticsinaBox/tree/main/src/bicep-deployment/Pattern5
-1. Update the configuration file with new values: ..\src\bicep-deployment\pattern5\config-infra-dev.yml
+1. Clone the repo: https://github.com/Azure/AnalyticsinaBox/tree/main/Synapse/src/bicep-deployment/Pattern5
+1. Update the configuration file with new values: ..Synapse\src\bicep-deployment\pattern5\config-infra-dev.yml
     - location: eastus 
     - prefix: xxx
     - postfix: x12
