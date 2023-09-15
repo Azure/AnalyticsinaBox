@@ -129,8 +129,8 @@ stages:
       - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
         displayName: 'Synapse deployment task for workspace: $(synapseWorkspace) '
         inputs:
-          TemplateFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern4/src/workspace_publish_pattern_4/TemplateForWorkspace.json'
-          ParametersFile: '$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern4/src/workspace_publish_pattern_4/TemplateParametersForWorkspace.json'
+          TemplateFile: '$(System.DefaultWorkingDirectory)/Synapse/src/bicep-deployment/Pattern4_batch_ingestion/src/workspace_publish_pattern_4/TemplateForWorkspace.json'
+          ParametersFile: '$(System.DefaultWorkingDirectory)/Synapse/src/bicep-deployment/Pattern4_batch_ingestion/src/workspace_publish_pattern_4/TemplateParametersForWorkspace.json'
           azureSubscription: $(ado_service_connection_rg)
           ResourceGroupName: $(resourceGroupName)
           TargetWorkspaceName: $(synapseWorkspace)
