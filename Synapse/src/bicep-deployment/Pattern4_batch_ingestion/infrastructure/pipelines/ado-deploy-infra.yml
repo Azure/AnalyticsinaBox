@@ -93,7 +93,7 @@ stages:
                 Inline: |
                     $keyVaultname="$(keyVaultName)"
                     $keyVaultSecretnameSqlConnString="sqlconn-sampledb"
-                    $scriptPath="$(System.DefaultWorkingDirectory)/src/bicep-deployment/Pattern4/src/sql_scripts/PostDeployment/create_metadata_tables.sql"
+                    $scriptPath="$(System.DefaultWorkingDirectory)/Synapse/src/bicep-deployment/Pattern4_batch_ingestion/src/sql_scripts/PostDeployment/create_metadata_tables.sql"
                     # Installing the SQLServer Module
                     
                     if (!(Get-Module -Name SQLServer)){
