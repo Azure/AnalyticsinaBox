@@ -27,8 +27,8 @@ Here are the Azure resources that are being deployed for the streaming pattern.
 1.  **Azure Devops pipeline** - A CI/CD pipeline to deploy all of the components in the solution to Azure.
 
 ## Deployment Steps
-1. Clone or fork the repo: https://github.com/Azure/AnalyticsinaBox/tree/main/src/bicep-deployment/Pattern3
-1. Update the configuration file: ..\src\bicep-deployment\pattern3\config-infra-dev-streaming.yml
+1. Clone or fork the repo: https://github.com/Azure/AnalyticsinaBox.git
+1. Update the configuration file: ..Synapse\src\bicep-deployment\Pattern3_streaming_ingestion\config-infra-dev-streaming.yml
     - location: eastus
     - prefix: fasthack
     - postfix: pt3
@@ -38,7 +38,7 @@ Here are the Azure resources that are being deployed for the streaming pattern.
 1. Create a new Pipeline
 1. If you have cloned the repo into Azure Devops, select 'Azure Repos Git'
 1. Select 'Existing Azure Pipelines YAML file
-1. In the path field, enter: src/bicep-deployment/Pattern3/infrastructure/pipelines/ado-deploy-infra-streaming.yml
+1. In the path field, enter: Synapse\src\bicep-deployment\Pattern3_streaming_ingestion\infrastructure\pipelines\ado-deploy-infra-streaming.yml
 1. You will receive a prompt for the below parameters:
     1. SQL Server password (please be aware of advanced complexity requirements). Do not use '@' or '$' symbols in the password.
     1. objectIDofServicePrincipal
