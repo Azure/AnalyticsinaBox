@@ -10,9 +10,7 @@ This tutorial is a companion to the Metadata Driven Pipelines in Fabric posts. T
 
 ## Architecture
 
-Below is a high level architecture diagram of what you will build in this tutorial:
-
-![fabric_architecture](images/fabric_metadata_architecture.jpg)
+Below is a high level architecture diagram of what you will build in this tutorial: ![fabric_architecture](images/fabric_metadata_architecture.jpg)
 ## Prerequisites
 * Permissions to create the Azure Resource Group, Azure Storage Account, Azure SQL Server and Azure SQL DBs needed for this tutorial.
 * Permissions to create a Microsoft Fabric Workspace
@@ -31,19 +29,14 @@ Create an Azure Resource Group, Storage Account, and Azure SQL DBs.
     1. Choose your **location**
     1. For authentication method, select **Use both SQL and Microsoft authentication**
     1. Click the **Set admin** button and select your user account
-    1. Enter a **Server admin login and password**. Your screen should similar to the one below:
-    ![create-sql-server1](images/create-sqlserver-1.jpg)
-    1. Navigate to the **Networking** tab and change the slider under Firewall rules to **Yes** to allow Azure services and resources to access this server.
-      ![create-sql-server2](images/create-sqlsserver-2.jpg)
+    1. Enter a **Server admin login and password**. Your screen should similar to the one below: ![create-sql-server1](images/create-sqlserver-1.jpg)
+    1. Navigate to the **Networking** tab and change the slider under Firewall rules to **Yes** to allow Azure services and resources to access this server. ![create-sql-server2](images/create-sqlsserver-2.jpg)
     1. Select **Review + create**
 1. **Create an Azure SQL DB for Metadata Driven Pipeline Configurations**
-    1. Go to the Azure SQL Server you created in the previous step and click **Create database**
-    ![sqldb1](images/create-sqldb-1.jpg)
+    1. Go to the Azure SQL Server you created in the previous step and click **Create database**![sqldb1](images/create-sqldb-1.jpg)
     1. Make sure your resource group and SQL server are selected. Enter **FabricMetadataOrchestration** for the database name.
-    1. For **Workload environment** Choose **Development**
-    ![sqldb2](images/create-sqldb-2.jpg)
-    1. Navigate to **Networking** and under **Firewall rules**, move slider for **Add current client IP address** to **Yes**
-    ![sqldb3](images/create-sqldb-3.jpg)
+    1. For **Workload environment** Choose **Development**![sqldb2](images/create-sqldb-2.jpg)
+    1. Navigate to **Networking** and under **Firewall rules**, move slider for **Add current client IP address** to **Yes** ![sqldb3](images/create-sqldb-3.jpg)
     1. Click **Review and create**
 1. **Download and restore the Wide World Importers Database**
     1. Download the Wide World Importers Database for Azure SQL DB. [Click here to immediately download the bacpac](https://github.com/Microsoft/sql-server-samples/releases/download/wide-world-importers-v1.0/WideWorldImporters-Standard.bacpac)
