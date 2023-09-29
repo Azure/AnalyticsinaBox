@@ -28,8 +28,8 @@ Below is a high level architecture diagram of what you will build in this tutori
     1. Choose your **location**
     1. For authentication method, select **Use both SQL and Microsoft authentication**
     1. Click the **Set admin** button and select your user account
-    1. Enter a **Server admin login and password**. Your screen should similar to the one below.
-       ![create-sql-server1](images/create-sqlserver-1.jpg)
+    1. Enter a **Server admin login and password**. Your screen should similar to the one below. 
+    ![create-sql-server1](images/create-sqlserver-1.jpg)
     1. Navigate to the **Networking** tab and change the slider under Firewall rules to **Yes** to allow Azure services and resources to access this server.
       ![create-sql-server2](images/create-sqlsserver-2.jpg)
     1. Select **Review + create**
