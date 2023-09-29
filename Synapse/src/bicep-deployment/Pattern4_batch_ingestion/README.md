@@ -18,12 +18,12 @@ Here are the Azure resources that are going to be deployed using the devops pipe
 
 ## Deployment Steps
 ### Clone / Fork repository
-1. Clone or Fork the repo: https://github.com/Azure/AnalyticsinaBox/tree/main/src/bicep-deployment/Pattern4 to your own git repo
+1. Clone or Fork the repo: https://github.com/Azure/AnalyticsinaBox.git to your own git repo
 1. If not already done, create a Service Connection from Azure DevOps to Azure. Record the name of the Service Connection for the next step.
 
 ### Update configuration file
 1. Edit the configuration file (within your copy of the repo) and update the parameters listed below (examples provided): 
-.\src\bicep-deployment\Pattern 4\config-infra-dev.yml
+./Synapse/src/bicep-deployment/Pattern4_batch_ingestion/config-infra-dev.yml
 </br>
 </br>
 **location**: eastus </br>
