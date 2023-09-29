@@ -15,12 +15,13 @@ Below is a high level architecture diagram of what you will build in this tutori
 * Permissions to create the Azure Resource Group, Azure Storage Account, Azure SQL Server and Azure SQL DBs needed for this tutorial.
 * Permissions to create a Microsoft Fabric Workspace
 * SQL Server Management Studio or Azure Data Studio
+* Basic understanding of creating data pipelines, either from Azure Data Factory, Synapse Analytics or Microsoft Fabric.
 ## Create Azure Resources
-Create an Azure Resource Group, Storage Account, and Azure SQL DBs.
+Create an Azure Resource Group, Storage Account, and Azure SQL DBs needed for this tutorial.
 ### Create an Azure Resource group 
  [Follow the instructions here](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal), if neccessary, to create your resource group.
 ### Create an Azure Storage account
-Create a blob storage account in the resource group created in the previous step. [Follow the instructions here](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal),if necessary, to create your blob storage account. This will be used to restore the Wide World Importers database.
+Create a blob storage account in the resource group created in the previous step. [Follow the instructions here](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal), if necessary, to create your blob storage account. This will be used to restore the Wide World Importers database.
 ### Create an Azure SQL Server
 1. In the Azure Portal, in **Create a resource**, choose **SQL Server** and click **Create.**
 1. Choose your **Subscription**
@@ -64,3 +65,33 @@ After creating the Lakehouses, copy the lakehouse names and table URLs and keep 
 Create a Fabric Data Warehouse by [following the instructions here](https://learn.microsoft.com/en-us/fabric/data-warehouse/create-warehouse)
 ### Create Fabric Connections to your Azure SQL DBs
 Create 2 Fabric connections, one to the Wide World Importers Azure SQL DB and to the FabricMetadataConfiguration Azure SQL DB. [per the instructions here](https://learn.microsoft.com/en-us/fabric/data-factory/).
+### Upload Spark Notebooks to Fabric
+Upload the notebooks to be used in the pipeline
+1. Download the 3 notebooks [found in the repo](src/notebooks/)
+1. Log into the Microsoft Fabric portal and switch to the Data Science experience and click ![Import Notebook](images/datascience-import-1.jpg)
+1. Select upload and choose all of the 3 notebooks ![downloaded.](images/datascience-import-2.jpg)
+
+## Create Microsoft Fabric Pipelines and Activities
+From this point forward, the instructions will be an exercise of creating pipelines, adding activities and configuring the settings for each activity. The configurations for each activity are in a format that allows you to copy and paste values into each activity. It is important to copy the text exactly as is to avoid errors in scripts or subsequent activities. Do to the length of the instructions, I am keeping images in this post to a minimum - another reason to follow the instructions carefully. You can also refer to the original blog posts cited at the tops of this blog post for reference.
+### Create the pipeline to load data from Wide World Importers to the Fabric Lakehouse
+This pipeline loops through the tables defined in Lakehouse table to load from World Wide Importers to the Fabric Lakehouse
+* Create a new Data Pipeline and call it "Get WWImporters Data direct"
+* Add a Set variable activity
+* Click on the canvas and add the following parameters:
+
+<div style="margin-left: auto;
+            margin-right: auto;
+            width: 80%">
+
+| Name                | Type   |
+| ------------------- | ------ |
+| sqlsourcedatecolumn | String |
+| sqlstartdate        | String |
+| sqlenddate          | String |
+| sqlsourceschema     | String |
+| sqlsourcetable      | String |
+| sinktablename       | String |
+| loadtype            | String |
+| sourcekeycolumn     | String |
+| batchloaddatetime   | String |
+</div>
