@@ -1,4 +1,4 @@
-# Tutorial: Build Metadata Driven Pipelines in Microsoft Fabric
+# Solution Guide: Build Metadata Driven Pipelines in Microsoft Fabric
 
 ## Description
 
@@ -6,7 +6,7 @@ Metadata-driven pipelines in Azure Data Factory, Synapse Pipelines, and now, Mic
 
 In August 2023, I created 2 blog posts on Metadata Driven Pipelines with Fabric. Both involve landing the data in a Fabric Lakehouse and building a Star Schema for the Gold Layer. [The first post](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651) illustrates creating the Star Schema in a Fabric Lakehouse. [The second post](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749) covers using a Fabric Data Warehouse for the Star Schema and why you may want to choose this option. 
 
-This tutorial is a companion to the Metadata Driven Pipelines in Fabric posts. The intent is to provide step-by-step instructions on how to build the Metadata Driven Pipelines described in those blogs. The reason is 2-fold - this will help you better understand Microsoft Fabric, but also because Fabric is not fully integrated with Git at this time. There are no ARM templates to deploy like in Azure Synapse or Data Factory. However, when Fabric supports Git integration with Pipelines and Connections, we will create another pattern which will allow you deploy all Fabric artifacts into your own Fabric tenant.
+This solution guide is a companion to the Metadata Driven Pipelines in Fabric posts. The intent is to provide step-by-step instructions on how to build the Metadata Driven Pipelines described in those blogs. The reason is 2-fold - this will help you better understand Microsoft Fabric, but also because Fabric is not fully integrated with Git at this time. There are no ARM templates to deploy like in Azure Synapse or Data Factory. However, when Fabric supports Git integration with Pipelines and Connections, we will create another pattern which will allow you deploy all Fabric artifacts into your own Fabric tenant.
 
 ## Architecture
 
@@ -71,7 +71,7 @@ Upload the notebooks to be used in the pipeline
 1. Log into the Microsoft Fabric portal and switch to the Data Science experience and click ![Import Notebook](images/datascience-import-1.jpg)
 1. Select upload and choose all of the 3 notebooks ![downloaded.](images/datascience-import-2.jpg)
 
-## Create Microsoft Fabric Pipelines and Activities
+## Create Microsoft Fabric Pipelines and Views
 From this point forward, the instructions will be an exercise of creating pipelines, adding activities and configuring the settings for each activity. The configurations for each activity are in a format that allows you to copy and paste values into each activity. It is important to copy the text exactly as is to avoid errors in scripts or subsequent activities. Do to the length of the instructions, I am keeping images in this post to a minimum - another reason to follow the instructions carefully. You can also refer to the original blog posts cited at the tops of this blog post for reference.
 ### Create the pipeline to load data from Wide World Importers to the Fabric Lakehouse
 This pipeline loops through the tables defined in PipelineOrchestrator_FabricLakehouse table to load from World Wide Importers to the Fabric Lakehouse. The pipeline will look like this when finished: ![get-wwi-data](images/get-wwi-data-pipeline.jpg)
@@ -308,3 +308,16 @@ We will now start building the Orchestrator pipeline which will kickoff the pipe
    | Settings | Notebook        |                   |                | Dropdown           | Build Calendar                   |
    | Settings | Base parameters | startyear         | int            | Dynamic Expression | @pipeline().parameters.startyear |
    | Settings | Base parameters | endyear           | int            | Dynamic Expression | @pipeline().parameters.endyear   |
+Run the Orchestrator pipeline to load the Lakehouse. When it is complete, you should see the following tables and files in your Lakehouse:![lakehouse-tables1](images/lakehouse-tables-1.jpg)
+Now that we have the tables in our Fabric Lakehouse, we can create SQL views over them which will be used to load our Fabric Gold Lakehouse and/or our Fabric Data Warehouse.
+### Create Data Warehouse Views over Lakehouse Tables and Data Warehouse tables and Stored Procedures
+If you read the blog posts, you will know that, at least at this point in time, that the Lakehouse SQL Endpoint is not exposed in the Copy Data pipeline activity. So while you can build SQL views in the Lakehouse, you can not leverage them in a Copy Data activity. Therefore, we will create the SQL Views in the Fabric Data Warehouse.
+1. Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fabric-dw-objects.sql).
+1. Open the downloaded SQL script (create-fabric-dw-objects.sql) using notepad and copy the entire contents of the script.
+1. From the Fabric portal, go to you Fabric Workspace and open your Data Warehouse and 
+[create a new Query](https://learn.microsoft.com/en-us/fabric/data-warehouse/query-warehouse).
+1. Paste the code into the Fabric Datawarehouse query.
+1. Do a Find and Replace **[Ctrl-H]** and replace the text **myFTAFabricWarehouse** with your Fabric Warehouse name.
+1. Do another Find and Replace and replace the text **myFTAFabricLakehouse** with your Fabric Lakehouse name.
+1. Run the SQL query script. You should see the following objects in you Fabric Data Warehouse after running the script:![dw-objects](images/dw-objects.jpg)
+Now that we have the views needed to load both the Lakehouse and Warehouse as well as the tables and stored procedure for the Warehouse, we can continue with building our data pipelines.
