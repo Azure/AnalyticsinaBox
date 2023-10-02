@@ -74,7 +74,8 @@ Upload the notebooks to be used in the pipeline
 ## Create Microsoft Fabric Pipelines and Activities
 From this point forward, the instructions will be an exercise of creating pipelines, adding activities and configuring the settings for each activity. The configurations for each activity are in a format that allows you to copy and paste values into each activity. It is important to copy the text exactly as is to avoid errors in scripts or subsequent activities. Do to the length of the instructions, I am keeping images in this post to a minimum - another reason to follow the instructions carefully. You can also refer to the original blog posts cited at the tops of this blog post for reference.
 ### Create the pipeline to load data from Wide World Importers to the Fabric Lakehouse
-This pipeline loops through the tables defined in Lakehouse table to load from World Wide Importers to the Fabric Lakehouse
+This pipeline loops through the tables defined in PipelineOrchestrator_FabricLakehouse table to load from World Wide Importers to the Fabric Lakehouse. The pipeline will look like this when finished: ![get-wwi-data](images/get-wwi-data-pipeline.jpg)
+
 1. Create a new Data Pipeline and call it "Get WWImporters Data direct"
 1. Add a Set variable activity
 1. Click on the canvas and add the following  pipeline **Parameters**:
@@ -108,7 +109,7 @@ This pipeline loops through the tables defined in Lakehouse table to load from W
     | Settings | Variable type | Radio Button       | Pipeline variable     |
     | Settings | Name          | String             | pipelinestarttime     |
     | Settings | Value         | Dynamic Expression | @utcnow()             |
-1. Add another **Set variable**, drag the green arrow from the previous activity to it and set configurations:
+1. Add another **Set variable**, drag the green arrow from the previous activity to it and configure:
 
     | Tab      | Configuration | Value Type   | Value              |
     | -------- | ------------- | ------------ | ------------------ |
@@ -116,8 +117,33 @@ This pipeline loops through the tables defined in Lakehouse table to load from W
     | Settings | Variable type | Radio Button | Pipeline variable  |
     | Settings | Name          | String       | datepredicate      |
     | Settings | Value         | Dynamic Expression |@if(equals(pipeline().parameters.sqlenddate,null),concat(pipeline().parameters.sqlsourcedatecolumn,' >= ''', pipeline().parameters.sqlstartdate,''''),concat(pipeline().parameters.sqlsourcedatecolumn, ' >= ''',pipeline().parameters.sqlstartdate,''' and ', pipeline().parameters.sqlsourcedatecolumn,' < ''',pipeline().parameters.sqlenddate,'''')) |
-1. Add **If condition** activity:
+1. Add **If condition** activity, drag arrow from previous activity and configure:
     | Tab        | Configuration | Value Type         | Value                                          |
     | ---------- | ------------- | ------------------ | ---------------------------------------------- |
     | General    | Name          | String             | Check loadtype                                 |
     | Activities | Expression    | Dynamic Expression | @equals(pipeline().parameters.loadtype,'full') |
+1. Now configure the **If True** activities:
+    1. Add **Copy Data** activity and configure:
+        | Tab     | Configuration   | Value Type   | Value                           |
+        | ------- | --------------- | ------------ | ------------------------------- |
+        | General | Name            | String       | Copy data to delta table        |
+        | Source  | Data store type | Radio button | External                        |
+        | Source  | Connection      | Drop down    | <choose your metadata database> |
+        | Source  | Connection type | Drop down    | Azure SQL Database              |
+        | Source  | User query      | Radio button | Query                           |
+        | Source  | Query           | Dynamic Expression | select * from @{pipeline().parameters.sqlsourceschema}.@{pipeline().parameters.sqlsourcetable} where  @{variables('datepredicate')} |
+        | Destination | Data store type           | Radio button       | Workspace                            |
+        | Destination | Workspace data store type | Drop down          | Lakehouse                            |
+        | Destination | Lakehouse                 | Drop down          | <choose your lakehouse>              |
+        | Destination | Root folder               | Radio button       | Tables                               |
+        | Destination | Table name                | Dynamic Expression | @pipeline().parameters.sinktablename |
+        | Destination | Advanced-> Table action   | Radio button       | Overwrite                            |
+    1. Add **Notebook** activity, drag arrow from previous activity and configure:
+        | Tab      | Configuration               | Add New Parameter | Value Type         | Value                                      |
+        | -------- | --------------------------- | ----------------- | ------------------ | ------------------------------------------ |
+        | General  | Settings                    |                   | String             | Get MaxDate loaded                         |
+        | Settings | Notebook                    |                   | Dropdown           | Get Max Data from Delta Table              |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | <your Bronze lakehouse abfs path>          |
+        | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktablename       |
+        | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.sourcekeycolumn     |
+        | Settings | Advanced -> Base parameters | dateColumn        | Dynamic Expression | @pipeline().parameters.sqlsourcedatecolumn |
