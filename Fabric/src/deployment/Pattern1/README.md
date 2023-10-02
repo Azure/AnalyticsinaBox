@@ -77,7 +77,7 @@ From this point forward, the instructions will be an exercise of creating pipeli
 This pipeline loops through the tables defined in PipelineOrchestrator_FabricLakehouse table to load from World Wide Importers to the Fabric Lakehouse. The pipeline will look like this when finished: ![get-wwi-data](images/get-wwi-data-pipeline.jpg)
 
 1. Create a new Data Pipeline and call it "Get WWImporters Data direct"
-1. Add a Set variable activity
+1. Add a **Set variable** activity
 1. Click on the canvas and add the following  pipeline **Parameters**:
 
       Name                | Type   |
@@ -122,7 +122,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
     | ---------- | ------------- | ------------------ | ---------------------------------------------- |
     | General    | Name          | String             | Check loadtype                                 |
     | Activities | Expression    | Dynamic Expression | @equals(pipeline().parameters.loadtype,'full') |
-1. Now configure the **If True** activities:
+1. Now configure the **If True** activities. Your True activities will be a flow of activities when the table to be loaded should be a full load. When completed, the True activities will look like this: ![full-load](images/wwi-fullload-activities.jpg)
     1. Add **Copy Data** activity and configure:
         | Tab     | Configuration   | Value Type   | Value                           |
         | ------- | --------------- | ------------ | ------------------------------- |
@@ -147,3 +147,164 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktablename       |
         | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.sourcekeycolumn     |
         | Settings | Advanced -> Base parameters | dateColumn        | Dynamic Expression | @pipeline().parameters.sqlsourcedatecolumn |
+    1. Add **Set variable**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                                                                               |
+        | -------- | ------------- | ------------------ | ----------------------------------------------------------------------------------- |
+        | General  | Name          | String             | Get maxdate                                                                         |
+        | Settings | Variable type | Radio Button       | Pipeline variable                                                                   |
+        | Settings | Name          | Dropdown           | maxdate                                                                             |
+        | Settings | Value         | Dynamic Expression | @split(split(activity('Get MaxDate loaded').output.result.exitValue,'\|')[0],'=')[1] |
+    1. Add another **Set variable**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type   | Value             |
+        | -------- | ------------- | ------------ | ----------------- |
+        | General  | Name          | String       | set rows inserted |
+        | Settings | Variable type | Radio Button | Pipeline variable |
+        | Settings | Name          | Dropdown     | rowsinserted      |
+        | Settings | Value         | Dynamic Expression | @split(split(activity('Get MaxDate loaded').output.result.exitValue,'\|')[1],'=')[1] |
+    1. Add another **Set variable**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                |
+        | -------- | ------------- | ------------------ | -------------------- |
+        | General  | Name          | String             | Set pipeline endtime |
+        | Settings | Variable type | Radio Button       | Pipeline variable    |
+        | Settings | Name          | Dropdown           | pipelineendtime      |
+        | Settings | Value         | Dynamic Expression | @utcnow()            |
+    1. Add  **Script**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration   | Value Type   | Value                           |
+        | -------- | --------------- | ------------ | ------------------------------- |
+        | General  | Name            | String       | Update Pipeline Run details     |
+        | Settings | Data store type | Radio Button | External                        |
+        | Settings | Connection      | Dropdown     | <choose your metadata database> |
+        | Settings | Script          | Radio Button | NonQuery                        |
+        | Settings | Script          | Dynamic Expression  | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to delta table').output.executionDetails[0].status}', rowsread = @{activity('Copy data to delta table').output.rowsRead}, rowscopied= @{activity('Copy data to delta table').output.rowsCopied}, deltalakeinserted = '@{variables('rowsinserted')}', deltalakeupdated =0, sqlmaxdatetime = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |
+1. Now configure the **If False** activities. Your False activities will be a flow of activities when the table to be loaded should be an incremental load. When completed, the False activities will look like this: ![wwi-incremental](images/wwi-incremental-activities.jpg)
+    1. Add **Copy Data** activity:
+        | Tab     | Configuration   | Value Type   | Value                           |
+        | ------- | --------------- | ------------ | ------------------------------- |
+        | General | Name            | String       | Copy data to parquet            |
+        | Source  | Data store type | Radio button | External                        |
+        | Source  | Connection      | Drop down    | <choose your metadata database> |
+        | Source  | Connection type | Drop down    | Azure SQL Database              |
+        | Source  | User query      | Radio button | Query                           |
+        | Source  | Query      | Dynamic Expression | select * from @{pipeline().parameters.sqlsourceschema}.@{pipeline().parameters.sqlsourcetable} where  @{variables('datepredicate')} |
+        | Destination | Data store type           | Radio button | Workspace               |
+        | Destination | Workspace data store type | Drop down    | Lakehouse               |
+        | Destination | Lakehouse                 | Drop down    | <choose your lakehouse> |
+        | Destination | Root folder               | Radio button | Files                   |
+        | Destination  | File Path (1)  | Dynamic Expression | incremental/@{pipeline().parameters.sinktablename} |
+        | Destination  | File Path (2)  | Dynamic Expression | @{pipeline().parameters.sinktablename}.parquet |
+        | Destination  | File format      | Drop down | Parquet |
+    1. Add **Notebook** activity, drag arrow from previous activity and configure:
+        | Tab      | Configuration               | Add New Parameter | Value Type         | Value                                      |
+        | -------- | --------------------------- | ----------------- | ------------------ | ------------------------------------------ |
+        | General  | Settings                    |                   | String             | Load to Delta                              |
+        | Settings | Notebook                    |                   | Dropdown           | Create or Merge to Deltalake               |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | <your Bronze lakehouse abfs path>          |
+        | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktablename       |
+        | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.sourcekeycolumn     |
+        | Settings | Advanced -> Base parameters | dateColumn        | Dynamic Expression | @pipeline().parameters.sqlsourcedatecolumn |
+    1. Add **Set variable**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                                                                          |
+        | -------- | ------------- | ------------------ | ------------------------------------------------------------------------------ |
+        | General  | Name          | String             | Get maxdate incr                                                               |
+        | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
+        | Settings | Name          | Dropdown           | maxdate                                                                        |
+        | Settings | Value         | Dynamic Expression | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[0],'=')[1] |
+    1. Add **Set variable**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                                                                          |
+        | -------- | ------------- | ------------------ | ------------------------------------------------------------------------------ |
+        | General  | Name          | String             | set rows inserted incr                                                         |
+        | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
+        | Settings | Name          | Dropdown           | rowsinserted                                                                   |
+        | Settings | Value         | Dynamic Expression | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[1],'=')[1] |
+    1. Add **Set variable**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                                                                          |
+        | -------- | ------------- | ------------------ | ------------------------------------------------------------------------------ |
+        | General  | Name          | String             | set rows updated incr                                                          |
+        | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
+        | Settings | Name          | Dropdown           | rowsupdated                                                                    |
+        | Settings | Value         | Dynamic Expression | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[2],'=')[1] |
+    1. Add **Set variable**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                     |
+        | -------- | ------------- | ------------------ | ------------------------- |
+        | General  | Name          | String             | Set pipeline endtime incr |
+        | Settings | Variable type | Radio Button       | Pipeline variable         |
+        | Settings | Name          | Dropdown           | pipelineendtime           |
+        | Settings | Value         | Dynamic Expression | @utcnow()                 |
+    1. Add  **Script**, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration   | Value Type   | Value                                             |
+        | -------- | --------------- | ------------ | ------------------------------------------------- |
+        | General  | Name            | String       | Update Pipeline Run details - incremental         |
+        | Settings | Data store type | Radio Button | External                                          |
+        | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
+        | Settings | Script(1)       | Radio Button | NonQuery                                          |
+        | Settings | Script(2)       | Dynamic Expression | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to parquet').output.executionDetails[0].status}', rowsread = @{activity('Copy data to parquet').output.rowsRead}, rowscopied= @{activity('Copy data to parquet').output.rowsCopied},deltalakeinserted = '@{variables('rowsinserted')}',deltalakeupdated = '@{variables('rowsupdated')}', sqlmaxdatetime = '@{variables('maxdate')}', sqlstartdate = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}'  where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |
+
+If you have gotten this far, awesome! Thank you! Don't forget to save your changes!
+
+To actually run the pipeline, we will start building our Orchestrator pipeline. An Orchestrator pipeline is the main pipeline that links together large flows of activities.
+### Configure the Orchestrator Pipeline Part 1 - Invoke Pipeline to load from World Wide Importers to Fabric Lakehouse
+We will now start building the Orchestrator pipeline which will kickoff the pipeline to create or load each table from the World Wide Importers Database to the Fabric Lakehouse. When you are finished with Part 1, your Orchestrator Pipeline will look like this: ![orchestrator-1](images/orchestrator-1.jpg)
+1. Create a new Data Pipeline called **orchestrator Load WWI to Fabric**
+1. Add a **Set Variable** activity
+1. Click on the canvas and create the following **Parameters**:
+   | Name       | Type | Default Value | Description                                             |
+   | ---------- | ---- | ------------- | ------------------------------------------------------- |
+   | startyear  | int  | 2013          | Year to start loading from WWI                          |
+   | endyear    | int  | 2025          | Year to end loading from WWI                            |
+   | loaddwh    | int  | 0             | Set to 1 if you want to load to Fabric Data Warehouse   |
+   | loadgoldlh | int  | 1             | Set to 1 if you want to load to Fabric Gold Lakehouse   |
+   | loadbronze | int  | 1             | Set to 1 if you want to load to Fabric Bronze Lakehouse |
+   | waittime | int  | 300            | Delay needed for tables to materialize in Bronze Lakehouse before loading to DW or Gold LH. Can set to 1 if not loading Bronze or only loading to Bronze |
+1. Add pipeline **Variables**
+   | Name              | Type   |
+   | ----------------- | ------ |
+   | batchloaddatetime | String |
+1. Go back to the **Set variable** activity you added in step 2 and configure:
+   | Tab      | Configuration | Value Type         | Value                   |
+   | -------- | ------------- | ------------------ | ----------------------- |
+   | General  | Name          | String             | set batch load datetime |
+   | Settings | Variable type | Radio Button       | Pipeline variable       |
+   | Settings | Name          | Dropdown           | batchloaddatetime       |
+   | Settings | Value         | Dynamic Expression | @pipeline().TriggerTime |
+1. Add **Lookup** activity, drag the green arrow from the previous activity to it and configure:
+   | Tab      | Configuration   | Value Type   | Value                                |
+   | -------- | --------------- | ------------ | ------------------------------------ |
+   | General  | Name            | String       | Get tables to load to deltalake      |
+   | Settings | Data store type | Radio button | External                             |
+   | Settings | Connection      | Drop down    | Connection to your metadata database |
+   | Settings | Connection Type | Drop down    | Azure SQL Database                   |
+   | Settings | Use query       | Radio button | Query                                |
+   | Settings |  | Drop down    | Azure SQL Database                   |
+   | Settings | Use query       | Radio button | Query                                |
+   | Settings | Query       | Dynamic Expression |select * from dbo.PipelineOrchestrator_FabricLakehouse where skipload=0 and 1=@{pipeline().parameters.loadbronze} |
+   | Settings | First row only      | Check box | Not Checked                                |
+1. Add **For each** activity, drag the green arrow from the previous activity to it and configure:
+   | Tab        | Configuration | Value Type                                    | Value                                                     |
+   | ---------- | ------------- | --------------------------------------------- | --------------------------------------------------------- |
+   | General    | Name          | String                                        | For each table to load to deltalake                       |
+   | Settings   | Batch count   | String                                        | 4                                                         |
+   | Settings   | Items         | Dynamic Expression                            | @activity('Get tables to load to deltalake').output.value |
+   | Activities | Activity      | Click pencil and add Invoke pipeline Activity |                                                           |
+1. Click on the pencil in the **Activities** box and add an **Invoke Pipeline** activity and configure as follows:
+   | Tab      | Configuration      | Parameter Name      | Value Type         | Value                           |
+   | -------- | ------------------ | ------------------- | ------------------ | ------------------------------- |
+   | General  | Name               |                     | String             | Get WWImporters Data            |
+   | Settings | Invoked pipeline   |                     | Dropdown           | Get WWI Importers Data direct   |
+   | Settings | Wait on completion |                     | Checkbox           | Checked                         |
+   | Settings | Parameters         | sqlsourcedatecolumn | Dynamic Expression | @item().sqlsourcedatecolumn     |
+   | Settings | Parameters         | sqlstartdate        | Dynamic Expression | @item().sqlstartdate            |
+   | Settings | Parameters         | sqlenddate          | Dynamic Expression | @item().sqlenddate              |
+   | Settings | Parameters         | sqlsourceschema     | Dynamic Expression | @item().sqlsourceschema         |
+   | Settings | Parameters         | sqlsourcetable      | Dynamic Expression | @item().sqlsourcetable          |
+   | Settings | Parameters         | sinktablename       | Dynamic Expression | @item().sinktablename           |
+   | Settings | Parameters         | loadtype            | Dynamic Expression | @item().loadtype                |
+   | Settings | Parameters         | sourcekeycolumn     | Dynamic Expression | @item().sourcekeycolumn         |
+   | Settings | Parameters         | batchloaddatetime   | Dynamic Expression | @variables('batchloaddatetime') |
+1. Exit the **Activities** box in the For each activity by clicking on  **Main canvas** in the upper left corner
+1. On the Main Canvas, add **Notebook** activity, drag the green arrow from the **For each** activity to it and configure:
+   | Tab      | Configuration   | Add New Parameter | Parameter Type | Value Type         | Value                            |
+   | -------- | --------------- | ----------------- | -------------- | ------------------ | -------------------------------- |
+   | General  | Name            |                   |                | String             | Build Calendar                   |
+   | Settings | Notebook        |                   |                | Dropdown           | Build Calendar                   |
+   | Settings | Base parameters | startyear         | int            | Dynamic Expression | @pipeline().parameters.startyear |
+   | Settings | Base parameters | endyear           | int            | Dynamic Expression | @pipeline().parameters.endyear   |
