@@ -320,4 +320,149 @@ If you read the blog posts, you will know that, at least at this point in time, 
 1. Do a Find and Replace **[Ctrl-H]** and replace the text **myFTAFabricWarehouse** with your Fabric Warehouse name.
 1. Do another Find and Replace and replace the text **myFTAFabricLakehouse** with your Fabric Lakehouse name.
 1. Run the SQL query script. You should see the following objects in you Fabric Data Warehouse after running the script:![dw-objects](images/dw-objects.jpg)
+
 Now that we have the views needed to load both the Lakehouse and Warehouse as well as the tables and stored procedure for the Warehouse, we can continue with building our data pipelines.
+### Create the pipeline to load data from Fabric Lakehouse to Gold Fabric Lakehouse
+When this pipeline is complete, it will look like this: ![lakehousetable](images/load-lakehouse-pipeline.jpg)
+
+1. Create a new Data Pipeline called **Load Lakehouse Table**
+1. Add a **Set Variable** activity
+1. Click on the canvas and create the following **Parameters**:
+    | Name              | Type   |
+    | ----------------- | ------ |
+    | sourcestartdate   | String |
+    | sourcestartdate   | String |
+    | sourceenddate     | String |
+    | sourceschema      | String |
+    | sourcetable       | String |
+    | loadtype          | String |
+    | batchloaddatetime | String |
+    | sinktable         | String |
+    | tablekey          | String |
+    | tablekey2         | String |
+1. Add pipeline **Variables**:
+    | Name              | Type   |
+    | ----------------- | ------ |
+    | datepredicate     | String |
+    | maxdate           | String |
+    | rowsinserted      | String |
+    | rowsupdated       | String |
+    | pipelinestarttime | String |
+    | pipelineendtime   | String |
+1. Configure the **Set variable** added in step 2:
+     Tab      | Configuration | Value type         | Value                 |
+    | -------- | ------------- | ------------------ | --------------------- |
+    | General  | Name          | String             | Set pipelinestarttime |
+    | Settings | Variable type | Radio Button       | Pipeline variable     |
+    | Settings | Name          | String             | pipelinestarttime     |
+    | Settings | Value         | Dynamic Expression | @utcnow()             |
+1. Add **If condition** activity, drag the green arrow from the previous activity to it and configure:
+    | Tab        | Configuration | Value type         | Value                                          |
+    | ---------- | ------------- | ------------------ | ---------------------------------------------- |
+    | General    | Name          | String             | Check loadtype                                 |
+    | Activities | Expression    | Dynamic Expression | @equals(pipeline().parameters.loadtype,'full') |
+1. Now configure the **If True** activities. Like the previous pipeline, the True activities will be a flow of activities when the table to be loaded should be a full load. When completed, the True activities will look like this:![lakehouse-true](images/load-lakehouse-full.jpg)
+
+    1. Add **Copy Data** Activity and configure:
+    
+        | Tab         | Configuration             | Value Type         | Value                               |
+        | ----------- | ------------------------- | ------------------ | ----------------------------------- |
+        | General     | Name                      | String             | Copy data to gold lakehouse         |
+        | Source      | Data store type           | Radio Button       | Workspace                           |
+        | Source      | Workspace data store type | Drop down          | Data Warehouse                      |
+        | Source      | Data Warehouse            | Drop down          | <your DWH name>                     |
+        | Source      | Use query                 | Radio Button       | Table                               |
+        | Source      | Table (Schema)            | Dynamic Expression | @pipeline().parameters.sourceschema |
+        | Source      | Table (Table name)        | Dynamic Expression | @pipeline().parameters.sourcetable  |
+        | Destination | Data store type           | Radio Button       | Workspace                           |
+        | Destination | Workspace data store type | Drop down          | Lakehouse                           |
+        | Destination | Lakehouse                 | Drop down          | <your Gold Lakehouse name>          |
+        | Destination | Root folder               | Radio Button       | Tables                              |
+        | Destination | Table (Table name)        | Dynamic Expression | @pipeline().parameters.sinktable    |
+        | Destination | Advanced -> Table action  | Radio Button       | Overwrite                           |
+    1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                |
+        | -------- | ------------- | ------------------ | -------------------- |
+        | General  | Name          | String             | Set pipeline endtime |
+        | Settings | Variable type | Radio Button       | Pipeline variable    |
+        | Settings | Name          | Dropdown           | pipelineendtime      |
+        | Settings | Value         | Dynamic Expression | @utcnow()            |
+    1. Add **Script** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration   | Value Type   | Value                                             |
+        | -------- | --------------- | ------------ | ------------------------------------------------- |
+        | General  | Name            | String       | Update Pipeline Run details                       |
+        | Settings | Data store type | Radio Button | External                                          |
+        | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
+        | Settings | Script(1)       | Radio Button | NonQuery                                          |
+        | Settings | Script(2)       | Dynamic Expression | Update dbo.PipelineOrchestrator_FabricLakehouseGold set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to gold lakehouse').output.executionDetails[0].status}',  rowscopied= @{activity('Copy data to gold lakehouse').output.rowsCopied},deltalakeinserted= @{activity('Copy data to gold lakehouse').output.rowsCopied}, rowsread= @{activity('Copy data to gold lakehouse').output.rowsRead}, pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sourceschema = '@{pipeline().parameters.sourceschema}' and sourcetable = '@{pipeline().parameters.sourcetable}'  |
+1. Now configure the **If False** activities. Your False activities will be a flow of activities when the table to be loaded should be an incremental load. When completed, the False activities will look like this: ![table-l=incremental](images/load-lakehouse-incr.jpg)
+    1. Add **Set variable** activity and configure:
+        | Tab      | Configuration | Value Type   | Value              |
+        | -------- | ------------- | ------------ | ------------------ |
+        | General  | Name          | String       | Set date predicate |
+        | Settings | Variable type | Radio Button | Pipeline variable  |
+        | Settings | Name          | String       | datepredicate      |
+        | Settings | Value          |Dynamic Expression     | @if(equals(pipeline().parameters.sourceenddate,null),concat('LastUpdated >= ''', pipeline().parameters.sourcestartdate,''''),concat('LastUpdated >= ''',pipeline().parameters.sourcestartdate,''' and LastUpdated < ''',pipeline().parameters.sourceenddate,''''))    |
+    1. Add **Copy Data** activity, drag the green arrow from the previous activity to it and configure:
+    
+    | Tab     | Configuration             | Value Type   | Value                          |
+    | ------- | ------------------------- | ------------ | ------------------------------ |
+    | General | Name                      | String       | Get incremental fact data      |
+    | Source  | Data store type           | Radio button | Workspace                      |
+    | Source  | Workspace data store type | Drop down    | Data Warehouse                 |
+    | Source  | Data Warehouse            | Drop down    | \<choose your Fabric Warehouse> |
+    | Source  | Use query                 | Radio button | Query                          |
+    | Source  | Query               | Dynamic Expression | select * from @{pipeline().parameters.sourceschema}.@{pipeline().parameters.sourcetable} where @{variables('datepredicate')} |
+    | Destination | Data store type           | Radio button       | Workspace                                      |
+    | Destination | Workspace data store type | Drop down          | Lakehouse                                      |
+    | Destination | Lakehouse                 | Drop down          | \<choose your Gold lakehouse>                   |
+    | Destination | Root folder               | Radio button       | Files                                          |
+    | Destination | File Path (1)             | Dynamic Expression | incremental/@{pipeline().parameters.sinktable} |
+    | Destination | File Path (2)             | Dynamic Expression | @{pipeline().parameters.sinktable}.parquet     |
+    | Destination | File format               | Drop down          | Parquet                                        |
+    1. Add **Notebook** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration               | Add New Parameter | Value Type         | Value                            |
+        | -------- | --------------------------- | ----------------- | ------------------ | -------------------------------- |
+        | General  | Settings                    |                   | String             | Merge to Gold                    |
+        | Settings | Notebook                    |                   | Dropdown           | Create or Merge to Deltalake     |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | <your Gold lakehouse abfs path>  |
+        | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktable |
+        | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.tablekey  |
+        | Settings | Advanced -> Base parameters | tableKey2         | Dynamic Expression | @pipeline().parameters.tablekey2 |
+        | Settings | Advanced -> Base parameters | dateColumn        | String             | LastUpdated                      |
+    1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                                                                          |
+        | -------- | ------------- | ------------------ | ------------------------------------------------------------------------------ |
+        | General  | Name          | String             | Get maxdate incr                                                               |
+        | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
+        | Settings | Name          | Dropdown           | maxdate                                                                        |
+        | Settings | Value         | Dynamic Expression | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[0],'=')[1] |
+    1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                                                                          |
+        | -------- | ------------- | ------------------ | ------------------------------------------------------------------------------ |
+        | General  | Name          | String             | set rows inserted incr                                                         |
+        | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
+        | Settings | Name          | Dropdown           | rowsinserted                                                                   |
+        | Settings | Value         | Dynamic Expression | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[1],'=')[1] |
+    1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                                                                          |
+        | -------- | ------------- | ------------------ | ------------------------------------------------------------------------------ |
+        | General  | Name          | String             | set rows updated incr                                                          |
+        | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
+        | Settings | Name          | Dropdown           | rowsupdated                                                                    |
+        | Settings | Value         | Dynamic Expression | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[2],'=')[1] |
+    1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                     |
+        | -------- | ------------- | ------------------ | ------------------------- |
+        | General  | Name          | String             | Set pipeline endtime incr |
+        | Settings | Variable type | Radio Button       | Pipeline variable         |
+        | Settings | Name          | Dropdown           | pipelineendtime           |
+        | Settings | Value         | Dynamic Expression | @utcnow()                 |
+    1. Add **Script** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration   | Value Type   | Value                                             |
+        | -------- | --------------- | ------------ | ------------------------------------------------- |
+        | General  | Name            | String       | Update Pipeline Run details - incremental         |
+        | Settings | Data store type | Radio Button | External                                          |
+        | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
+        | Settings | Script(1)       | Radio Button | NonQuery                                          |
+        | Settings | Script(1)       | Dynamic Expression | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to parquet').output.executionDetails[0].status}', rowsread = @{activity('Copy data to parquet').output.rowsRead}, rowscopied= @{activity('Copy data to parquet').output.rowsCopied},deltalakeinserted = '@{variables('rowsinserted')}',deltalakeupdated = '@{variables('rowsupdated')}', sqlmaxdatetime = '@{variables('maxdate')}', sqlstartdate = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}'  where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |

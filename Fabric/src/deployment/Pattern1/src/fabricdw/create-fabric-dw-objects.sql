@@ -1,6 +1,6 @@
 
--- Find/Replace [MyFTAFabricWarehouse] with your Warehouse Name
--- Find/Replace [myFTAFabricLakehouse] with your lakehouse name
+-- Find/Replace myFTAFabricWarehouse with your Warehouse Name
+-- Find/Replace myFTAFabricLakehouse with your lakehouse name
 CREATE SCHEMA [Silver]
 GO
 
