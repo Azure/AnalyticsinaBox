@@ -100,3 +100,24 @@ This pipeline loops through the tables defined in Lakehouse table to load from W
     | rowsupdated       | String |
     | pipelinestarttime | String |
     | pipelineendtime   | String |
+1. Configure the **Set variable** activity created in the 2nd step:
+
+    | Tab      | Configuration | Value Type         | Value                 |
+    | -------- | ------------- | ------------------ | --------------------- |
+    | General  | Name          | String             | Set pipelinestarttime |
+    | Settings | Variable type | Radio Button       | Pipeline variable     |
+    | Settings | Name          | String             | pipelinestarttime     |
+    | Settings | Value         | Dynamic Expression | @utcnow()             |
+1. Add another **Set variable**, drag the green arrow from the previous activity to it and set configurations:
+
+    | Tab      | Configuration | Value Type   | Value              |
+    | -------- | ------------- | ------------ | ------------------ |
+    | General  | Name          | String       | Set Date predicate |
+    | Settings | Variable type | Radio Button | Pipeline variable  |
+    | Settings | Name          | String       | datepredicate      |
+    | Settings | Value         | Dynamic Expression |@if(equals(pipeline().parameters.sqlenddate,null),concat(pipeline().parameters.sqlsourcedatecolumn,' >= ''', pipeline().parameters.sqlstartdate,''''),concat(pipeline().parameters.sqlsourcedatecolumn, ' >= ''',pipeline().parameters.sqlstartdate,''' and ', pipeline().parameters.sqlsourcedatecolumn,' < ''',pipeline().parameters.sqlenddate,'''')) |
+1. Add **If condition** activity:
+    | Tab        | Configuration | Value Type         | Value                                          |
+    | ---------- | ------------- | ------------------ | ---------------------------------------------- |
+    | General    | Name          | String             | Check loadtype                                 |
+    | Activities | Expression    | Dynamic Expression | @equals(pipeline().parameters.loadtype,'full') |
