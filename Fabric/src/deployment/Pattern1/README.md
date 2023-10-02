@@ -75,23 +75,28 @@ Upload the notebooks to be used in the pipeline
 From this point forward, the instructions will be an exercise of creating pipelines, adding activities and configuring the settings for each activity. The configurations for each activity are in a format that allows you to copy and paste values into each activity. It is important to copy the text exactly as is to avoid errors in scripts or subsequent activities. Do to the length of the instructions, I am keeping images in this post to a minimum - another reason to follow the instructions carefully. You can also refer to the original blog posts cited at the tops of this blog post for reference.
 ### Create the pipeline to load data from Wide World Importers to the Fabric Lakehouse
 This pipeline loops through the tables defined in Lakehouse table to load from World Wide Importers to the Fabric Lakehouse
-* Create a new Data Pipeline and call it "Get WWImporters Data direct"
-* Add a Set variable activity
-* Click on the canvas and add the following parameters:
+1. Create a new Data Pipeline and call it "Get WWImporters Data direct"
+1. Add a Set variable activity
+1. Click on the canvas and add the following  pipeline **Parameters**:
 
-<div style="margin-left: auto;
-            margin-right: auto;
-            width: 80%">
+      Name                | Type   |
+     ------------------- | ------ |
+     sqlsourcedatecolumn | String |
+     sqlstartdate        | String |
+     sqlenddate          | String |
+     sqlsourceschema     | String |
+     sqlsourcetable      | String |
+     sinktablename       | String |
+     loadtype            | String |
+     sourcekeycolumn     | String |
+     batchloaddatetime   | String |
+1. Move to the **Variables** tab and add the following variables: 
 
-| Name                | Type   |
-| ------------------- | ------ |
-| sqlsourcedatecolumn | String |
-| sqlstartdate        | String |
-| sqlenddate          | String |
-| sqlsourceschema     | String |
-| sqlsourcetable      | String |
-| sinktablename       | String |
-| loadtype            | String |
-| sourcekeycolumn     | String |
-| batchloaddatetime   | String |
-</div>
+    | Name              | Type   |
+    | ----------------- | ------ |
+    | datepredicate     | String |
+    | maxdate           | String |
+    | rowsinserted      | String |
+    | rowsupdated       | String |
+    | pipelinestarttime | String |
+    | pipelineendtime   | String |
