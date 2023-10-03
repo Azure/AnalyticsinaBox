@@ -176,6 +176,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | Settings | Connection      | Dropdown     | <choose your metadata database> |
         | Settings | Script          | Radio Button | NonQuery                        |
         | Settings | Script          | Dynamic Expression  | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to delta table').output.executionDetails[0].status}', rowsread = @{activity('Copy data to delta table').output.rowsRead}, rowscopied= @{activity('Copy data to delta table').output.rowsCopied}, deltalakeinserted = '@{variables('rowsinserted')}', deltalakeupdated =0, sqlmaxdatetime = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |
+    1. Exit the **True activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
 1. Now configure the **If False** activities. Your False activities will be a flow of activities when the table to be loaded should be an incremental load. When completed, the False activities will look like this: ![wwi-incremental](images/wwi-incremental-activities.jpg)
     1. Add **Copy Data** activity:
         | Tab     | Configuration   | Value Type   | Value                           |
@@ -238,8 +239,8 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
         | Settings | Script(1)       | Radio Button | NonQuery                                          |
         | Settings | Script(2)       | Dynamic Expression | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to parquet').output.executionDetails[0].status}', rowsread = @{activity('Copy data to parquet').output.rowsRead}, rowscopied= @{activity('Copy data to parquet').output.rowsCopied},deltalakeinserted = '@{variables('rowsinserted')}',deltalakeupdated = '@{variables('rowsupdated')}', sqlmaxdatetime = '@{variables('maxdate')}', sqlstartdate = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}'  where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |
-
-If you have gotten this far, awesome! Thank you! Don't forget to save your changes!
+    1. Exit the **False activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
+If you have gotten this far, awesome! Thank you! Save your changes! You are done with your first pipeline!
 
 To actually run the pipeline, we will start building our Orchestrator pipeline. An Orchestrator pipeline is the main pipeline that links together large flows of activities.
 ### Configure the Orchestrator Pipeline Part 1 - Invoke Pipeline to load from World Wide Importers to Fabric Lakehouse
@@ -395,6 +396,7 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
         | Settings | Script(1)       | Radio Button | NonQuery                                          |
         | Settings | Script(2)       | Dynamic Expression | Update dbo.PipelineOrchestrator_FabricLakehouseGold set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to gold lakehouse').output.executionDetails[0].status}',  rowscopied= @{activity('Copy data to gold lakehouse').output.rowsCopied},deltalakeinserted= @{activity('Copy data to gold lakehouse').output.rowsCopied}, rowsread= @{activity('Copy data to gold lakehouse').output.rowsRead}, pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sourceschema = '@{pipeline().parameters.sourceschema}' and sourcetable = '@{pipeline().parameters.sourcetable}'  |
+    1. Exit the **True activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
 1. Now configure the **If False** activities. Your False activities will be a flow of activities when the table to be loaded should be an incremental load. When completed, the False activities will look like this: ![table-l=incremental](images/load-lakehouse-incr.jpg)
     1. Add **Set variable** activity and configure:
         | Tab      | Configuration | Value Type   | Value              |
@@ -465,6 +467,8 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
         | Settings | Script(1)       | Radio Button | NonQuery                                          |
         | Settings | Script(1)       | Dynamic Expression | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to parquet').output.executionDetails[0].status}', rowsread = @{activity('Copy data to parquet').output.rowsRead}, rowscopied= @{activity('Copy data to parquet').output.rowsCopied},deltalakeinserted = '@{variables('rowsinserted')}',deltalakeupdated = '@{variables('rowsupdated')}', sqlmaxdatetime = '@{variables('maxdate')}', sqlstartdate = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}'  where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |
+    1. Exit the **False activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
+
 You are done with this pipeline! Save your changes!
 ### Configure the Orchestrator Pipeline Part 2 - Invoke Pipeline to load from Fabric Lakehouse to Gold Lakehouse
 Now we will update the Orchestrator pipeline, **orchestrator Load WWI to Fabric**, to load data from the first Fabric Lakehouse to the Gold Fabric Lakehouse. When you are done, your pipeline should look like this: ![orchestrator-part2](images/orchestrator-2.jpg)
@@ -576,3 +580,67 @@ When this pipeline is complete, it will look like this: ![gold-dw-tables](images
        | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
        | Settings | Script(1)       | Radio Button | NonQuery                                          |
        | Settings | Script(2)       | Dynamic Expression  | Update dbo.PipelineOrchestrator_FabricWarehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to warehouse').output.executionDetails[0].status}',  rowsinserted= @{activity('Copy data to warehouse').output.rowsCopied}, rowsupdated=0, pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sourceschema = '@{pipeline().parameters.sourceschema}' and sourcetable = '@{pipeline().parameters.sourcetable}'   |
+    1. Exit the **True activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
+1. Now configure the **If False** activities. Your False activities will be a flow of activities when the table to be loaded should be an incremental load. When completed, the False activities will look like this: ![dw-incremental](images/dw-false.jpg)
+    1. Add **Lookup** activity and configure:
+        | Tab      | Configuration               | New parameter name | Paramater Type | Value Type         | Value                                                                             |
+        | -------- | --------------------------- | ------------------ | -------------- | ------------------ | --------------------------------------------------------------------------------- |
+        | General  | Name                        |                    |                | String             | Load Incremental via Stored Proc                                                  |
+        | Settings | Data store type             |                    |                | Radio button       | Workspace                                                                         |
+        | Settings | Workspace data store type   |                    |                | Drop down          | jhFTAFabricWarehouse                                                              |
+        | Settings | Use query                   |                    |                | Radio button       | Stored procedure                                                                  |
+        | Settings | Stored procedure name       |                    |                | Dynamic Expression | @{pipeline().parameters.storedprocschema}.@{pipeline().parameters.storedprocname} |
+        | Settings | Stored procedure parameters | EndDate            | DateTime       | Dynamic Expression | @pipeline().parameters.sourceenddate                                              |
+        | Settings |                             | StartDate          | DateTime       | Dynamic Expression | @pipeline().parameters.sourcestartdate                                            |
+        | Settings | First row only              |                    |                | Check box          | Checked                                                                           |
+    1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration | Value Type         | Value                     |
+        | -------- | ------------- | ------------------ | ------------------------- |
+        | General  | Name          | String             | Set pipeline endtime_incr |
+        | Settings | Variable type | Radio Button       | Pipeline variable         |
+        | Settings | Name          | Dropdown           | pipelineendtime           |
+        | Settings | Value         | Dynamic Expression | @utcnow()                 |
+    1. Add **Script** activity, drag the green arrow from the previous activity to it and configure:
+        | Tab      | Configuration   | Value Type   | Value                                             |
+        | -------- | --------------- | ------------ | ------------------------------------------------- |
+        | General  | Name            | String       | Update Pipeline Run details_incr                  |
+        | Settings | Data store type | Radio Button | External                                          |
+        | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
+        | Settings | Script(1)       | Radio Button | NonQuery                                          |
+        | Settings | Script(2)       | Dynamic Expression | Update dbo.PipelineOrchestrator_FabricWarehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = 'Succeeded', sinkmaxdatetime = '@{activity('Load Incremental via Stored Proc').output.firstRow.MaxDate}', sourcestartdate = '@{activity('Load Incremental via Stored Proc').output.firstRow.MaxDate}', rowsupdated = @{activity('Load Incremental via Stored Proc').output.firstRow.UpdateCount}, rowsinserted = @{activity('Load Incremental via Stored Proc').output.firstRow.InsertCount},  pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sourceschema = '@{pipeline().parameters.sourceschema}' and sourcetable = '@{pipeline().parameters.sourcetable}'  |
+    1. Exit the **False activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
+### Configure the Orchestrator Pipeline Part 3 - Invoke Pipeline to load from Fabric Lakehouse to Fabric Data Warehouse
+We are on the final steps! Update the Orchestrator pipeline, **orchestrator Load WWI to Fabric**, to load data from the first Fabric Lakehouse to the Data Warehouse. When you are done, your pipeline should look like this: ![orchestrator-done](images/get-wwi-data-pipeline.jpg)
+1. Add add another **Lookup** activity.  Get a 2nd green arrow from the **Wait** activity to it and configure:
+    | Tab      | Configuration   | Value Type         | Value                                                                                                            |
+    | -------- | --------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+    | General  | Name            | String             | Get tables to load to warehouse                                                                                  |
+    | Settings | Data store type | Radio button       | External                                                                                                         |
+    | Settings | Connection      | Drop down          | Connection to your metadata database                                                                             |
+    | Settings | Connection Type | Drop down          | Azure SQL Database                                                                                               |
+    | Settings | Use query       | Radio button       | Query                                                                                                            |
+    | Settings | Query           | Dynamic Expression | select \* from dbo.PipelineOrchestrator_FabricWarehouse where skipload=0 and @{pipeline().parameters.loaddwh} =1 |
+    | Settings | First row only  | Check box          | Not Checked                                                                                                      |
+1. Add **For each** activity, drag the green arrow from the previous activity to it and configure:
+    | Tab        | Configuration | Value Type                                    | Value                                                     |
+    | ---------- | ------------- | --------------------------------------------- | --------------------------------------------------------- |
+    | General    | Name          | String                                        | For each table to load to warehouse                       |
+    | Settings   | Items         | Dynamic Expression                            | @activity('Get tables to load to warehouse').output.value |
+1. Click on the pencil in the **Activities** box of the **For each** and add an **Invoke Pipeline** activity and configure as follows:
+    | Tab      | Configuration      | Parameter Name    | Value Type         | Value                           |
+    | -------- | ------------------ | ----------------- | ------------------ | ------------------------------- |
+    | General  | Name               |                   | String             | Invoke Load Warehouse Table     |
+    | Settings | Invoked pipeline   |                   | Dropdown           | Load Warehouse Table            |
+    | Settings | Wait on completion |                   | Checkbox           | Checked                         |
+    | Settings | Parameters         | sourcestartdate   | Dynamic Expression | @item().sourcestartdate         |
+    | Settings | Parameters         | sourceenddate     | Dynamic Expression | @item().sourceenddate           |
+    | Settings | Parameters         | sourceschema      | Dynamic Expression | @item().sourceschema            |
+    | Settings | Parameters         | sourcetable       | Dynamic Expression | @item().sourcetable             |
+    | Settings | Parameters         | sinkschema        | Dynamic Expression | @item().sinkschema              |
+    | Settings | Parameters         | loadtype          | Dynamic Expression | @item().loadtype                |
+    | Settings | Parameters         | batchloaddatetime | Dynamic Expression | @variables('batchloaddatetime') |
+    | Settings | Parameters         | sinktable         | Dynamic Expression | @item().sinktable               |
+    | Settings | Parameters         | storedprocschema  | Dynamic Expression | @item().storedprocschema        |
+    | Settings | Parameters         | storedprocname    | Dynamic Expression | @item().storedprocname          |
+1. Exit the **Activities** box in the **For each** activity by clicking on  **Main canvas** in the upper left corner
+You are done!! Save the **orchestrator Load WWI to Fabric** pipeline. Let's run it but since we already ran the load to the 2 Lakeshouses, let's just run the load from the first or "Bronze" Lakehouse to the Data Warehouse. ![part3-run](images/part3-run.jpg)
