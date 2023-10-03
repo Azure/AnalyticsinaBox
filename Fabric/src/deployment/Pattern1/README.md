@@ -175,7 +175,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | -------- | --------------- | ------------ | ------------------------------- |
         | General  | Name            | String       | Update Pipeline Run details     |
         | Settings | Data store type | Radio Button | External                        |
-        | Settings | Connection      | Dropdown     | \<choose your metadata database> |
+        | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
         | Settings | Script          | Radio Button | NonQuery                        |
         | Settings | Script          | Dynamic Expression  | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to delta table').output.executionDetails[0].status}', rowsread = @{activity('Copy data to delta table').output.rowsRead}, rowscopied= @{activity('Copy data to delta table').output.rowsCopied}, deltalakeinserted = '@{variables('rowsinserted')}', deltalakeupdated =0, sqlmaxdatetime = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |
     1. Exit the **True activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
@@ -274,7 +274,7 @@ We will now start building the Orchestrator pipeline which will kickoff the pipe
    | -------- | --------------- | ------------ | ------------------------------------ |
    | General  | Name            | String       | Get tables to load to deltalake      |
    | Settings | Data store type | Radio button | External                             |
-   | Settings | Connection      | Drop down    | \<choose your metadata database connection> |
+   | Settings | Connection      | Drop down    | Connection to FabricMetdataOrchestration Database |
    | Settings | Connection Type | Drop down    | Azure SQL Database                   |
    | Settings | Use query       | Radio button | Query                                |
    | Settings | Query       | Dynamic Expression |select * from dbo.PipelineOrchestrator_FabricLakehouse where skipload=0 and 1=@{pipeline().parameters.loadbronze} |
@@ -486,7 +486,7 @@ Now we will update the Orchestrator pipeline, **orchestrator Load WWI to Fabric*
     | -------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
     | General  | Name            | String             | Get tables to load to gold lakehouse                                                                                     |
     | Settings | Data store type | Radio button       | External                                                                                                                 |
-    | Settings | Connection      | Drop down          | \<choose your metadata database connection>   |
+    | Settings | Connection      | Drop down          | Connection to FabricMetdataOrchestration Database  |
     | Settings | Connection Type | Drop down          | Azure SQL Database                                                                                                       |
     | Settings | Use query       | Radio button       | Query                                                                                                                    |
     | Settings | Query           | Dynamic Expression | select \* from dbo.PipelineOrchestrator_FabricLakehouseGold where skipload=0 and @{pipeline().parameters.loadgoldlh} = 1 |
@@ -620,7 +620,7 @@ We are on the final steps! Update the Orchestrator pipeline, **orchestrator Load
     | -------- | --------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
     | General  | Name            | String             | Get tables to load to warehouse                                                                                  |
     | Settings | Data store type | Radio button       | External                                                                                                         |
-    | Settings | Connection      | Drop down          | <choose your metadata database connection>                                      |
+    | Settings | Connection      | Drop down          | Connection to FabricMetdataOrchestration Database                                      |
     | Settings | Connection Type | Drop down          | Azure SQL Database                                                                                               |
     | Settings | Use query       | Radio button       | Query                                                                                                            |
     | Settings | Query           | Dynamic Expression | select \* from dbo.PipelineOrchestrator_FabricWarehouse where skipload=0 and @{pipeline().parameters.loaddwh} =1 |
