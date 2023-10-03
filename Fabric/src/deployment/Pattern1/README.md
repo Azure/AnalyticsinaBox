@@ -2,7 +2,7 @@
 
 ## Description
 
-Metadata-driven pipelines in Azure Data Factory, Synapse Pipelines, and now, Microsoft Fabric, give you the capability to ingest and transform data with less code, reduced maintenance and greater scalability than writing code or pipelines for every data source that needs to be ingested and transformed. The key lies in identifying the data loading and transformation pattern(s) for your data sources and destinations and then building the framework to support each pattern.
+Metadata-driven pipelines in Azure Data Factory, Synapse Pipelines, and now, Microsoft Fabric, give you the capability to ingest and transform data with less code, reduced maintenance and greater scalability than writing code or pipelines for every data source entity that needs to be ingested and transformed. The key lies in identifying the data loading and transformation pattern(s) for your data sources and destinations and then building the framework to support each pattern.
 
 In August 2023, I created 2 blog posts on Metadata Driven Pipelines with Fabric. Both involve landing the data in a Fabric Lakehouse and building a Star Schema for the Gold Layer. [The first post](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651) illustrates creating the Star Schema in a Fabric Lakehouse. [The second post](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749) covers using a Fabric Data Warehouse for the Star Schema and why you may want to choose this option. 
 
@@ -10,7 +10,7 @@ This solution guide is a companion to the Metadata Driven Pipelines in Fabric po
 
 ## Architecture
 
-Below is a high level architecture diagram of what you will build in this tutorial: ![fabric_architecture](images/fabric_metadata_architecture.jpg)
+Below is a high level architecture diagram of what you will build in this solution: ![fabric_architecture](images/fabric_metadata_architecture.jpg)
 ## Prerequisites
 * Permissions to create the Azure Resource Group, Azure Storage Account, Azure SQL Server and Azure SQL DBs needed for this tutorial.
 * Permissions to create a Microsoft Fabric Workspace
@@ -52,6 +52,7 @@ Run scripts to create views, tables and stored procedures used in this tutorial.
 1. Download the SQL script found in [in this repo](src/sql/2-metadatadb/create-metadata-tables.sql)
 1. Connect to the FabricMetadataOrchestration database in SQL Server Management Studio or Azure Data Studio
 1. Run the script to script to create and load the tables. You should see the following tables as shown below: ![tables](images/metadata-tables-2.jpg)
+Notice the values for the **loadtype**,**sqlsourcedatecolumn**,**sqlstartdate**, and **sqlenddate** columns of the **PipelineOrchestrator_FabricLakehouse** table. For the tables with **loadtype** equal to 'incremental', only 1 weeks worth of data will be loaded. This is because these tables are very large so for testing purposes, we only need a small amount of data. After these tables are loaded into the Lakehouse, the **sqlstartdate** will be updated to the max date of each column indicated in the **sqlsourcedatecolumn** for each table. This means that if you run the pipeline again without resetting the **sqlenddate**, no new data will be added to the tables that are incrementally loaded. You may be tempted to set the **sqlenddate** to NULL, which is what the value would be for scheduled loads in production, but I would caution you against doing that in this solution without testing how long the load from the World Wide Importers database to the Lakehouse runs. Instead, update the **sqlenddate** to add just a few more days worth of data.
 ## Create Microsoft Fabric Resources
 Create the Microsoft Fabric Workspace, Lakehouses, Data Warehouse, and Azure SQL DB Connections.
 ### Create a Microsoft Fabric workspace
@@ -59,16 +60,16 @@ Create the Microsoft Fabric Workspace, Lakehouses, Data Warehouse, and Azure SQL
 ### Create Bronze and Gold Fabric Lakehouses
 [Create 2 Microsoft Fabric Lakehouses](https://learn.microsoft.com/en-us/fabric/data-engineering/create-lakehouse) in you workspace.
 After creating the Lakehouses, copy the lakehouse names and table URLs and keep for your reference. 
-* To get the URLs, open each Lakehouse and click on the ellipses next to the **Tables** folder. Choose **Properties** and copy the abfss file path. [getlakehouse](images/get_lakehouse_url.jpg)
+* To get the URLs, open each Lakehouse and click on the ellipses next to the **Tables** folder. Choose **Properties** and copy the abfss file path. ![getlakehouse](images/get_lakehouse_url.jpg)
 * Paste each into notepad or a Word document and remove the "/Tables" from the end of the string. Your string will look something like **abfss://\<uniqueid>@onelake.dfs.fabric.microsoft.com/a\<anotheruniqueid>**
 ### Create a Fabric Data Warehouse
 Create a Fabric Data Warehouse by [following the instructions here](https://learn.microsoft.com/en-us/fabric/data-warehouse/create-warehouse)
 ### Create Fabric Connections to your Azure SQL DBs
-Create 2 Fabric connections, one to the Wide World Importers Azure SQL DB and to the FabricMetadataConfiguration Azure SQL DB. [per the instructions here](https://learn.microsoft.com/en-us/fabric/data-factory/).
+Create 2 Fabric connections, one to the Wide World Importers Azure SQL DB and to the FabricMetadataConfiguration Azure SQL DB [per the instructions here](https://learn.microsoft.com/en-us/fabric/data-factory/).
 ### Upload Spark Notebooks to Fabric
 Upload the notebooks to be used in the pipeline
 1. Download the 3 notebooks [found in the repo](src/notebooks/)
-1. Log into the Microsoft Fabric portal and switch to the Data Science experience and click ![Import Notebook](images/datascience-import-1.jpg)
+1. Log into the Microsoft Fabric portal and switch to the Data Science experience and click **Import notebook**![Import Notebook](images/datascience-import-1.jpg)
 1. Select upload and choose all of the 3 notebooks ![downloaded.](images/datascience-import-2.jpg)
 
 ## Create Microsoft Fabric Pipelines and Objects
