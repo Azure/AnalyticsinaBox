@@ -52,7 +52,7 @@ Run scripts to create views, tables and stored procedures used in this tutorial.
 1. Download the SQL script found in [in this repo](src/sql/2-metadatadb/create-metadata-tables.sql)
 1. Connect to the FabricMetadataOrchestration database in SQL Server Management Studio or Azure Data Studio
 1. Run the script to script to create and load the tables. You should see the following tables as shown below: ![tables](images/metadata-tables-2.jpg)
-Notice the values for the **loadtype**,**sqlsourcedatecolumn**,**sqlstartdate**, and **sqlenddate** columns of the **PipelineOrchestrator_FabricLakehouse** table. For the tables with **loadtype** equal to 'incremental', only 1 weeks worth of data will be loaded. This is because these tables are very large so for testing purposes, we only need a small amount of data. After these tables are loaded into the Lakehouse, the **sqlstartdate** will be updated to the max date of each column indicated in the **sqlsourcedatecolumn** for each table. This means that if you run the pipeline again without resetting the **sqlenddate**, no new data will be added to the tables that are incrementally loaded. You may be tempted to set the **sqlenddate** to NULL, which is what the value would be for scheduled loads in production, but I would caution you against doing that in this solution without testing how long the load from the World Wide Importers database to the Lakehouse runs. Instead, update the **sqlenddate** to add just a few more days worth of data after the inital run of just one week's data.
+Notice the values for the **loadtype**, **sqlsourcedatecolumn**, **sqlstartdate**, and **sqlenddate** columns of the **PipelineOrchestrator_FabricLakehouse** table. For the tables with **loadtype** equal to **'incremental'**, only 1 weeks worth of data will be loaded. This is because these tables are very large so for testing purposes, we only need a small amount of data. After these tables are loaded into the Lakehouse, the **sqlstartdate** will be updated to the max date of each column indicated in the **sqlsourcedatecolumn** for each table. This means that if you run the pipeline again without resetting the **sqlenddate**, no new data will be added to the tables that are incrementally loaded. You may be tempted to set the **sqlenddate** to NULL, which is what the value would be for scheduled loads in production, but I would caution you against doing that in this solution without testing how long the load from the World Wide Importers database to the Lakehouse runs. Instead, update the **sqlenddate** to add just a few more days worth of data after the inital run of just one week's data to test the incremental load logic.
 
 ## Create Microsoft Fabric Resources
 Create the Microsoft Fabric Workspace, Lakehouses, Data Warehouse, and Azure SQL DB Connections.
@@ -145,7 +145,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | -------- | --------------------------- | ----------------- | ------------------ | ------------------------------------------ |
         | General  | Settings                    |                   | String             | Get MaxDate loaded                         |
         | Settings | Notebook                    |                   | Dropdown           | Get Max Data from Delta Table              |
-        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Bronze lakehouse abfs path>          |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Bronze lakehouse abfss path>          |
         | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktablename       |
         | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.sourcekeycolumn     |
         | Settings | Advanced -> Base parameters | dateColumn        | Dynamic Expression | @pipeline().parameters.sqlsourcedatecolumn |
@@ -175,7 +175,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | -------- | --------------- | ------------ | ------------------------------- |
         | General  | Name            | String       | Update Pipeline Run details     |
         | Settings | Data store type | Radio Button | External                        |
-        | Settings | Connection      | Dropdown     | <choose your metadata database> |
+        | Settings | Connection      | Dropdown     | \<choose your metadata database> |
         | Settings | Script          | Radio Button | NonQuery                        |
         | Settings | Script          | Dynamic Expression  | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to delta table').output.executionDetails[0].status}', rowsread = @{activity('Copy data to delta table').output.rowsRead}, rowscopied= @{activity('Copy data to delta table').output.rowsCopied}, deltalakeinserted = '@{variables('rowsinserted')}', deltalakeupdated =0, sqlmaxdatetime = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |
     1. Exit the **True activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
@@ -185,13 +185,13 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | ------- | --------------- | ------------ | ------------------------------- |
         | General | Name            | String       | Copy data to parquet            |
         | Source  | Data store type | Radio button | External                        |
-        | Source  | Connection      | Drop down    | <choose your metadata database> |
+        | Source  | Connection      | Drop down    | \<choose your metadata database> |
         | Source  | Connection type | Drop down    | Azure SQL Database              |
         | Source  | User query      | Radio button | Query                           |
         | Source  | Query      | Dynamic Expression | select * from @{pipeline().parameters.sqlsourceschema}.@{pipeline().parameters.sqlsourcetable} where  @{variables('datepredicate')} |
         | Destination | Data store type           | Radio button | Workspace               |
         | Destination | Workspace data store type | Drop down    | Lakehouse               |
-        | Destination | Lakehouse                 | Drop down    | <choose your lakehouse> |
+        | Destination | Lakehouse                 | Drop down    | \<choose your lakehouse> |
         | Destination | Root folder               | Radio button | Files                   |
         | Destination  | File Path (1)  | Dynamic Expression | incremental/@{pipeline().parameters.sinktablename} |
         | Destination  | File Path (2)  | Dynamic Expression | @{pipeline().parameters.sinktablename}.parquet |
@@ -201,7 +201,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | -------- | --------------------------- | ----------------- | ------------------ | ------------------------------------------ |
         | General  | Settings                    |                   | String             | Load to Delta                              |
         | Settings | Notebook                    |                   | Dropdown           | Create or Merge to Deltalake               |
-        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Bronze lakehouse abfs path>          |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Bronze lakehouse abfss path>          |
         | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktablename       |
         | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.sourcekeycolumn     |
         | Settings | Advanced -> Base parameters | dateColumn        | Dynamic Expression | @pipeline().parameters.sqlsourcedatecolumn |
@@ -244,7 +244,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
     1. Exit the **False activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
 If you have gotten this far, awesome! Thank you! Save your changes! You are done with your first pipeline!
 
-To actually run the pipeline, we will start building our Orchestrator pipeline. An Orchestrator pipeline is the main pipeline that links together large flows of activities.
+To actually run the pipeline, we will start building our Orchestrator pipeline. An Orchestrator pipeline is the main pipeline that coordineate the flow of all pipeline activities, including calling other pipelines.
 ### Configure the Orchestrator Pipeline Part 1 - Invoke Pipeline to load from World Wide Importers to Fabric Lakehouse
 We will now start building the Orchestrator pipeline which will kickoff the pipeline to create or load each table from the World Wide Importers Database to the Fabric Lakehouse. When you are finished with Part 1, your Orchestrator Pipeline will look like this: ![orchestrator-1](images/orchestrator-1.jpg)
 1. Create a new Data Pipeline called **orchestrator Load WWI to Fabric**
@@ -276,8 +276,6 @@ We will now start building the Orchestrator pipeline which will kickoff the pipe
    | Settings | Data store type | Radio button | External                             |
    | Settings | Connection      | Drop down    | Connection to your metadata database |
    | Settings | Connection Type | Drop down    | Azure SQL Database                   |
-   | Settings | Use query       | Radio button | Query                                |
-   | Settings |  | Drop down    | Azure SQL Database                   |
    | Settings | Use query       | Radio button | Query                                |
    | Settings | Query       | Dynamic Expression |select * from dbo.PipelineOrchestrator_FabricLakehouse where skipload=0 and 1=@{pipeline().parameters.loadbronze} |
    | Settings | First row only      | Check box | Not Checked                                |
@@ -366,7 +364,7 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
     | ---------- | ------------- | ------------------ | ---------------------------------------------- |
     | General    | Name          | String             | Check loadtype                                 |
     | Activities | Expression    | Dynamic Expression | @equals(pipeline().parameters.loadtype,'full') |
-1. Now configure the **If True** activities. Like the previous pipeline, the True activities will be a flow of activities when the table to be loaded should be a full load. When completed, the True activities will look like this:![lakehouse-true](images/load-lakehouse-full.jpg)
+1. Now configure the **If True** activities. Like the previous pipeline, the True activities will be a flow of activities when the table to be loaded is a full load. When completed, the True activities will look like this:![lakehouse-true](images/load-lakehouse-full.jpg)
 
     1. Add **Copy Data** Activity and configure:
     
@@ -375,13 +373,13 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | General     | Name                      | String             | Copy data to gold lakehouse         |
         | Source      | Data store type           | Radio Button       | Workspace                           |
         | Source      | Workspace data store type | Drop down          | Data Warehouse                      |
-        | Source      | Data Warehouse            | Drop down          | \<your Data Warehouse name>                     |
+        | Source      | Data Warehouse            | Drop down          | \<your Data Warehouse name>         |
         | Source      | Use query                 | Radio Button       | Table                               |
         | Source      | Table (Schema)            | Dynamic Expression | @pipeline().parameters.sourceschema |
         | Source      | Table (Table name)        | Dynamic Expression | @pipeline().parameters.sourcetable  |
         | Destination | Data store type           | Radio Button       | Workspace                           |
         | Destination | Workspace data store type | Drop down          | Lakehouse                           |
-        | Destination | Lakehouse                 | Drop down          | \<your Gold Lakehouse name>          |
+        | Destination | Lakehouse                 | Drop down          | \<your Gold Lakehouse name>         |
         | Destination | Root folder               | Radio Button       | Tables                              |
         | Destination | Table (Table name)        | Dynamic Expression | @pipeline().parameters.sinktable    |
         | Destination | Advanced -> Table action  | Radio Button       | Overwrite                           |
@@ -431,7 +429,7 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | -------- | --------------------------- | ----------------- | ------------------ | -------------------------------- |
         | General  | Settings                    |                   | String             | Merge to Gold                    |
         | Settings | Notebook                    |                   | Dropdown           | Create or Merge to Deltalake     |
-        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Gold lakehouse abfs path>  |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Gold lakehouse abfss path>  |
         | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktable |
         | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.tablekey  |
         | Settings | Advanced -> Base parameters | tableKey2         | Dynamic Expression | @pipeline().parameters.tablekey2 |
@@ -560,7 +558,7 @@ When this pipeline is complete, it will look like this: ![gold-dw-tables](images
         | General     | Name                        | String             | Copy data to warehouse                                                             |
         | Source      | Data store type             | Radio Button       | Workspace                                                                          |
         | Source      | Workspace data store type   | Drop down          | Data Warehouse                                                                     |
-        | Source      | Data Warehouse              | Drop down          | \<your DWH name>                                                                    |
+        | Source      | Data Warehouse              | Drop down          | \<your Fabric Data Warehouse name>                                                                    |
         | Source      | Use query                   | Radio Button       | Table                                                                              |
         | Source      | Table (Schema)              | Dynamic Expression | @pipeline().parameters.sourceschema                                                |
         | Source      | Table (Table name)          | Dynamic Expression | @pipeline().parameters.sourcetable                                                 |
@@ -593,7 +591,7 @@ When this pipeline is complete, it will look like this: ![gold-dw-tables](images
         | -------- | --------------------------- | ------------------ | -------------- | ------------------ | --------------------------------------------------------------------------------- |
         | General  | Name                        |                    |                | String             | Load Incremental via Stored Proc                                                  |
         | Settings | Data store type             |                    |                | Radio button       | Workspace                                                                         |
-        | Settings | Workspace data store type   |                    |                | Drop down          | jhFTAFabricWarehouse                                                              |
+        | Settings | Workspace data store type   |                    |                | Drop down          | \<your Fabric Data Warehouse name>    |
         | Settings | Use query                   |                    |                | Radio button       | Stored procedure                                                                  |
         | Settings | Stored procedure name       |                    |                | Dynamic Expression | @{pipeline().parameters.storedprocschema}.@{pipeline().parameters.storedprocname} |
         | Settings | Stored procedure parameters | EndDate            | DateTime       | Dynamic Expression | @pipeline().parameters.sourceenddate                                              |
