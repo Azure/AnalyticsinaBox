@@ -130,13 +130,13 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | ------- | --------------- | ------------ | ------------------------------- |
         | General | Name            | String       | Copy data to delta table        |
         | Source  | Data store type | Radio button | External                        |
-        | Source  | Connection      | Drop down    | \<choose your metadata database> |
+        | Source  | Connection      | Drop down    | \<choose your World Wide Importers database connection> |
         | Source  | Connection type | Drop down    | Azure SQL Database              |
         | Source  | User query      | Radio button | Query                           |
         | Source  | Query           | Dynamic Expression | select * from @{pipeline().parameters.sqlsourceschema}.@{pipeline().parameters.sqlsourcetable} where  @{variables('datepredicate')} |
         | Destination | Data store type           | Radio button       | Workspace                            |
         | Destination | Workspace data store type | Drop down          | Lakehouse                            |
-        | Destination | Lakehouse                 | Drop down          | \<choose your lakehouse>              |
+        | Destination | Lakehouse                 | Drop down          | \<choose your Fabric Lakehouse>              |
         | Destination | Root folder               | Radio button       | Tables                               |
         | Destination | Table name                | Dynamic Expression | @pipeline().parameters.sinktablename |
         | Destination | Advanced-> Table action   | Radio button       | Overwrite                            |
@@ -145,7 +145,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | -------- | --------------------------- | ----------------- | ------------------ | ------------------------------------------ |
         | General  | Settings                    |                   | String             | Get MaxDate loaded                         |
         | Settings | Notebook                    |                   | Dropdown           | Get Max Data from Delta Table              |
-        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Bronze lakehouse abfss path>          |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<enter your Bronze Lakehouse abfss path>          |
         | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktablename       |
         | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.sourcekeycolumn     |
         | Settings | Advanced -> Base parameters | dateColumn        | Dynamic Expression | @pipeline().parameters.sqlsourcedatecolumn |
@@ -185,13 +185,13 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | ------- | --------------- | ------------ | ------------------------------- |
         | General | Name            | String       | Copy data to parquet            |
         | Source  | Data store type | Radio button | External                        |
-        | Source  | Connection      | Drop down    | \<choose your metadata database> |
+        | Source  | Connection      | Drop down    | \<choose your World Wide Importers database connection> |
         | Source  | Connection type | Drop down    | Azure SQL Database              |
         | Source  | User query      | Radio button | Query                           |
         | Source  | Query      | Dynamic Expression | select * from @{pipeline().parameters.sqlsourceschema}.@{pipeline().parameters.sqlsourcetable} where  @{variables('datepredicate')} |
         | Destination | Data store type           | Radio button | Workspace               |
         | Destination | Workspace data store type | Drop down    | Lakehouse               |
-        | Destination | Lakehouse                 | Drop down    | \<choose your lakehouse> |
+        | Destination | Lakehouse                 | Drop down    | \<choose your Fabric Lakehouse> |
         | Destination | Root folder               | Radio button | Files                   |
         | Destination  | File Path (1)  | Dynamic Expression | incremental/@{pipeline().parameters.sinktablename} |
         | Destination  | File Path (2)  | Dynamic Expression | @{pipeline().parameters.sinktablename}.parquet |
@@ -201,7 +201,7 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
         | -------- | --------------------------- | ----------------- | ------------------ | ------------------------------------------ |
         | General  | Settings                    |                   | String             | Load to Delta                              |
         | Settings | Notebook                    |                   | Dropdown           | Create or Merge to Deltalake               |
-        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Bronze lakehouse abfss path>          |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<enter your Bronze Lakehouse abfss path>          |
         | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktablename       |
         | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.sourcekeycolumn     |
         | Settings | Advanced -> Base parameters | dateColumn        | Dynamic Expression | @pipeline().parameters.sqlsourcedatecolumn |
@@ -274,7 +274,7 @@ We will now start building the Orchestrator pipeline which will kickoff the pipe
    | -------- | --------------- | ------------ | ------------------------------------ |
    | General  | Name            | String       | Get tables to load to deltalake      |
    | Settings | Data store type | Radio button | External                             |
-   | Settings | Connection      | Drop down    | Connection to your metadata database |
+   | Settings | Connection      | Drop down    | \<choose your metadata database connection> |
    | Settings | Connection Type | Drop down    | Azure SQL Database                   |
    | Settings | Use query       | Radio button | Query                                |
    | Settings | Query       | Dynamic Expression |select * from dbo.PipelineOrchestrator_FabricLakehouse where skipload=0 and 1=@{pipeline().parameters.loadbronze} |
@@ -373,13 +373,13 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | General     | Name                      | String             | Copy data to gold lakehouse         |
         | Source      | Data store type           | Radio Button       | Workspace                           |
         | Source      | Workspace data store type | Drop down          | Data Warehouse                      |
-        | Source      | Data Warehouse            | Drop down          | \<your Data Warehouse name>         |
+        | Source      | Data Warehouse            | Drop down          | \<choose your Fabric Data Warehouse>         |
         | Source      | Use query                 | Radio Button       | Table                               |
         | Source      | Table (Schema)            | Dynamic Expression | @pipeline().parameters.sourceschema |
         | Source      | Table (Table name)        | Dynamic Expression | @pipeline().parameters.sourcetable  |
         | Destination | Data store type           | Radio Button       | Workspace                           |
         | Destination | Workspace data store type | Drop down          | Lakehouse                           |
-        | Destination | Lakehouse                 | Drop down          | \<your Gold Lakehouse name>         |
+        | Destination | Lakehouse                 | Drop down          | \<choose your Fabric Gold Lakehouse>         |
         | Destination | Root folder               | Radio Button       | Tables                              |
         | Destination | Table (Table name)        | Dynamic Expression | @pipeline().parameters.sinktable    |
         | Destination | Advanced -> Table action  | Radio Button       | Overwrite                           |
@@ -414,12 +414,12 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | General | Name                      | String       | Get incremental fact data      |
         | Source  | Data store type           | Radio button | Workspace                      |
         | Source  | Workspace data store type | Drop down    | Data Warehouse                 |
-        | Source  | Data Warehouse            | Drop down    | \<choose your Fabric Warehouse> |
+        | Source  | Data Warehouse            | Drop down    | \<choose your Fabric Data Warehouse> |
         | Source  | Use query                 | Radio button | Query                          |
         | Source  | Query               | Dynamic Expression | select * from @{pipeline().parameters.sourceschema}.@{pipeline().parameters.sourcetable} where @{variables('datepredicate')} |
         | Destination | Data store type           | Radio button       | Workspace                                      |
         | Destination | Workspace data store type | Drop down          | Lakehouse                                      |
-        | Destination | Lakehouse                 | Drop down          | \<choose your Gold lakehouse>                   |
+        | Destination | Lakehouse                 | Drop down          | \<choose your Fabric Gold lakehouse>                   |
         | Destination | Root folder               | Radio button       | Files                                          |
         | Destination | File Path (1)             | Dynamic Expression | incremental/@{pipeline().parameters.sinktable} |
         | Destination | File Path (2)             | Dynamic Expression | @{pipeline().parameters.sinktable}.parquet     |
@@ -429,7 +429,7 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | -------- | --------------------------- | ----------------- | ------------------ | -------------------------------- |
         | General  | Settings                    |                   | String             | Merge to Gold                    |
         | Settings | Notebook                    |                   | Dropdown           | Create or Merge to Deltalake     |
-        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<your Gold lakehouse abfss path>  |
+        | Settings | Advanced -> Base parameters | lakehousePath     | String             | \<enter your Gold Lakehouse abfss path>  |
         | Settings | Advanced -> Base parameters | tableName         | Dynamic Expression | @pipeline().parameters.sinktable |
         | Settings | Advanced -> Base parameters | tableKey          | Dynamic Expression | @pipeline().parameters.tablekey  |
         | Settings | Advanced -> Base parameters | tableKey2         | Dynamic Expression | @pipeline().parameters.tablekey2 |
@@ -486,7 +486,7 @@ Now we will update the Orchestrator pipeline, **orchestrator Load WWI to Fabric*
     | -------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
     | General  | Name            | String             | Get tables to load to gold lakehouse                                                                                     |
     | Settings | Data store type | Radio button       | External                                                                                                                 |
-    | Settings | Connection      | Drop down          | Connection to your metadata database                                                                                     |
+    | Settings | Connection      | Drop down          | \<choose your metadata database connection>   |
     | Settings | Connection Type | Drop down          | Azure SQL Database                                                                                                       |
     | Settings | Use query       | Radio button       | Query                                                                                                                    |
     | Settings | Query           | Dynamic Expression | select \* from dbo.PipelineOrchestrator_FabricLakehouseGold where skipload=0 and @{pipeline().parameters.loadgoldlh} = 1 |
@@ -558,13 +558,13 @@ When this pipeline is complete, it will look like this: ![gold-dw-tables](images
         | General     | Name                        | String             | Copy data to warehouse                                                             |
         | Source      | Data store type             | Radio Button       | Workspace                                                                          |
         | Source      | Workspace data store type   | Drop down          | Data Warehouse                                                                     |
-        | Source      | Data Warehouse              | Drop down          | \<your Fabric Data Warehouse name>                                                                    |
+        | Source      | Data Warehouse              | Drop down          | \<choose your Fabric Data Warehouse>                                 |
         | Source      | Use query                   | Radio Button       | Table                                                                              |
         | Source      | Table (Schema)              | Dynamic Expression | @pipeline().parameters.sourceschema                                                |
         | Source      | Table (Table name)          | Dynamic Expression | @pipeline().parameters.sourcetable                                                 |
         | Destination | Data store type             | Radio Button       | Workspace                                                                          |
         | Destination | Workspace data store type   | Drop down          | Dara Warehouse                                                                     |
-        | Destination | Data Warehouse              | Drop down          | \<your Fabric Data Warehouse name>                                                  |
+        | Destination | Data Warehouse              | Drop down          | \<choose your Fabric Data Warehouse>                                                  |
         | Destination | Table Option                | Radio Button       | Use existing                                                                       |
         | Destination | Table (Schema)              | Dynamic Expression | @pipeline().parameters.sinkschema                                                  |
         | Destination | Table (Table name)          | Dynamic Expression | @pipeline().parameters.sinktable                                                   |
@@ -591,7 +591,7 @@ When this pipeline is complete, it will look like this: ![gold-dw-tables](images
         | -------- | --------------------------- | ------------------ | -------------- | ------------------ | --------------------------------------------------------------------------------- |
         | General  | Name                        |                    |                | String             | Load Incremental via Stored Proc                                                  |
         | Settings | Data store type             |                    |                | Radio button       | Workspace                                                                         |
-        | Settings | Workspace data store type   |                    |                | Drop down          | \<your Fabric Data Warehouse name>    |
+        | Settings | Workspace data store type   |                    |                | Drop down          | \<choose your Fabric Data Warehouse>    |
         | Settings | Use query                   |                    |                | Radio button       | Stored procedure                                                                  |
         | Settings | Stored procedure name       |                    |                | Dynamic Expression | @{pipeline().parameters.storedprocschema}.@{pipeline().parameters.storedprocname} |
         | Settings | Stored procedure parameters | EndDate            | DateTime       | Dynamic Expression | @pipeline().parameters.sourceenddate                                              |
@@ -620,7 +620,7 @@ We are on the final steps! Update the Orchestrator pipeline, **orchestrator Load
     | -------- | --------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
     | General  | Name            | String             | Get tables to load to warehouse                                                                                  |
     | Settings | Data store type | Radio button       | External                                                                                                         |
-    | Settings | Connection      | Drop down          | Connection to your metadata database                                                                             |
+    | Settings | Connection      | Drop down          | <choose your metadata database connection>                                      |
     | Settings | Connection Type | Drop down          | Azure SQL Database                                                                                               |
     | Settings | Use query       | Radio button       | Query                                                                                                            |
     | Settings | Query           | Dynamic Expression | select \* from dbo.PipelineOrchestrator_FabricWarehouse where skipload=0 and @{pipeline().parameters.loaddwh} =1 |
