@@ -74,10 +74,13 @@ Upload the notebooks to be used in the pipeline
 1. Select upload and choose all of the 3 notebooks to your Fabric Workspace. ![downloaded.](images/datascience-import-2.jpg)
 
 ## Create Microsoft Fabric Pipelines and Objects
-From this point forward, the instructions will be an exercise of creating pipelines, adding activities and configuring the settings for each activity. The configurations for each activity are in a table that allows you to copy and paste values into each activity. It is important to copy the text exactly as is to avoid errors in scripts or subsequent activities. Here's a couple examples:
+From this point forward, the instructions will be an exercise of creating pipelines, adding activities and configuring the settings for each activity. The configurations for each activity are in a table that allows you to copy and paste values into each activity. It is important to copy the text exactly as is to avoid errors in scripts or subsequent activities. Here's a couple of examples:
 ![instructions1](images/instructions1.jpg)
+
 The instructions above are telling you to go to the pipeline **Parameters**, add 9 new parameters of type string, and copy each parameter name from the table to the parameter name in the pipeline.
+
 ![instruction2](images/instructions2.jpg)
+
 The instructions  above are for configuring a **Set Variable** activity. First go to the **General** tab, and copy the Value from the table to the **Name** configuration. Then go to the **Settings** tab, for **Variable type** click the Radio Button and choose **Pipeline variable**; for **Name**, copy the value pipelinestarttime from the table and paste it into the setting box; for the **Value** configuration, click on the **Add dynamic content** link and copy and paste the value \@utcnow() into the Pipeline expression builder.
 
 Due to the length of the instructions, I am keeping images in this post to a minimum - another reason to follow the instructions carefully. You can also refer to the original blog posts cited at the tops of this blog post for reference.
@@ -291,7 +294,7 @@ We will now start building the Orchestrator pipeline which will kickoff the pipe
    | General    | Name          | String                                        | For each table to load to deltalake                       |
    | Settings   | Batch count   | String                                        | 4                                                         |
    | Settings   | Items         | Dynamic Content                            | @activity('Get tables to load to deltalake').output.value |
-                                                        |
+                                                        
 1. Click on the pencil in the **Activities** box of the **For Each** and add an **Invoke Pipeline** activity and configure as follows:
    | Tab      | Configuration      | Parameter Name      | Value Type         | Value                           |
    | -------- | ------------------ | ------------------- | ------------------ | ------------------------------- |
@@ -320,7 +323,7 @@ Run the Orchestrator pipeline to load the Lakehouse. When it is complete, you sh
 
 Now that we have the tables in our Fabric Lakehouse, we can create SQL views over them which will be used to load our Fabric Gold Lakehouse and/or our Fabric Data Warehouse.
 ### Create Data Warehouse Objects
-If you read the blog posts, you would have read that at this point in time the Lakehouse SQL Endpoint is not exposed in the Copy Data pipeline activity. So while you can build SQL views in the Lakehouse, you can not leverage them in a Copy Data activity. Therefore, we will create the SQL Views in the Fabric Data Warehouse.
+If you read the original blog posts, you would know that at this point in time the Lakehouse SQL Endpoint is not exposed in the Copy Data pipeline activity. So while you can build SQL views in the Lakehouse, you can not leverage them in a Copy Data activity. Therefore, we will create the SQL Views in the Fabric Data Warehouse.
 1. Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fabric-dw-objects.sql).
 1. Open the downloaded SQL script (create-fabric-dw-objects.sql) using notepad and copy the entire contents of the script.
 1. From the Fabric portal, go to you Fabric Workspace and open your Data Warehouse and 
@@ -655,4 +658,21 @@ We are on the final steps! Update the Orchestrator pipeline, **orchestrator Load
 1. Exit the **Activities** box in the **For each** activity by clicking on  **Main canvas** in the upper left corner
  Save the **orchestrator Load WWI to Fabric** pipeline. Let's run it. But if you already ran the pipelines to load to the 2 Lakeshouses, just run the load from the first or "Bronze" Lakehouse to the Data Warehouse. ![part3-run](images/part3-run.jpg)
 
-You are done! 
+You are done! That was a lot of work writing this and I am out of words! So instead check out these resources:
+
+[Metadata Driven Pipelines for Microsoft Fabric](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651)
+[Metadata Driven Pipelines for Microsoft Fabric - Part 2, Data Warehouse Style](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749)
+
+[Getting Started with Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/)
+
+[Microsoft Fabric Lakehouse Overview](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview)
+
+[Data Factory in Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/data-factory/)
+
+[Direct Lake Overview](https://learn.microsoft.com/en-us/power-bi/enterprise/directlake-overview)
+
+[Microsoft Fabric Data Warehouse Overview](https://learn.microsoft.com/en-us/fabric/data-warehouse/)
+
+[Microsoft Fabric Lakehouse vs Data Warehouse Decision Guide](https://learn.microsoft.com/en-us/fabric/get-started/decision-guide-warehouse-lakehouse)
+
+[James Serra - Lakeshoue vs Warehouse Video](https://www.jamesserra.com/archive/2023/07/microsoft-fabric-lakehouse-vs-warehouse-video/)
