@@ -75,6 +75,7 @@ Upload the notebooks to be used in the pipeline
 
 ## Create Microsoft Fabric Pipelines and Objects
 From this point forward, the instructions will be an exercise of creating pipelines, adding activities and configuring the settings for each activity. The configurations for each activity are in a table that allows you to copy and paste values into each activity. It is important to copy the text exactly as is to avoid errors in scripts or subsequent activities. Here's a couple of examples:
+
 ![instructions1](images/instructions1.jpg)
 
 The instructions above are telling you to go to the pipeline **Parameters**, add 9 new parameters of type string, and copy each parameter name from the table to the parameter name in the pipeline.
@@ -660,19 +661,12 @@ We are on the final steps! Update the Orchestrator pipeline, **orchestrator Load
 
 You are done! That was a lot of work writing this and I am out of words! So instead check out these resources:
 
-[Metadata Driven Pipelines for Microsoft Fabric](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651)
-[Metadata Driven Pipelines for Microsoft Fabric - Part 2, Data Warehouse Style](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749)
-
-[Getting Started with Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/)
-
-[Microsoft Fabric Lakehouse Overview](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview)
-
-[Data Factory in Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/data-factory/)
-
-[Direct Lake Overview](https://learn.microsoft.com/en-us/power-bi/enterprise/directlake-overview)
-
-[Microsoft Fabric Data Warehouse Overview](https://learn.microsoft.com/en-us/fabric/data-warehouse/)
-
-[Microsoft Fabric Lakehouse vs Data Warehouse Decision Guide](https://learn.microsoft.com/en-us/fabric/get-started/decision-guide-warehouse-lakehouse)
-
+[Metadata Driven Pipelines for Microsoft Fabric](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651)  
+[Metadata Driven Pipelines for Microsoft Fabric - Part 2, Data Warehouse Style](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749)  
+[Getting Started with Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/)  
+[Microsoft Fabric Lakehouse Overview](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview)  
+[Data Factory in Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/data-factory/)  
+[Fabric Direct Lake Overview](https://learn.microsoft.com/en-us/power-bi/enterprise/directlake-overview)  
+[Microsoft Fabric Data Warehouse Overview](https://learn.microsoft.com/en-us/fabric/data-warehouse/)  
+[Microsoft Fabric Lakehouse vs Data Warehouse Decision Guide](https://learn.microsoft.com/en-us/fabric/get-started/decision-guide-warehouse-lakehouse)  
 [James Serra - Lakeshoue vs Warehouse Video](https://www.jamesserra.com/archive/2023/07/microsoft-fabric-lakehouse-vs-warehouse-video/)
