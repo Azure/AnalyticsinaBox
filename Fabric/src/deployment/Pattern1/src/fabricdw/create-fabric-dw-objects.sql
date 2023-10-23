@@ -181,7 +181,7 @@ CREATE TABLE [Gold].[InvoicedSales](
 	[ExtendedPrice] [decimal](18, 2) NULL,
 	[GrossProfit] [decimal](18, 2) NULL,
 	[TaxAmount] [decimal](18, 2) NULL
-) ON [PRIMARY]
+) 
 GO
 
 DROP TABLE IF EXISTS [Gold].[Products];

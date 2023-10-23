@@ -40,7 +40,7 @@ Create a blob storage account in the resource group created in the previous step
 1. Navigate to **Networking** and under **Firewall rules**, move slider for **Add current client IP address** to **Yes** ![sqldb3](images/create-sqldb-3.jpg)
 1. Click **Review and create**
 ### Download and restore the Wide World Importers Database
-1. Download the Wide World Importers Database for Azure SQL DB. [Click here to immediately download the bacpac](https://github.com/Microsoft/ql-server-samples/releases/download/wide-world-importers-v1.0/WideWorldImporters-Standard.bacpac)
+1. Download the Wide World Importers Database for Azure SQL DB. [Click here to immediately download the bacpac](https://github.com/Microsoft/sql-server-samples/releases/download/wide-world-importers-v1.0/WideWorldImporters-Standard.bacpac)
 1. Upload the bacpac to the storage account created previously and restore the Wide World Importers database. [Follow the instructions here](https://learn.microsoft.com/en-us/azure/azure-sql/database/database-import?view=azuresql&tabs=azure-powershell), if necessary, to restore the database from the bacpac.
 ## Create Azure SQL DB Objects
 Run scripts to create views, tables and stored procedures used in this tutorial.
@@ -66,11 +66,11 @@ After creating the Lakehouses, copy the lakehouse names and table URLs and keep 
 ### Create a Fabric Data Warehouse
 Create a Fabric Data Warehouse by [following the instructions here](https://learn.microsoft.com/en-us/fabric/data-warehouse/create-warehouse)
 ### Create Fabric Connections to your Azure SQL DBs
-Create 2 Fabric connections, one to the Wide World Importers Azure SQL DB and to the FabricMetadataConfiguration Azure SQL DB [per the instructions here](https://learn.microsoft.com/en-us/fabric/data-factory/).
+Create 2 Fabric connections, one to the Wide World Importers Azure SQL DB and to the FabricMetadataConfiguration Azure SQL DB [per the instructions here](https://learn.microsoft.com/en-us/fabric/data-factory/connector-azure-sql-database).
 ### Upload Spark Notebooks to Fabric
 Upload the notebooks to be used in the pipeline
 1. Download the 3 notebooks [found in the repo](src/notebooks/)
-1. Log into the Microsoft Fabric portal and switch to the Data Science experience and click **Import notebook**![Import Notebook](images/datascience-import-1.jpg)
+1. Log into the Microsoft Fabric portal and switch to the Data Engineering experience and click **Import notebook**![Import Notebook](images/datascience-import-1.jpg)
 1. Select upload and choose all of the 3 notebooks to your Fabric Workspace. ![downloaded.](images/datascience-import-2.jpg)
 
 ## Create Microsoft Fabric Pipelines and Objects
@@ -319,6 +319,7 @@ We will now start building the Orchestrator pipeline which will kickoff the pipe
    | Settings | Notebook        |                   |                | Dropdown           | Build Calendar                   |
    | Settings | Base parameters | startyear         | int            | Dynamic Content | @pipeline().parameters.startyear |
    | Settings | Base parameters | endyear           | int            | Dynamic Content | @pipeline().parameters.endyear   |
+   | Settings | Base parameters | lakehousePath     | String         |String  | \<enter your Bronze Lakehouse abfss path>          |
 
 Run the Orchestrator pipeline to load the Lakehouse. When it is complete, you should see the following tables and files in your Lakehouse: ![lakehouse-tables1](images/lakehouse-tables-1.jpg)
 
@@ -343,7 +344,6 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
 1. Click on the canvas and create the following **Parameters**:
     | Name              | Type   |
     | ----------------- | ------ |
-    | sourcestartdate   | String |
     | sourcestartdate   | String |
     | sourceenddate     | String |
     | sourceschema      | String |
@@ -450,21 +450,21 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | General  | Name          | String             | Get maxdate incr                                                               |
         | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
         | Settings | Name          | Dropdown           | maxdate                                                                        |
-        | Settings | Value         | Dynamic Content | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[0],'=')[1] |
+        | Settings | Value         | Dynamic Content | @split(split(activity('Merge to Gold').output.result.exitValue,'\|')[0],'=')[1] |
     1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
         | Tab      | Configuration | Value Type         | Value                                                                          |
         | -------- | ------------- | ------------------ | ------------------------------------------------------------------------------ |
         | General  | Name          | String             | set rows inserted incr                                                         |
         | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
         | Settings | Name          | Dropdown           | rowsinserted                                                                   |
-        | Settings | Value         | Dynamic Content | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[1],'=')[1] |
+        | Settings | Value         | Dynamic Content | @split(split(activity('Merge to Gold').output.result.exitValue,'\|')[1],'=')[1] |
     1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
         | Tab      | Configuration | Value Type         | Value                                                                          |
         | -------- | ------------- | ------------------ | ------------------------------------------------------------------------------ |
         | General  | Name          | String             | set rows updated incr                                                          |
         | Settings | Variable type | Radio Button       | Pipeline variable                                                              |
         | Settings | Name          | Dropdown           | rowsupdated                                                                    |
-        | Settings | Value         | Dynamic Content | @split(split(activity('Load to Delta').output.result.exitValue,'\|')[2],'=')[1] |
+        | Settings | Value         | Dynamic Content | @split(split(activity('Merge to Gold').output.result.exitValue,'\|')[2],'=')[1] |
     1. Add **Set variable** activity, drag the green arrow from the previous activity to it and configure:
         | Tab      | Configuration | Value Type         | Value                     |
         | -------- | ------------- | ------------------ | ------------------------- |
@@ -479,7 +479,7 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
         | Settings | Data store type | Radio Button | External                                          |
         | Settings | Connection      | Dropdown     | Connection to FabricMetdataOrchestration Database |
         | Settings | Script(1)       | Radio Button | NonQuery                                          |
-        | Settings | Script(1)       | Dynamic Content | Update dbo.PipelineOrchestrator_FabricLakehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Copy data to parquet').output.executionDetails[0].status}', rowsread = @{activity('Copy data to parquet').output.rowsRead}, rowscopied= @{activity('Copy data to parquet').output.rowsCopied},deltalakeinserted = '@{variables('rowsinserted')}',deltalakeupdated = '@{variables('rowsupdated')}', sqlmaxdatetime = '@{variables('maxdate')}', sqlstartdate = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}'  where sqlsourceschema = '@{pipeline().parameters.sqlsourceschema}' and sqlsourcetable = '@{pipeline().parameters.sqlsourcetable}' |
+        | Settings | Script(1)       | Dynamic Content | Update dbo.PipelineOrchestrator_FabricLakehouseGold set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = '@{activity('Get incremental fact data').output.executionDetails[0].status}', rowsread = @{activity('Get incremental fact data').output.rowsRead}, rowscopied= @{activity('Get incremental fact data').output.rowsCopied},deltalakeinserted = '@{variables('rowsinserted')}',deltalakeupdated = '@{variables('rowsupated')}', sinkmaxdatetime = '@{variables('maxdate')}', sourcestartdate = '@{variables('maxdate')}', pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}'  where sourceschema = '@{pipeline().parameters.sourceschema}' and sourcetable = '@{pipeline().parameters.sourcetable}'|
     1. Exit the **False activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
 
 You are done with this pipeline! Save your changes!
@@ -512,7 +512,6 @@ Now we will update the Orchestrator pipeline, **orchestrator Load WWI to Fabric*
     | General  | Name               |                   | String             | Invoke Load Gold Lakehouse      |
     | Settings | Invoked pipeline   |                   | Dropdown           | Load Lakehouse Table            |
     | Settings | Wait on completion |                   | Checkbox           | Checked                         |
-    | Settings | Parameters         | sourcestartdate   | Dynamic Content | @item().sourcestartdate         |
     | Settings | Parameters         | sourceenddate     | Dynamic Content | @item().sourceenddate           |
     | Settings | Parameters         | sourceschema      | Dynamic Content | @item().sourceschema            |
     | Settings | Parameters         | sourcetable       | Dynamic Content | @item().sourcetable             |
