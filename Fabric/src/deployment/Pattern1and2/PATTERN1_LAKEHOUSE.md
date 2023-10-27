@@ -1,4 +1,7 @@
 # Pattern 1: Load from Fabric Lakehouse to Fabric Gold Lakehouse
+To complete this pattern, we will:
+- Create the pipeline to load data from the Fabric Lakehouse to the Gold Lakehouse
+- Update the Orchestrator pipeline to do the Lookup against the Metadata Database table and call the new pipeline
 ## Create the pipeline to load data from Fabric Lakehouse to Gold Fabric Lakehouse
 When this pipeline is complete, it will look like this: ![lakehousetable](images/load-lakehouse-pipeline.jpg)
 
@@ -190,6 +193,7 @@ When your pipeline has finished, you should now have these tables and files in y
 Your done! You have completed an End-to-End Metadata Driven Pipeline in Fabric!
 
 Here are some additional resources to check out:
+
 [Metadata Driven Pipelines for Microsoft Fabric](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651)  
 [Getting Started with Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/)  
 [Microsoft Fabric Lakehouse Overview](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview)  

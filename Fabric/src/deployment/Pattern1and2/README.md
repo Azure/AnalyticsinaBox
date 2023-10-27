@@ -111,7 +111,7 @@ The instructions  above are for configuring a **Set Variable** activity. First g
 
 Due to the length of the instructions, I am keeping images in this post to a minimum - another reason to follow the instructions carefully. You can also refer to the original blog posts cited at the tops of this blog post for reference.
 ### Create the pipeline and activities
-This pipeline loops through the tables defined in PipelineOrchestrator_FabricLakehouse table to load from World Wide Importers to the Fabric Lakehouse. The pipeline will look like this when finished: ![get-wwi-data](images/get-wwi-data-pipeline.jpg)
+This pipeline will be called from an Orchestrator pipeline to load  a table from the World Wide Importers to the Fabric Lakehouse. The pipeline will look like this when finished: ![get-wwi-data](images/get-wwi-data-pipeline.jpg)
 
 1. Create a new Data Pipeline and call it "**Get WWImporters Data direct**"
 1. Add a **Set variable** activity
@@ -279,9 +279,8 @@ This pipeline loops through the tables defined in PipelineOrchestrator_FabricLak
     1. Exit the **False activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
 If you have gotten this far, awesome! Thank you! Save your changes! You are done with your first pipeline!
 
-
 ### Create the Orchestration Pipeline
-To run the pipeline, we will create an Orchestrator pipeline. An Orchestrator pipeline is the main pipeline that coordinates the flow and execution of all pipeline activities, including calling other pipelines. When you are finished, your Orchestrator Pipeline will look like this: ![orchestrator-1](images/orchestrator-1.jpg)
+To run the pipeline, we will create an Orchestrator pipeline. An Orchestrator pipeline is the main pipeline that coordinates the flow and execution of all pipeline activities, including calling other pipelines. When you are finished with the steps below, your Orchestrator Pipeline will look like this: ![orchestrator-1](images/orchestrator-1.jpg)
 1. Create a new Data Pipeline called **orchestrator Load WWI to Fabric**
 1. Add a **Set Variable** activity
 1. Click on the canvas and create the following **Parameters**:

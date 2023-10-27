@@ -1,5 +1,12 @@
 # Pattern 2: Load from Fabric Lakehouse to Fabric Data Warehouse
+To complete this pipeline you will:
+
+- Download and run the scripts to create the Fabric Datawarehouse Tables and Stored Procedures
+- Create the pipeline to load data from the Fabric Lakehouse to the Data Warehouse
+- Update the Orchestrator pipeline to do the Lookup against the Metadata Database table and call the new pipeline
+
 ## Create Fabric Data Warehouse Tables and Stored Procedures
+
 Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fabric-dw-objects.sql).
 1. Open the downloaded SQL script (create-fabric-dw-objects.sql) using notepad and copy the entire contents of the script.
 1. From the Fabric portal, go to your Fabric Workspace and open your Data Warehouse and [create a new Query](https://learn.microsoft.com/en-us/fabric/data-warehouse/query-warehouse).
@@ -10,7 +17,9 @@ Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fa
 ![dw-views](images/dw-objects.jpg)
 
 ## Create the pipeline to load from Fabric Lakehouse to Gold Data Warehouse
+
 When this pipeline is complete, it will look like this: ![gold-dw-tables](images/golddw-tables.jpg)
+
 1. Create a new Data Pipeline called **Load Warehouse Table**
 1. Add a **Set Variable** activity
 1. Click on the canvas and create the following **Parameters**:
@@ -150,6 +159,7 @@ Update the Orchestrator pipeline, **orchestrator Load WWI to Fabric**, to load d
 Your done! You have completed an End-to-End Metadata Driven Pipeline in Fabric!
 
 Here are some additional resources to check out:
+
 [Metadata Driven Pipelines for Microsoft Fabric - Part 2, Data Warehouse Style](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749)  
 [Getting Started with Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/)  
 [Microsoft Fabric Lakehouse Overview](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview)  
