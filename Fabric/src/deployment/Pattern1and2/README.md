@@ -14,7 +14,7 @@ For both patterns, you will:
 - Create the Azure SQL DB objects, including the Metadata Driven Pipeline tables
 - Create the Microsoft Fabric Resources
 - Create Fabric Data Pipelines to Orchestrate and Load from the World Wide Importers Azure SQL DB to the Fabric Lakehouse
-- Create Data Warehouse Objects
+- Create Views over the Fabric Lakehouse Tables
 
 You then have the option to complete with Pattern 1 or 2 (or both!)
 
@@ -81,13 +81,15 @@ After creating the Lakehouses, copy the lakehouse names and table URLs and keep 
 * To get the URLs, open each Lakehouse and click on the ellipses next to the **Tables** folder. Choose **Properties** and copy the abfss file path. ![getlakehouse](images/get_lakehouse_url.jpg)
 * Paste each into notepad or a Word document and remove the "/Tables" from the end of the string. Your string will look something like **abfss://\<uniqueid>@onelake.dfs.fabric.microsoft.com/a\<anotheruniqueid>**
 ### Create a Fabric Data Warehouse
-Create a Fabric Data Warehouse by [following the instructions here](https://learn.microsoft.com/en-us/fabric/data-warehouse/create-warehouse). 
+Create a Fabric Data Warehouse by [following the instructions here](https://learn.microsoft.com/en-us/fabric/data-warehouse/create-warehouse).
 
-You need the Fabric Data Warehouse since it contains the SQL views required to load from the Lakehouse to the Gold Lakehouse OR Data Warehouse. Views defined in the Lakehouse SQL Endpoint are not exposed in a Copy Data Activity so the views live in the Data Warehouse for both patterns.
+Both patterns leverage SQL views over Lakehouse tables to load data from the Lakehouse to the Gold Lakehouse or to the Gold Data Warehouse in a Copy Data Activity. While views can be created over Lakehouse Tables in the Fabric Lakehouse, these views are not exposed in the Copy Data Activity, at least as of this writing. Therefore we need to create the views in the Fabric Data Warehouse for both patterns.
 
 ### Create Fabric Connections to your Azure SQL DBs
 Create 2 Fabric connections, one to the Wide World Importers Azure SQL DB and to the FabricMetadataConfiguration Azure SQL DB [per the instructions here](https://learn.microsoft.com/en-us/fabric/data-factory/connector-azure-sql-database).
+
 ### Upload Spark Notebooks to Fabric
+
 Upload the notebooks to be used in the pipeline
 1. Download the 3 notebooks [found in the repo](src/notebooks/)
 1. Log into the Microsoft Fabric portal and switch to the Data Engineering experience and click **Import notebook**![Import Notebook](images/datascience-import-1.jpg)
@@ -96,6 +98,7 @@ Upload the notebooks to be used in the pipeline
 ## Create Pipelines to Load Data from World Wide Importers to Fabric Lakehouse
 
 ### Instructions for building the Data Pipelines
+
 From this point forward, the instructions will be an exercise of creating pipelines, adding activities and configuring the settings for each activity. The configurations for each activity are in a table that allows you to copy and paste values into each activity. It is important to copy the text exactly as is to avoid errors in scripts or subsequent activities. Here's a couple of examples:
 
 ![instructions1](images/instructions1.jpg)
@@ -108,7 +111,7 @@ The instructions  above are for configuring a **Set Variable** activity. First g
 
 Due to the length of the instructions, I am keeping images in this post to a minimum - another reason to follow the instructions carefully. You can also refer to the original blog posts cited at the tops of this blog post for reference.
 ### Create the pipeline and activities
-This pipeline loops through the tables defined in PipelineOrchestrator_FabricLakehouse table to load from World Wide Importers to the Fabric Lakehouse. The pipeline will look like this when finished: ![get-wwi-data](images/wwi-pipeline-complete.jpg)
+This pipeline loops through the tables defined in PipelineOrchestrator_FabricLakehouse table to load from World Wide Importers to the Fabric Lakehouse. The pipeline will look like this when finished: ![get-wwi-data](images/get-wwi-data-pipeline.jpg)
 
 1. Create a new Data Pipeline and call it "**Get WWImporters Data direct**"
 1. Add a **Set variable** activity

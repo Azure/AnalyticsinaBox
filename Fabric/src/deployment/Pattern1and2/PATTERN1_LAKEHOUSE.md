@@ -1,4 +1,5 @@
-### Create the pipeline to load data from Fabric Lakehouse to Gold Fabric Lakehouse
+# Pattern 1: Load from Fabric Lakehouse to Fabric Gold Lakehouse
+## Create the pipeline to load data from Fabric Lakehouse to Gold Fabric Lakehouse
 When this pipeline is complete, it will look like this: ![lakehousetable](images/load-lakehouse-pipeline.jpg)
 
 1. Create a new Data Pipeline called **Load Lakehouse Table**
@@ -145,7 +146,7 @@ When this pipeline is complete, it will look like this: ![lakehousetable](images
     1. Exit the **False activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
 
 You are done with this pipeline! Save your changes!
-### Configure the Orchestrator Pipeline Part 2 - Invoke Pipeline to load from Fabric Lakehouse to Gold Lakehouse
+## Configure the Orchestrator Pipeline to load from Fabric Lakehouse to Gold Lakehouse
 Now we will update the Orchestrator pipeline, **orchestrator Load WWI to Fabric**, to load data from the first Fabric Lakehouse to the Gold Fabric Lakehouse. When you are done, your pipeline should look like this: ![orchestrator-part2](images/orchestrator-2.jpg)
 
 1. It can take up to 5 minutes from the time a table is created in the Fabric Lakehouse for it to be available in an endpoint. So we'll add a **Wait** activity. Drag the green arrow from the Build Calendar **Notebook** activity to it and configure:
@@ -186,3 +187,11 @@ Now we will update the Orchestrator pipeline, **orchestrator Load WWI to Fabric*
 1. Save the Orchestrator Pipeline and Run it. If you just loaded the first Lakehouse, you can run the Orchestrator Pipeline but set the parameters to run only the Lakehouse to Gold Lakehouse load: ![run-gold](images/run-gold-only.jpg)
 When your pipeline has finished, you should now have these tables and files in your Gold Lakehouse: ![gold-lh](images/goldlh-tables.jpg)
 
+Your done! You have completed an End-to-End Metadata Driven Pipeline in Fabric!
+
+Here are some additional resources to check out:
+[Metadata Driven Pipelines for Microsoft Fabric](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651)  
+[Getting Started with Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/)  
+[Microsoft Fabric Lakehouse Overview](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview)  
+[Data Factory in Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/data-factory/)  
+[Fabric Direct Lake Overview](https://learn.microsoft.com/en-us/power-bi/enterprise/directlake-overview)  

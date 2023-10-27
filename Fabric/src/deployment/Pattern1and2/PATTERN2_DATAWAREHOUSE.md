@@ -1,4 +1,4 @@
-# Pattern 2: Fabric Data Warehouse for Gold Layer/Star Schema
+# Pattern 2: Load from Fabric Lakehouse to Fabric Data Warehouse
 ## Create Fabric Data Warehouse Tables and Stored Procedures
 Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fabric-dw-objects.sql).
 1. Open the downloaded SQL script (create-fabric-dw-objects.sql) using notepad and copy the entire contents of the script.
@@ -6,9 +6,10 @@ Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fa
 1. Paste the code into the Fabric Data Warehouse query.
 1. Do a Find and Replace **[Ctrl-H]** and replace the text **myFTAFabricWarehouse** with your Fabric Warehouse name.
 1. Do another Find and Replace and replace the text **myFTAFabricLakehouse** with your Fabric Lakehouse name.
-1. Run the SQL query script. After running the script, you should see the following tables and stored procedures in the Gold schema of your Fabric Data Warehouse  ![dw-views](images/dw-objects.jpg)
+1. Run the SQL query script. After running the script, you should see the following tables and stored procedures in the Gold schema of your Fabric Data Warehouse:
+![dw-views](images/dw-objects.jpg)
 
-## Create the pipeline to load data from Fabric Lakehouse to Gold Data Warehouse
+## Create the pipeline to load from Fabric Lakehouse to Gold Data Warehouse
 When this pipeline is complete, it will look like this: ![gold-dw-tables](images/golddw-tables.jpg)
 1. Create a new Data Pipeline called **Load Warehouse Table**
 1. Add a **Set Variable** activity
@@ -105,9 +106,14 @@ When this pipeline is complete, it will look like this: ![gold-dw-tables](images
         | Settings | Script(1)       | Radio Button | NonQuery                                          |
         | Settings | Script(2)       | Dynamic Content | Update dbo.PipelineOrchestrator_FabricWarehouse set batchloaddatetime = '@{pipeline().parameters.batchloaddatetime}', loadstatus = 'Succeeded', sinkmaxdatetime = '@{activity('Load Incremental via Stored Proc').output.firstRow.MaxDate}', sourcestartdate = '@{activity('Load Incremental via Stored Proc').output.firstRow.MaxDate}', rowsupdated = @{activity('Load Incremental via Stored Proc').output.firstRow.UpdateCount}, rowsinserted = @{activity('Load Incremental via Stored Proc').output.firstRow.InsertCount},  pipelinestarttime='@{variables('pipelinestarttime')}', pipelineendtime = '@{variables('pipelineendtime')}' where sourceschema = '@{pipeline().parameters.sourceschema}' and sourcetable = '@{pipeline().parameters.sourcetable}'  |
     1. Exit the **False activities** box of the **If condition** by clicking on  **Main canvas** in the upper left corner
-### Configure the Orchestrator Pipeline Part 3 - Invoke Pipeline to load from Fabric Lakehouse to Fabric Data Warehouse
-We are on the final steps! Update the Orchestrator pipeline, **orchestrator Load WWI to Fabric**, to load data from the first Fabric Lakehouse to the Data Warehouse. When you are done, your pipeline should look like this: ![orchestrator-done](images/wwi-pipeline-complete.jpg)
-1. Add add another **Lookup** activity.  Get a 2nd green arrow from the **Wait** activity to it and configure:
+## Configure the Orchestrator Pipeline to load from Fabric Lakehouse to Fabric Data Warehouse
+Update the Orchestrator pipeline, **orchestrator Load WWI to Fabric**, to load data from the first Fabric Lakehouse to the Data Warehouse. When you are done, your pipeline should look like this: ![orchestrator-done](images/orchestrator-dw.jpg)
+1. It can take up to 5 minutes from the time a table is created in the Fabric Lakehouse for it to be available in an endpoint. So we'll add a **Wait** activity. Drag the green arrow from the Build Calendar **Notebook** activity to it and configure:
+    | Tab      | Configuration        | Value Type         | Value                           |
+    | -------- | -------------------- | ------------------ | ------------------------------- |
+    | General  | Name                 | String             | Delay gold load                 |
+    | Settings | Wait time in seconds | Dynamic Content | @pipeline().parameters.waittime |
+1. Add a **Lookup** activity.  Drag the green arrow from the **Wait** activity to it and configure:
     | Tab      | Configuration   | Value Type         | Value                                                                                                            |
     | -------- | --------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
     | General  | Name            | String             | Get tables to load to warehouse                                                                                  |
@@ -139,16 +145,15 @@ We are on the final steps! Update the Orchestrator pipeline, **orchestrator Load
     | Settings | Parameters         | storedprocschema  | Dynamic Content | @item().storedprocschema        |
     | Settings | Parameters         | storedprocname    | Dynamic Content | @item().storedprocname          |
 1. Exit the **Activities** box in the **For each** activity by clicking on  **Main canvas** in the upper left corner
- Save the **orchestrator Load WWI to Fabric** pipeline. Let's run it. But if you already ran the pipelines to load to the 2 Lakeshouses, just run the load from the first or "Bronze" Lakehouse to the Data Warehouse. ![part3-run](images/part3-run.jpg)
+ Save the **orchestrator Load WWI to Fabric** pipeline. Let's run it. If you already ran the pipelines to load to the the Fabric Lakeshouse, just run the load from the first or "Bronze" Lakehouse to the Data Warehouse. ![part3-run](images/part3-run.jpg)
 
-You are done! That was a lot of work writing this and I am out of words! So instead check out these resources:
+Your done! You have completed an End-to-End Metadata Driven Pipeline in Fabric!
 
-[Metadata Driven Pipelines for Microsoft Fabric](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651)  
+Here are some additional resources to check out:
 [Metadata Driven Pipelines for Microsoft Fabric - Part 2, Data Warehouse Style](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749)  
 [Getting Started with Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/)  
 [Microsoft Fabric Lakehouse Overview](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview)  
 [Data Factory in Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/data-factory/)  
-[Fabric Direct Lake Overview](https://learn.microsoft.com/en-us/power-bi/enterprise/directlake-overview)  
 [Microsoft Fabric Data Warehouse Overview](https://learn.microsoft.com/en-us/fabric/data-warehouse/)  
 [Microsoft Fabric Lakehouse vs Data Warehouse Decision Guide](https://learn.microsoft.com/en-us/fabric/get-started/decision-guide-warehouse-lakehouse)  
 [James Serra - Lakeshoue vs Warehouse Video](https://www.jamesserra.com/archive/2023/07/microsoft-fabric-lakehouse-vs-warehouse-video/)
