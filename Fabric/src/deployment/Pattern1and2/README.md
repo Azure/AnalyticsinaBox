@@ -349,17 +349,15 @@ Now that we have the tables in our Fabric Lakehouse, we can create SQL views ove
 
 ## Create Data Warehouse Views
 If you read the original blog posts, you would know that at this point in time the Lakehouse SQL Endpoint is not exposed in the Copy Data pipeline activity. So while you can build SQL views in the Lakehouse, you can not leverage them in a Copy Data activity. Therefore, we will create the SQL Views in the Fabric Data Warehouse.
-1. Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fabric-dw-objects.sql).
-1. Open the downloaded SQL script (create-fabric-dw-objects.sql) using notepad and copy the entire contents of the script.
-1. From the Fabric portal, go to you Fabric Workspace and open your Data Warehouse and 
-[create a new Query](https://learn.microsoft.com/en-us/fabric/data-warehouse/query-warehouse).
+1. Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fabric-dw-views.sql).
+1. Open the downloaded SQL script (create-fabric-dw-views.sql) using notepad and copy the entire contents of the script.
+1. From the Fabric portal, go to your Fabric Workspace and open your Data Warehouse and [create a new Query](https://learn.microsoft.com/en-us/fabric/data-warehouse/query-warehouse).
 1. Paste the code into the Fabric Data Warehouse query.
 1. Do a Find and Replace **[Ctrl-H]** and replace the text **myFTAFabricWarehouse** with your Fabric Warehouse name.
 1. Do another Find and Replace and replace the text **myFTAFabricLakehouse** with your Fabric Lakehouse name.
-1. Run the SQL query script. You should see the following objects in you Fabric Data Warehouse after running the script: ![dw-objects](images/dw-objects.jpg)
-    1. 1. Notice the script also creates Tables and Stored Procedures in the Gold schema. These are only used in Pattern 2. You can delete them if you never plan to implement Pattern 2, but it doesn't hurt to have them.
+1. Run the SQL query script. After running the script, you should see the following views in the Silver schema of your Fabric Data Warehouse  ![dw-views](images/dw-views.jpg)
 
-Now we have the views needed to load the Star Schema for either the the Gold Fabric Lakehouse or the Fabric Data Warehouse. Now the decision is yours: Do you want to build your Gold Layer/Star Schema in another Fabric Lakehouse ala Pattern 1? Or does the Fabric Data Warehouse better suit your needs?
+Now the decision is yours: Do you want to build your Gold Layer/Star Schema in another Fabric Lakehouse ala Pattern 1? Or does the Fabric Data Warehouse better suit your needs?
 
-- [Pattern 1: Build Star Schema in Fabric Lakehouse](/Fabric/src/deployment/Pattern1and2/PATTERN1_LAKEHOUSE.md)
-- [Pattern 2: Build Star Schema in Fabric Data Warehouse](/Fabric/src/deployment/Pattern1and2/PATTERN2_DATAWAREHOUSE.md)
+## [Pattern 1: Build Star Schema in Fabric Lakehouse](/Fabric/src/deployment/Pattern1and2/PATTERN1_LAKEHOUSE.md)
+## [Pattern 2: Build Star Schema in Fabric Data Warehouse](/Fabric/src/deployment/Pattern1and2/PATTERN2_DATAWAREHOUSE.md)

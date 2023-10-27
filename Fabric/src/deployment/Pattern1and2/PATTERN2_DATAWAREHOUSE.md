@@ -1,3 +1,13 @@
+# Pattern 2: Fabric Data Warehouse for Gold Layer/Star Schema
+## Create Fabric Data Warehouse Tables and Stored Procedures
+Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fabric-dw-objects.sql).
+1. Open the downloaded SQL script (create-fabric-dw-objects.sql) using notepad and copy the entire contents of the script.
+1. From the Fabric portal, go to your Fabric Workspace and open your Data Warehouse and [create a new Query](https://learn.microsoft.com/en-us/fabric/data-warehouse/query-warehouse).
+1. Paste the code into the Fabric Data Warehouse query.
+1. Do a Find and Replace **[Ctrl-H]** and replace the text **myFTAFabricWarehouse** with your Fabric Warehouse name.
+1. Do another Find and Replace and replace the text **myFTAFabricLakehouse** with your Fabric Lakehouse name.
+1. Run the SQL query script. After running the script, you should see the following tables and stored procedures in the Gold schema of your Fabric Data Warehouse  ![dw-views](images/dw-objects.jpg)
+
 ## Create the pipeline to load data from Fabric Lakehouse to Gold Data Warehouse
 When this pipeline is complete, it will look like this: ![gold-dw-tables](images/golddw-tables.jpg)
 1. Create a new Data Pipeline called **Load Warehouse Table**
