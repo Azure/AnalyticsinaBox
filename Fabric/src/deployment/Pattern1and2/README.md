@@ -4,9 +4,11 @@
 
 Metadata-driven pipelines in Azure Data Factory, Synapse Pipelines, and now, Microsoft Fabric, give you the capability to ingest and transform data with less code, reduced maintenance and greater scalability than writing code or pipelines for every data source entity that needs to be ingested and transformed. The key lies in identifying the data loading and transformation pattern(s) for your data sources and destinations and then building the framework to support each pattern.
 
-In August 2023, I created 2 blog posts on Metadata Driven Pipelines with Fabric. Both involve landing the data in a Fabric Lakehouse and building a Star Schema for the Gold Layer. [The first post](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651) illustrates creating the Star Schema in a Fabric Lakehouse. [The second post](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749) covers using a Fabric Data Warehouse for the Star Schema and why you may want to choose this option.
+This solution guide is a companion to 2 blog posts about Metadata Driven Pipelines in Fabric. Both involve landing the data in a Fabric Lakehouse and building a Star Schema for the Gold Layer:
+- Pattern 1: [Metadata Driven Pipelines in Fabric](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric/ba-p/3891651) illustrates creating the Star Schema in a Fabric Lakehouse. 
+- Pattern 2: [Metadata Driven Pipelines in Fabric with Data Warehouse](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749) covers using a Fabric Data Warehouse for the Star Schema and why you may want to choose this option.
 
-This solution guide is a companion to the Metadata Driven Pipelines in Fabric posts. The intent is to provide step-by-step instructions on how to build the Metadata Driven Pipelines described in those blogs. The reason is 2-fold - this will help you better understand Microsoft Fabric, but also because Fabric is not fully integrated with Git at this time. There are no ARM templates to deploy like in Azure Synapse or Data Factory. However, when Fabric supports Git integration with Pipelines and Connections, we will create another pattern which will allow you deploy all Fabric artifacts into your own Fabric tenant.
+ The intent is to provide step-by-step instructions on how to build the Metadata Driven Pipelines described in those blogs. The reason is 2-fold - this will help you better understand Microsoft Fabric, but also because Fabric is not fully integrated with Git at this time. There are no ARM templates to deploy like in Azure Synapse or Data Factory. However, when Fabric supports Git integration with Pipelines and Connections, we will create another pattern which will allow you deploy all Fabric artifacts into your own Fabric tenant.
 
 For both patterns, you will:
 
@@ -16,7 +18,7 @@ For both patterns, you will:
 - Create Fabric Data Pipelines to Orchestrate and Load from the World Wide Importers Azure SQL DB to the Fabric Lakehouse
 - Create Views over the Fabric Lakehouse Tables
 
-You then have the option to complete with Pattern 1 or 2 (or both!)
+You then have the option to complete this end-to-end architecture with Pattern 1 or 2: 
 
 - Pattern 1: Load Data from the Lakehouse to a Star Schema in a Gold Lakehouse
 - Pattern 2: Load Data from the Lakehouse to a Star Schema in a Data Warehouse
@@ -361,5 +363,7 @@ If you read the original blog posts, you would know that at this point in time t
 
 Now the decision is yours: Do you want to build your Gold Layer/Star Schema in another Fabric Lakehouse ala Pattern 1? Or does the Fabric Data Warehouse better suit your needs?
 
-## [Pattern 1: Build Star Schema in Fabric Lakehouse](/Fabric/src/deployment/Pattern1and2/PATTERN1_LAKEHOUSE.md)
-## [Pattern 2: Build Star Schema in Fabric Data Warehouse](/Fabric/src/deployment/Pattern1and2/PATTERN2_DATAWAREHOUSE.md)
+## Build Star Schema
+Choose one of the 2 patterns to complete your end-to-end architecture:
+### [Pattern 1: Build Star Schema in Fabric Lakehouse](/Fabric/src/deployment/Pattern1and2/PATTERN1_LAKEHOUSE.md)
+### [Pattern 2: Build Star Schema in Fabric Data Warehouse](/Fabric/src/deployment/Pattern1and2/PATTERN2_DATAWAREHOUSE.md)
