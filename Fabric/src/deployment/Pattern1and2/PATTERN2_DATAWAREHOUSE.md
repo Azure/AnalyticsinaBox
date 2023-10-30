@@ -13,7 +13,7 @@ Download the Datawarehouse SQL script file [located here](src/fabricdw/create-fa
 1. Paste the code into the Fabric Data Warehouse query.
 1. Do a Find and Replace **[Ctrl-H]** and replace the text **myFTAFabricWarehouse** with your Fabric Warehouse name.
 1. Do another Find and Replace and replace the text **myFTAFabricLakehouse** with your Fabric Lakehouse name.
-1. Run the SQL query script. After running the script, you should see the following tables and stored procedures in the Gold schema of your Fabric Data Warehouse:
+1. Run the SQL query script. After running the script, you should see the following tables and stored procedures in the Gold schema of your Fabric Data Warehouse:  
 ![dw-views](images/dw-objects.jpg)
 
 ## Create the pipeline to load from Fabric Lakehouse to Gold Data Warehouse
