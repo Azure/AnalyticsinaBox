@@ -158,7 +158,7 @@ Update the Orchestrator pipeline, **orchestrator Load WWI to Fabric**, to load d
 
 Your done! You have completed an End-to-End Metadata Driven Pipeline in Fabric!
 
-Additional resources:
+Additional Resources:  
 [Metadata Driven Pipelines for Microsoft Fabric - Part 2, Data Warehouse Style](https://techcommunity.microsoft.com/t5/fasttrack-for-azure/metadata-driven-pipelines-for-microsoft-fabric-part-2-data/ba-p/3906749)  
 [Getting Started with Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/get-started/)  
 [Microsoft Fabric Lakehouse Overview](https://learn.microsoft.com/en-us/fabric/data-engineering/lakehouse-overview)  
