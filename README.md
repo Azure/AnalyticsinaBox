@@ -28,3 +28,5 @@ This repository contains several scenarios, or, 'patterns' for you to deploy int
 ## Databricks
 
 ## Fabric
+* **Pattern 1**:  End-to-End Metadata Driven Pipeline in Fabric, From SQL to Lakehouse to Gold Lakehouse
+* **Pattern 2**:  End-to-End Metadata Driven Pipeline in Fabric, From SQL to Lakehouse to Data Warehouse
