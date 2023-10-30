@@ -5,3 +5,6 @@ This section or set of patterns aims to provide a "Fabric Easy Button" for commo
 
 ## Available Patterns
 This repository contains several scenarios, or, 'patterns' for you to deploy into your own environment. Below is a summary:
+
+* **Pattern 1**:  End-to-End Metadata Driven Pipeline in Fabric, From SQL to Staging Lakehouse to Gold Lakehouse
+* **Pattern 2**:  End-to-End Metadata Driven Pipeline in Fabric, From SQL to Staging Lakehouse to Data Warehouse
