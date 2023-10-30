@@ -25,6 +25,9 @@ This repository contains several scenarios, or, 'patterns' for you to deploy int
 * **Pattern 4**: Batch loading example from a source SQL database through to a Data Lake using Synapse Spark.
 * **Pattern 5**: Metadata Driven Synapse Pipelines with Azure SQL DB Source, Data Lake/Parquet Sink and Synapse Serverless Star Schema
 
-## Databricks
-
 ## Fabric
+* **Pattern 1**:  End-to-End Metadata Driven Pipeline in Fabric, From SQL Source to Lakehouse to Gold Lakehouse
+* **Pattern 2**:  End-to-End Metadata Driven Pipeline in Fabric, From SQL Source to Lakehouse to Data Warehouse
+
+## Databricks
+Coming Soon...
