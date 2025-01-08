@@ -4,12 +4,12 @@ variables:
   ap_vm_image: windows-2019
 
   location: eastus 
-  prefix: sa33
-  postfix: jh33
+  prefix: sa
+  postfix: smc32
   environment: dev
 
   # Azure DevOps 
-  ado_service_connection_rg: JHAnalyticsbox
+  ado_service_connection_rg: devopsconnection
 
 
   # IaC
